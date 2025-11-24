@@ -18,7 +18,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare name: string
 
   @column()
-  declare display_name: string
+  declare displayName: string
 
   @column()
   declare email: string
@@ -30,7 +30,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare bio: string
 
   @column()
-  declare profile_picture: URL
+  declare profilePicture: URL
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

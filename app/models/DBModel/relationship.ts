@@ -8,14 +8,14 @@ export default class Relationship extends BaseModel {
   declare id: number
 
   @column()
-  declare user_follow: number
+  declare userFollow: number
 
   @column()
-  declare user_followed: number
-
-  @belongsTo(() => User)
-  public user!: BelongsTo<typeof User>
+  declare userFollowed: number
 
   @column.dateTime({ autoCreate: true })
   declare timestamp: DateTime
+
+  @belongsTo(() => User)
+  public user!: BelongsTo<typeof User>
 }

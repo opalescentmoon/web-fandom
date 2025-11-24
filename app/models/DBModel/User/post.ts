@@ -1,37 +1,43 @@
 import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import User from './user.js'
 import Fandom from '#models/DBModel/fandom'
+import Media from '#models/DBModel/media'
 
 export default class Post extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare user_id: number
+  declare userId: number
 
   @belongsTo(() => User)
   public user!: BelongsTo<typeof User>
 
   @column()
-  declare fandom_id: number
-
-  @belongsTo(() => Fandom)
-  public fandom!: BelongsTo<typeof Fandom>
+  declare fandomId: number
 
   @column()
-  declare content_id: number
+  declare contentId: number
 
   @column()
-  declare post_type: string
+  declare postType: string
 
   @column()
-  declare parent_id: number
+  declare parentId: number
 
   @column()
   declare caption: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+
+  @belongsTo(() => Fandom)
+  public fandom!: BelongsTo<typeof Fandom>
+
+  @hasMany(() => Media)
+  public media!: HasMany<typeof Media>
 }

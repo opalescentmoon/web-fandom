@@ -9,17 +9,17 @@ export default class Like extends BaseModel {
   declare id: number
 
   @column()
-  declare user_id: number
+  declare userId: number
+
+  @column()
+  declare postId: number
+
+  @column.dateTime({ autoCreate: true })
+  declare timestamp: DateTime
 
   @belongsTo(() => User)
   public user!: BelongsTo<typeof User>
 
-  @column()
-  declare post_id: number
-
   @belongsTo(() => Post)
   public post!: BelongsTo<typeof Post>
-
-  @column.dateTime({ autoCreate: true })
-  declare timestamp: DateTime
 }

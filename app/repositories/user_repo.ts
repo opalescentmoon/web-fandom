@@ -15,9 +15,9 @@ export default class UserRepository {
     name: string
     email: string
     passwordHash: string
-    display_name?: string
+    displayName?: string
     bio?: string
-    profile_picture?: URL
+    profilePicture?: URL
   }) {
     return await User.create(data)
   }
@@ -45,6 +45,7 @@ export default class UserRepository {
 
   async updateEmail(id: number, email: string) {
     const user = await User.findOrFail(id)
+
     user.email = email
     await user.save()
 
