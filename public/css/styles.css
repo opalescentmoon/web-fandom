@@ -1,0 +1,932 @@
+.intro-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* Top red bar */
+.intro-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #c76369;
+  color: #fff;
+  padding: 0.5rem 1rem;
+}
+
+.icon-button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.intro-layout {
+  position: relative;
+}
+
+/* --- OFF-CANVAS SIDEBAR --- */
+
+.intro-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #e2a8ab;
+  padding: 1rem;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: none;
+  z-index: 40;
+}
+
+.intro-sidebar.is-open {
+  transform: translateX(0);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark overlay behind sidebar */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 30;
+}
+
+.intro-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- Sidebar content styling (same as before) --- */
+
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: #d38c90;
+}
+
+.display-name {
+  font-weight: 600;
+}
+
+.username {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar-link {
+  text-decoration: none;
+  color: #5c2c2e;
+  font-size: 0.9rem;
+}
+
+.sidebar-link-danger {
+  margin-top: 0.75rem;
+}
+
+/* Main content */
+.intro-main {
+  background: #fdf5f5;
+  padding: 1.5rem;
+  min-height: calc(100vh - 48px);
+}
+
+/* Top area: donations + search by media */
+.intro-top {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.intro-donations {
+  background: #b1585f;
+  color: #fff;
+  padding: 1rem;
+}
+
+.donation-placeholder-line {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  margin-top: 0.75rem;
+}
+
+.intro-search-media {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.intro-search-bar {
+  background: #e79aa0;
+  padding: 0.35rem 0.6rem;
+}
+
+.intro-search-bar input {
+  width: 100%;
+  border: none;
+  background: #f7cfd3;
+  padding: 0.35rem 0.1rem;
+}
+
+/* Media links */
+.media-links-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1.5rem;
+}
+
+.media-links-grid a {
+  font-size: 0.9rem;
+  color: #5c2c2e;
+  text-decoration: underline;
+}
+
+/* Recent / For You */
+.intro-section {
+  margin-top: 1.5rem;
+}
+
+.intro-section h2 {
+  margin-bottom: 0.7rem;
+}
+
+.intro-fandom-card-link {
+  display: block;        /* so the whole square is clickable */
+  text-decoration: none;        /* remove underline */
+  color: inherit;               /* text matches normal color */
+}
+
+
+.fandom-card-name {
+  font-size: 0.85rem;
+}
+
+.intro-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.intro-card-placeholder {
+  background: #edd4d6;
+  border-radius: 18px;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.6rem;
+}
+
+/* Homepage */
+.fandom-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* Header */
+.fandom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #c76369;
+  color: #fff;
+  padding: 0.5rem 1rem;
+}
+
+.fandom-header-center {
+  font-weight: 600;
+}
+
+.fandom-name {
+  letter-spacing: 0.03em;
+}
+
+/* 3-column grid */
+.fandom-layout {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 230px;
+  min-height: calc(100vh - 48px); /* header height */
+}
+
+
+/* Left sidebar */
+.fandom-sidebar {
+  background: #e6afb2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1rem;
+  gap: 0.75rem;
+}
+
+.sidebar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.sidebar-cta {
+  margin-top: auto;
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  border: none;
+  background: #c76369;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* Main feed */
+.fandom-middle {
+  display: flex;
+  flex-direction: column;
+  background: #fdf5f5;
+}
+
+/* Tabs styling */
+.fandom-tabs {
+  display: flex;
+  background: #d97e83;
+}
+
+.fandom-tab {
+  padding: 0.7rem 1.6rem;
+  text-decoration: none;
+  color: #fbe9ea;
+  font-size: 0.92rem;
+}
+
+.fandom-tab.is-active {
+  background: #fbe9ea;
+  color: #5c2c2e;
+  font-weight: 600;
+}
+
+/*feed*/
+.fandom-main {
+  padding: 1rem 1rem 2rem;
+}
+
+.feed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.post-card {
+  background: #f2e1e2;
+  border-radius: 18px;
+  padding: 0.6rem 0.75rem;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.avatar-circle.small {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #d38c90;
+}
+
+.post-user-text {
+  margin-left: 0.45rem;
+  font-size: 0.8rem;
+}
+
+.post-user {
+  display: flex;
+  align-items: center;
+}
+
+.post-username {
+  font-weight: 500;
+}
+
+.post-date {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.post-tag {
+  font-size: 0.8rem;
+}
+
+.post-body {
+  margin: 0.5rem 0;
+}
+
+.post-preview {
+  height: 80px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e9d0d2, #f5e4e5);
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-tags span {
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.post-actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Right filter column */
+.fandom-filter {
+  background: #ffffff;
+  padding: 1rem 1rem 2rem;
+  border-left: 1px solid #f0d7d9;
+}
+
+.filter-section + .filter-section {
+  margin-top: 1rem;
+}
+
+.filter-section h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+}
+
+.filter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.filter-list li + li {
+  margin-top: 0.15rem;
+}
+
+.filter-list a {
+  color: #7d3a3f;
+  text-decoration: none;
+}
+
+.filter-list a:hover {
+  text-decoration: underline;
+}
+
+.filter-static-link {
+  color: #7d3a3f;
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* Header text that you click */
+.collapse-header {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  color: #7d3a3f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+}
+
+.collapse-chevron {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+/* The list under Lore / World */
+.collapse-body {
+  list-style: none;
+  padding-left: 0.75rem;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
+}
+
+.collapse-body li {
+  margin-top: 0.15rem;
+}
+
+.collapse-body a {
+  text-decoration: none;
+  font-size: 0.85rem;
+  color: #7d3a3f;
+}
+
+.collapse-body a:hover {
+  text-decoration: underline;
+}
+
+/* Open state */
+.collapse-body.is-open {
+  max-height: 200px;    /* enough height for a few links */
+  opacity: 1;
+  margin-top: 0.2rem;
+}
+
+.collapse-header.is-open .collapse-chevron {
+  transform: rotate(180deg);
+}
+
+/* Search page*/
+.fandom-search-bar {
+  margin: 0.8rem 0 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 20px;
+  background: #f0ced1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.fandom-search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.search-icon {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.search-help {
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+}
+
+.search-recent h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.search-recent ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.search-recent li + li {
+  margin-top: 0.25rem;
+}
+
+.search-recent a {
+  text-decoration: none;
+  color: #7d3a3f;
+}
+
+.search-recent a:hover {
+  text-decoration: underline;
+}
+
+.search-result-title {
+  font-size: 0.9rem;
+  margin: 0.6rem 0 0.8rem;
+}
+
+/* Chat page */
+.chat-page-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #fdf5f5;
+}
+
+/* Top header */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #c76369;
+  color: #fff;
+  padding: 0.5rem 1rem;
+}
+
+.chat-header-title {
+  font-weight: 600;
+}
+
+/* 2-column shell */
+.chat-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  height: calc(100vh - 48px); /* minus header height */
+}
+
+/* Left list */
+.chat-list {
+  background: #e6afb2;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-list-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.chat-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f0ced1;
+  border-radius: 20px;
+  padding: 0.3rem 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.chat-search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.chat-list-items {
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.chat-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.35rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.chat-list-item.is-active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.chat-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #f2d7d9;
+}
+
+.chat-list-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-list-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.chat-list-last {
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+/* Right side */
+.chat-main {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* inner header */
+.chat-main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e9979b;
+  padding: 0.5rem 0.9rem;
+}
+
+.chat-main-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-main-name {
+  font-weight: 500;
+}
+
+/* message list */
+.chat-messages {
+  flex: 1;
+  padding: 0.75rem 0.9rem;
+  overflow-y: auto;
+  background: #fdf5f5;
+}
+
+.chat-message-row {
+  display: flex;
+  margin-bottom: 0.4rem;
+}
+
+.chat-message-row.incoming {
+  justify-content: flex-start;
+}
+
+.chat-message-row.outgoing {
+  justify-content: flex-end;
+}
+
+.chat-bubble {
+  max-width: 60%;
+  padding: 0.4rem 0.7rem;
+  border-radius: 18px;
+  font-size: 0.88rem;
+}
+
+.chat-message-row.incoming .chat-bubble {
+  background: #e8e1e2;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-message-row.outgoing .chat-bubble {
+  background: #e97f86;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+/* input bar */
+.chat-input-bar {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border-top: 1px solid #f0d7d9;
+  background: #f2d4d7;
+}
+
+.chat-input-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  border-radius: 18px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.88rem;
+}
+
+.chat-send-button {
+  margin-left: 0.5rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  background: #c76369;
+  color: #fff;
+  cursor: pointer;
+}
+
+/*profile page*/
+.profile-page-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #fdf5f5;
+}
+
+/* Top header */
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #c76369;
+  color: #fff;
+  padding: 0.5rem 1rem;
+}
+
+.profile-header-title {
+  font-weight: 600;
+}
+
+/* layout: main + right sidebar */
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) 320px;
+  gap: 0;
+  min-height: calc(100vh - 48px);
+}
+
+/* main column */
+.profile-main {
+  padding: 0;
+  background: #ffffff;
+}
+
+/* profile banner */
+.profile-banner {
+  display: flex;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  background: #e9979b;
+  color: #3b1414;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  background: #f4d5d7;
+}
+
+.profile-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.profile-username {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.profile-bio {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  max-width: 600px;
+}
+
+/* posts list */
+.profile-posts {
+  padding: 1.2rem 1.5rem 2rem;
+  background: #fdf5f5;
+}
+
+/* allow reuse of post-card styles from fandom pages;
+   if you already have .post-card/.post-header/etc. skip this block */
+.post-card {
+  background: #f4e4e6;
+  border-radius: 18px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar-circle.small {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #f2d7d9;
+}
+
+.post-user-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.post-username {
+  font-weight: 500;
+}
+
+.post-date {
+  opacity: 0.7;
+}
+
+.post-tag {
+  font-size: 0.85rem;
+}
+
+.post-tag-multi {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85rem;
+}
+
+.post-tag-sub {
+  font-size: 0.78rem;
+}
+
+.post-body {
+  margin-top: 0.6rem;
+}
+
+.post-preview {
+  height: 50px;
+  border-radius: 8px;
+  background: linear-gradient(to right, #f3dfe1, #eacfd2);
+}
+
+.post-preview.large {
+  height: 140px;
+}
+
+.post-footer {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.post-tags span + span {
+  margin-left: 0.3rem;
+}
+
+.post-actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* right sidebar */
+.profile-sidebar {
+  background: #ffffff;
+  border-left: 1px solid #f0d8da;
+  padding: 1.2rem 1.5rem;
+}
+
+.profile-sidebar-section + .profile-sidebar-section {
+  margin-top: 1.5rem;
+}
+
+.profile-sidebar-section h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.profile-sidebar-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile-sidebar-section li + li {
+  margin-top: 0.25rem;
+}
+
+.profile-sidebar-section a {
+  text-decoration: none;
+  font-size: 0.86rem;
+  color: #7d3a3f;
+}
+
+.profile-sidebar-section a:hover {
+  text-decoration: underline;
+}

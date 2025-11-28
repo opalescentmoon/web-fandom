@@ -1,0 +1,112 @@
+@let(isSearch = $props.isSearch || false)
+@let(currentQuery = $props.query || '')
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ $props.title || 'Fandom' }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+    <body class="fandom-body">
+    <!-- Top red header -->
+    <header class="fandom-header">
+      <button class="icon-button">
+        <a href="/">
+        <img src="/images/left.png" alt="Home" width="24" height="24" />
+        </a>
+      </button>
+
+      <div class="fandom-header-center">
+        <span class="fandom-name">{{ $props.fandomName || 'Fandom Name' }}</span>
+      </div>
+
+      <button class="icon-button">
+        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+      </button>
+    </header>
+
+    <!-- 3-column layout: [sidebar] [tabs+feed] [filter] -->
+    <div class="fandom-layout">
+      <!-- Left vertical sidebar -->
+      <aside class="fandom-sidebar">
+        <button class="sidebar-icon">
+            <a href="/fanworks">
+            <img src="/images/home.png" alt="Home" width="24" height="24" />
+            </a>
+        </button>
+        <button class="sidebar-icon">
+            <a href="/search?tab={{ $props.activeTab || 'fanworks' }}">
+            <img src="/images/loupe.png" alt="Search" width="24" height="24" />
+            </a>
+        </button>
+        <button class="sidebar-icon">
+            <a href="/chats">
+            <img src="/images/chat.png" alt="Chat" width="24" height="24" />
+            </a>
+        </button>
+        <button class="sidebar-icon">
+            <a href="/profile">
+            <img src="/images/user.png" alt="Profile" width="24" height="24" />
+            </a>
+        </button>
+
+        <button class="sidebar-cta">
+          {{ $props.hasJoined ? 'POST' : 'JOIN' }}
+        </button>
+      </aside>
+
+      <!-- Middle column: tabs + feed -->
+      <section class="fandom-middle">
+        <nav class="fandom-tabs">
+          <a
+            href="{{ isSearch ? `/search?tab=fanworks&q=${encodeURIComponent(currentQuery)}` : '/fanworks' }}"
+            class="fandom-tab {{ $props.activeTab === 'fanworks' ? 'is-active' : '' }}"
+          >
+            Fanworks
+          </a>
+          <a
+            href="{{ isSearch ? `/search?tab=wiki&q=${encodeURIComponent(currentQuery)}` : '/wiki' }}"
+            class="fandom-tab {{ $props.activeTab === 'wiki' ? 'is-active' : '' }}"
+          >
+            Wiki
+          </a>
+          <a
+            href="{{ isSearch ? `/search?tab=forum&q=${encodeURIComponent(currentQuery)}` : '/forum' }}"
+            class="fandom-tab {{ $props.activeTab === 'forum' ? 'is-active' : '' }}"
+          >
+            Forum
+          </a>
+        </nav>
+
+        <main class="fandom-main">
+          {{{ await $slots.main() }}}
+        </main>
+      </section>
+
+      <!-- Right column: filter -->
+      <aside class="fandom-filter">
+        {{{ await ($slots.filter?.() || '') }}}
+      </aside>
+    </div>
+
+        <script>
+      // simple collapse handler for wiki filters
+      document.addEventListener('click', (event) => {
+        const header = event.target.closest('[data-collapse-target]')
+        if (!header) return
+
+        const targetId = header.getAttribute('data-collapse-target')
+        const body = document.getElementById(targetId)
+        if (!body) return
+
+        const isOpen = body.classList.toggle('is-open')
+        header.classList.toggle('is-open', isOpen)
+      })
+    </script>
+
+  </body>
+
+</html>

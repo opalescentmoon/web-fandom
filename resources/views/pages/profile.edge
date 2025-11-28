@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body class="profile-page-body">
+    <!-- Top red header -->
+    <header class="profile-header">
+      <button class="icon-button" id="profileBackButton">
+        <img src="/images/left.png" alt="Back" width="24" height="24" />
+      </button>
+
+      <div class="profile-header-title">
+        Profile
+      </div>
+
+      <button class="icon-button">
+        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+      </button>
+    </header>
+
+    <!-- 2-column layout: [main profile + posts] [right sidebar] -->
+    <div class="profile-layout">
+      <!-- Middle / main column -->
+      <section class="profile-main">
+        <!-- Profile banner -->
+        <section class="profile-banner">
+          <div class="profile-avatar"></div>
+
+          <div class="profile-info-text">
+            <h1 class="profile-name">Display name</h1>
+            <div class="profile-username">@Username</div>
+
+            <div class="profile-stats">
+              <span>XX Follower</span>
+              <span>XX Following</span>
+            </div>
+
+            <p class="profile-bio">
+              Bio Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+              do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+          </div>
+        </section>
+
+        <!-- Posts list -->
+        <section class="profile-posts">
+          <!-- Post 1: Announcement style -->
+          <article class="post-card">
+            <header class="post-header">
+              <div class="post-user">
+                <div class="avatar-circle small"></div>
+                <div class="post-user-text">
+                  <div class="post-username">Username</div>
+                  <div class="post-date">01/01/2025</div>
+                </div>
+              </div>
+              <div class="post-tag">Announcement</div>
+            </header>
+
+            <div class="post-body">
+              <div class="post-preview"></div>
+            </div>
+
+            <footer class="post-footer">
+              <div class="post-tags">#tags #tags #tags</div>
+              <div class="post-actions">
+                <button>♡</button>
+                <button>↻</button>
+              </div>
+            </footer>
+          </article>
+
+          <!-- Post 2: Wiki-style -->
+          <article class="post-card">
+            <header class="post-header">
+              <div class="post-user">
+                <div class="avatar-circle small"></div>
+                <div class="post-user-text">
+                  <div class="post-username">Username</div>
+                  <div class="post-date">01/01/2025</div>
+                </div>
+              </div>
+              <div class="post-tag-multi">
+                <span>Lore</span>
+                <span class="post-tag-sub">Lore detail</span>
+              </div>
+            </header>
+
+            <div class="post-body">
+              <div class="post-preview large"></div>
+            </div>
+
+            <footer class="post-footer">
+              <div class="post-tags">#tags #tags #tags</div>
+              <div class="post-actions">
+                <button>♡</button>
+                <button>↻</button>
+              </div>
+            </footer>
+          </article>
+        </section>
+      </section>
+
+      <!-- Right sidebar: fandoms + tags -->
+      <aside class="profile-sidebar">
+        <section class="profile-sidebar-section">
+          <h3>Fandoms</h3>
+          <ul>
+            <li><a href="#">Fandom name</a></li>
+            <li><a href="#">Fandom name</a></li>
+            <li><a href="#">Fandom name</a></li>
+          </ul>
+        </section>
+
+        <section class="profile-sidebar-section">
+          <h3>Tags</h3>
+          <ul>
+            <li><a href="#">#Fanfic</a></li>
+            <li><a href="#">#Discussion</a></li>
+            <li><a href="#">#Poll</a></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <script>
+      // Back button: behave like chat page
+      const profileBackBtn = document.getElementById('profileBackButton')
+      if (profileBackBtn) {
+        profileBackBtn.addEventListener('click', () => {
+          if (window.history.length > 1) {
+            window.history.back()
+          } else {
+            window.location.href = '/'
+          }
+        })
+      }
+    </script>
+  </body>
+</html>

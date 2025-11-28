@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chats</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body class="chat-page-body">
+    <!-- Top red header -->
+    <header class="chat-header">
+      <button class="icon-button" id="chatBackButton">
+        <img src="/images/left.png" alt="Back" width="24" height="24" />
+      </button>
+
+      <div class="chat-header-title">
+        Chats
+      </div>
+
+      <button class="icon-button">
+        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+      </button>
+    </header>
+
+    <!-- 2-column chat layout -->
+    <div class="chat-shell">
+      <!-- Left: list of conversations -->
+      <aside class="chat-list">
+        <h2 class="chat-list-title">Chats</h2>
+
+        <div class="chat-search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search..." />
+        </div>
+
+        <div class="chat-list-items">
+          <!-- dummy chats -->
+          <button class="chat-list-item is-active">
+            <div class="chat-avatar-circle"></div>
+            <div class="chat-list-text">
+              <div class="chat-list-name">Display name</div>
+              <div class="chat-list-last">Last message preview…</div>
+            </div>
+          </button>
+
+          <button class="chat-list-item">
+            <div class="chat-avatar-circle"></div>
+            <div class="chat-list-text">
+              <div class="chat-list-name">Another user</div>
+              <div class="chat-list-last">Last message preview…</div>
+            </div>
+          </button>
+
+          <!-- add more dummy items if needed -->
+        </div>
+      </aside>
+
+      <!-- Right: conversation -->
+      <section class="chat-main">
+        <!-- Top bar inside chat -->
+        <header class="chat-main-header">
+          <div class="chat-main-user">
+            <div class="chat-avatar-circle"></div>
+            <span class="chat-main-name">Display name</span>
+          </div>
+
+          <div class="chat-main-status">
+            <!-- you can put "Online" or nothing here -->
+          </div>
+        </header>
+
+        <!-- Message area -->
+        <div class="chat-messages">
+          <!-- incoming (left) -->
+          <div class="chat-message-row incoming">
+            <div class="chat-bubble">
+              Lorem ipsum incoming message…
+            </div>
+          </div>
+
+          <div class="chat-message-row incoming">
+            <div class="chat-bubble">
+              Another incoming message…
+            </div>
+          </div>
+
+          <!-- outgoing (right) -->
+          <div class="chat-message-row outgoing">
+            <div class="chat-bubble">
+              Outgoing message on the right…
+            </div>
+          </div>
+
+          <div class="chat-message-row outgoing">
+            <div class="chat-bubble">
+              Short reply!
+            </div>
+          </div>
+
+          <!-- more dummies if you want -->
+        </div>
+
+        <!-- Input bar -->
+        <form class="chat-input-bar">
+          <input
+            type="text"
+            placeholder="Type a message..."
+            autocomplete="off"
+          />
+          <button type="submit" class="chat-send-button">
+            <img src="/images/send.png" alt="Send" width="24" height="24" />
+          </button>
+        </form>
+      </section>
+    </div>
+
+    <script>
+        const chatForm = document.querySelector('.chat-input-bar')
+const chatInput = chatForm.querySelector('input')
+const chatArea = document.querySelector('.chat-messages')
+
+// This function simulates sending a message now,
+// and later you can replace JUST the inside of this function
+async function sendMessage(text) {
+  // --- for now: fake message output ---
+  const bubble = document.createElement('div')
+  bubble.className = 'chat-message-row outgoing'
+  bubble.innerHTML = `<div class="chat-bubble">${text}</div>`
+  chatArea.appendChild(bubble)
+
+  chatArea.scrollTop = chatArea.scrollHeight
+
+  // --- later: replace this with real backend call ---
+  // await fetch('/messages', { method: 'POST', body: JSON.stringify({ text }) })
+  // or WebSocket logic
+}
+
+// Form submission (press Enter or press Send)
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault()
+
+  const text = chatInput.value.trim()
+  if (!text) return
+
+  sendMessage(text)     // 🧡 now it shows as a bubble
+  chatInput.value = ''   // clear field
+})
+
+      // Back button: go back to the page user came from
+      const backBtn = document.getElementById('chatBackButton')
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          if (window.history.length > 1) {
+            window.history.back()
+          } else {
+            // fallback if no history: go home or intro
+            window.location.href = '/'
+          }
+        })
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+@layout.fandom({
+  title: 'Forum',
+  fandomName: 'Fandom Name',
+  activeTab: 'forum',
+  hasJoined: true
+})
+  @slot('main')
+    <!-- forum-style cards -->
+    <article class="post-card">
+      <header class="post-header">
+        <div class="post-user">
+          <div class="avatar-circle small"></div>
+          <div class="post-user-text">
+            <div class="post-username">Username</div>
+            <div class="post-date">01/01/2025</div>
+          </div>
+        </div>
+        <div class="post-tag">#QnA</div>
+      </header>
+
+      <div class="post-body">
+        <div class="post-preview"></div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-tags">
+          #tags #tags #tags
+        </div>
+      </footer>
+    </article>
+  @endslot
+
+  @slot('filter')
+    <div class="filter-section">
+      <h4>Filter by Tags</h4>
+      <ul class="filter-list">
+        <li><a href="#">#QnA</a></li>
+        <li><a href="#">#Poll</a></li>
+        <li><a href="#">#Discussion</a></li>
+      </ul>
+    </div>
+
+    <div class="filter-section">
+      <h4>Trending</h4>
+      <ul class="filter-list">
+        <li><a href="#">#Tags</a></li>
+        <li><a href="#">#Tags</a></li>
+        <li><a href="#">#Tags</a></li>
+        <li><a href="#">#Tags</a></li>
+      </ul>
+    </div>
+  @endslot
+@end

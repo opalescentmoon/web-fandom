@@ -1,0 +1,74 @@
+@layout.fandom({
+  title: 'Wiki',
+  fandomName: 'Fandom Name',
+  activeTab: 'wiki',
+  hasJoined: true
+})
+  @slot('main')
+    <!-- wiki-style cards, your “announcement / lore / world building” blocks -->
+    <article class="wiki-card">
+      <header>
+        <div class="post-user">
+          <div class="avatar-circle small"></div>
+          <div class="post-user-text">
+            <div class="post-username">Username</div>
+            <div class="post-date">01/01/2025</div>
+          </div>
+        </div>
+        <div class="post-tag">Announcement</div>
+      </header>
+
+      <div class="post-body">
+        <div class="post-preview"></div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-tags">Lore · Detail</div>
+      </footer>
+    </article>
+  @endslot
+
+  @slot('filter')
+  <div class="filter-section">
+    <h4>Filter by Tags</h4>
+    <p class="filter-static-link">Announcement</p>
+  </div>
+
+  <!-- Lore collapsible -->
+  <div class="filter-section">
+    <button
+      class="collapse-header"
+      type="button"
+      data-collapse-target="lore-list"
+    >
+      <span>Lore</span>
+      <span class="collapse-chevron">▾</span>
+    </button>
+
+    <ul id="lore-list" class="collapse-body">
+      <li><a href="#">Characters</a></li>
+      <li><a href="#">Stories</a></li>
+      <li><a href="#">Lore detail</a></li>
+    </ul>
+  </div>
+
+  <!-- World collapsible -->
+  <div class="filter-section">
+    <button
+      class="collapse-header"
+      type="button"
+      data-collapse-target="world-list"
+    >
+      <span>World</span>
+      <span class="collapse-chevron">▾</span>
+    </button>
+
+    <ul id="world-list" class="collapse-body">
+      <li><a href="#">World map</a></li>
+      <li><a href="#">Locations</a></li>
+      <li><a href="#">World building</a></li>
+    </ul>
+  </div>
+@endslot
+
+@end

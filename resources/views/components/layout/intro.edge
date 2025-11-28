@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ title || 'FandomHub – Intro' }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="intro-body">
+    <!-- Top red bar -->
+    <header class="intro-header">
+      <button class="icon-button" id="sidebarToggle">
+        ☰
+      </button>
+
+      <div class="intro-header-center">
+        <!-- optional logo / name -->
+      </div>
+
+      <button class="icon-button">
+        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+      </button>
+    </header>
+
+    <div class="intro-layout">
+      <!-- Sidebar -->
+      <aside class="intro-sidebar" id="introSidebar">
+        <div class="sidebar-profile">
+          <div class="avatar-circle"></div>
+          <div class="profile-text">
+            <div class="display-name">Display name</div>
+            <div class="username">@Username</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-menu">
+          <a href="/profile" class="sidebar-link">Profile</a>
+          <a href="/chats" class="sidebar-link">Chats</a>
+          <a href="#" class="sidebar-link">Follower Request</a>
+          <a href="#" class="sidebar-link">Monetization</a>
+          <a href="#" class="sidebar-link">Settings</a>
+          <a href="#" class="sidebar-link sidebar-link-danger">Log Out</a>
+        </nav>
+      </aside>
+
+      <!-- Dark overlay behind sidebar -->
+      <div class="intro-overlay" id="introOverlay"></div>
+
+      <!-- Main content -->
+      <main class="intro-main">
+        {{{ await $slots.main() }}}
+      </main>
+    </div>
+
+    <script>
+      const sidebar = document.getElementById('introSidebar')
+      const toggle = document.getElementById('sidebarToggle')
+      const overlay = document.getElementById('introOverlay')
+
+      function setSidebarOpen (isOpen) {
+        if (!sidebar || !overlay) return
+        if (isOpen) {
+          sidebar.classList.add('is-open')
+          overlay.classList.add('is-visible')
+        } else {
+          sidebar.classList.remove('is-open')
+          overlay.classList.remove('is-visible')
+        }
+      }
+
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          const isOpen = sidebar.classList.contains('is-open')
+          setSidebarOpen(!isOpen)
+        })
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', () => setSidebarOpen(false))
+      }
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          setSidebarOpen(false)
+        }
+      })
+    </script>
+  </body>
+</html>

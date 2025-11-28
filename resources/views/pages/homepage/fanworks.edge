@@ -1,0 +1,65 @@
+@layout.fandom({
+  title: 'Fandom – Fanworks',
+  fandomName: 'Fandom Name',
+  activeTab: 'fanworks',
+  hasJoined: false   // change to true to show POST
+})
+
+  @slot('main')
+    <section class="feed-section">
+      <article class="post-card">
+        <header class="post-header">
+          <div class="post-user">
+            <div class="avatar-circle small"></div>
+            <div class="post-user-text">
+              <div class="post-username">Username</div>
+              <div class="post-date">01/01/2025</div>
+            </div>
+          </div>
+          <div class="post-tag">#Fanfiction</div>
+        </header>
+
+        <div class="post-body">
+          <div class="post-preview"></div>
+        </div>
+
+        <footer class="post-footer">
+          <div class="post-tags">
+            <span>#tags</span>
+            <span>#tags</span>
+            <span>#tags</span>
+          </div>
+          <div class="post-actions">
+            <button>♡</button>
+            <button>↻</button>
+          </div>
+        </footer>
+      </article>
+
+      <!-- duplicate a few dummy cards to match your mockup -->
+      <article class="post-card">…</article>
+    </section>
+  @endslot
+
+  @slot('filter')
+    <div class="filter-section">
+      <h4>Filter by Tags</h4>
+      <ul class="filter-list">
+        <li><a href="#">#Fanfiction</a></li>
+        <li><a href="#">#Fanart</a></li>
+        <li><a href="#">#Merch</a></li>
+      </ul>
+    </div>
+
+    <div class="filter-section">
+      <h4>Trending</h4>
+      <ul class="filter-list">
+        <li><a href="#">#Tags</a></li>
+        <li><a href="#">#Tags</a></li>
+        <li><a href="#">#Tags</a></li>
+        <li><a href="#">#Tags</a></li>
+      </ul>
+    </div>
+  @endslot
+
+@end

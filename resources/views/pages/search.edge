@@ -1,0 +1,124 @@
+@layout.fandom({
+  title: 'Search',
+  fandomName: 'Fandom Name',
+  activeTab: activeTab,   // or 'wiki' / 'forum' depending where user is
+  hasJoined: true,
+  isSearch: true,   // 👈 important!
+  query: query  
+})
+
+  @slot('main')
+    <!-- search bar under the tabs -->
+    <form class="fandom-search-bar" method="get" action="/search">
+      <input type="hidden" name="tab" value="{{ activeTab }}" />
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        name="q"
+        placeholder="Search..."
+        value="{{ query || '' }}"
+      />
+    </form>
+
+    @if(!query)
+      <!-- BEFORE SEARCH: helper text + recent search -->
+      <p class="search-help">
+        Use <strong>#</strong> when searching for tags…
+      </p>
+
+      <section class="search-recent">
+        <h3>Recent Search</h3>
+        <ul>
+          <li><a href="#">#Tags</a></li>
+          <li><a href="#">#Tags</a></li>
+          <li><a href="#">#Tags</a></li>
+          <li><a href="#">#Tags</a></li>
+        </ul>
+      </section>
+    @else
+      <!-- AFTER SEARCH: result message + feed cards -->
+      <p class="search-result-title">
+        Results for <strong>{{ query }}</strong> in
+        {{ activeTab === 'fanworks' ? 'Fanworks' : (activeTab === 'wiki' ? 'Wiki' : 'Forum') }}
+      </p>
+
+      <section class="feed-section">
+        <!-- just reuse your normal post-card style -->
+        <article class="post-card">
+          <header class="post-header">
+            <div class="post-user">
+              <div class="avatar-circle small"></div>
+              <div class="post-user-text">
+                <div class="post-username">Username</div>
+                <div class="post-date">01/01/2025</div>
+              </div>
+            </div>
+            <div class="post-tag">#Fanfiction</div>
+          </header>
+
+          <div class="post-body">
+            <div class="post-preview"></div>
+          </div>
+
+          <footer class="post-footer">
+            <div class="post-tags">
+              <span>#TagsA</span>
+              <span>#tags</span>
+            </div>
+            <div class="post-actions">
+              <button>♡</button>
+              <button>↻</button>
+            </div>
+          </footer>
+        </article>
+
+        <!-- more result cards here -->
+      </section>
+    @endif
+  @endslot
+
+  @slot('filter')
+    @if(!query)
+      <!-- BEFORE SEARCH: right side shows Trending tags (match your first mockup) -->
+      <div class="filter-section">
+        <h4>Trending</h4>
+        <ul class="filter-list">
+          <li><a href="#">#Tags</a></li>
+          <li><a href="#">#Tags</a></li>
+          <li><a href="#">#Tags</a></li>
+          <li><a href="#">#Tags</a></li>
+        </ul>
+      </div>
+    @else
+      <!-- AFTER SEARCH: right side becomes the normal filter for the active tab -->
+      @if(activeTab === 'fanworks')
+        <div class="filter-section">
+          <h4>Filter by Tags</h4>
+          <ul class="filter-list">
+            <li><a href="#">#Fanfiction</a></li>
+            <li><a href="#">#Fanart</a></li>
+            <li><a href="#">#Merch</a></li>
+          </ul>
+        </div>
+      @elseif(activeTab === 'wiki')
+        <!-- reuse your wiki filter (Announcement / Lore / World accordion) -->
+        <div class="filter-section">
+          <h4>Filter by Tags</h4>
+          <p class="filter-static-link">Announcement</p>
+        </div>
+        <!-- Lore + World collapsibles here if you want -->
+      @elseif(activeTab === 'forum')
+        <div class="filter-section">
+          <h4>#QnA</h4>
+        </div>
+        <div class="filter-section">
+          <h4>#Poll</h4>
+        </div>
+        <div class="filter-section">
+          <h4>#Discussion</h4>
+        </div>
+      @endif
+    @endif
+  @endslot
+
+@end

@@ -1,0 +1,75 @@
+@layout.intro({ title: 'Introduction' })
+
+@slot('main')
+  <section class="intro-top">
+    <div class="intro-donations">
+      <h2>DONATIONS</h2>
+      <div class="donation-placeholder-line"></div>
+      <div class="donation-placeholder-line"></div>
+    </div>
+
+    <div class="intro-search-media">
+      <form class="intro-search-bar">
+        <input type="text" placeholder="Search Fandoms..." />
+      </form>
+
+      <div class="intro-media-links">
+        <h3>Search by Media</h3>
+        <div class="media-links-grid">
+          <a href="#">Anime &amp; Manga</a>
+          <a href="#">Cartoon &amp; Comics</a>
+          <a href="#">Musics</a>
+          <a href="#">Video Games</a>
+          <a href="#">Books &amp; Literature</a>
+          <a href="#">Movies</a>
+          <a href="#">TV Shows</a>
+          <a href="#">Other Media</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="intro-section">
+    <h2>RECENT</h2>
+    <div class="intro-card-grid">
+      <a href="/fanworks" class="intro-fandom-card-link">
+      <div class="intro-card-placeholder">
+        <span class="fandom-card-name">Fandom name</span>
+      </div>
+      </a>
+      <a href="/fanworks" class="intro-fandom-card-link">
+      <div class="intro-card-placeholder">
+        <span class="fandom-card-name">Fandom name</span>
+      </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="intro-section">
+    <h2>FOR YOU</h2>
+    <div class="intro-card-grid">
+      <a href="/fanworks" class="intro-fandom-card-link">
+      <div class="intro-card-placeholder">
+        <span class="fandom-card-name">Fandom name</span>
+      </div>
+      </a>
+      <a href="/fanworks" class="intro-fandom-card-link">
+      <div class="intro-card-placeholder">
+        <span class="fandom-card-name">Fandom name</span>
+      </div>
+      </a>
+      <a href="/fanworks" class="intro-fandom-card-link">
+      <div class="intro-card-placeholder">
+        <span class="fandom-card-name">Fandom name</span>
+      </div>
+      </a>
+      <a href="/fanworks" class="intro-fandom-card-link">
+      <div class="intro-card-placeholder">
+        <span class="fandom-card-name">Fandom name</span>
+      </div>
+      </a>
+    </div>
+  </section>
+@endslot
+
+@end
