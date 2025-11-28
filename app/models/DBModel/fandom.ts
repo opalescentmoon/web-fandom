@@ -5,5 +5,8 @@ export default class Fandom extends BaseModel {
   declare fandomId: number
 
   @column()
+  declare categoryId: number
+
+  @column()
   declare fandomName: string
 }
