@@ -1,8 +1,10 @@
 @layout.fandom({
-  title: 'Forum',
-  fandomName: 'Fandom Name',
+  title: title,
+  fandomName: fandomName,
   activeTab: 'forum',
-  hasJoined: true
+  hasJoined: hasJoined,
+  slug: slug,
+  user: user   
 })
   @slot('main')
     <!-- forum-style cards -->
@@ -24,8 +26,14 @@
 
       <footer class="post-footer">
         <div class="post-tags">
-          #tags #tags #tags
+          <span>#tags</span>
+          <span>#tags</span>
+          <span>#tags</span>
         </div>
+        <div class="post-actions">
+            <button>♡</button>
+            <button>↻</button>
+          </div>
       </footer>
     </article>
   @endslot

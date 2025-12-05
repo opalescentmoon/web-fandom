@@ -1,16 +1,19 @@
 @layout.fandom({
-  title: 'Search',
-  fandomName: 'Fandom Name',
+  title: title,
+  fandomName: fandomName,
   activeTab: activeTab,   // or 'wiki' / 'forum' depending where user is
-  hasJoined: true,
+  hasJoined: hasJoined,
   isSearch: true,   // 👈 important!
-  query: query  
+  query: query,
+  slug: slug,
+  user: user     
 })
 
   @slot('main')
     <!-- search bar under the tabs -->
     <form class="fandom-search-bar" method="get" action="/search">
       <input type="hidden" name="tab" value="{{ activeTab }}" />
+      <input type="hidden" name="slug" value="{{ slug }}" /> 
       <span class="search-icon">🔍</span>
       <input
         type="text"
@@ -28,11 +31,11 @@
 
       <section class="search-recent">
         <h3>Recent Search</h3>
-        <ul>
-          <li><a href="#">#Tags</a></li>
-          <li><a href="#">#Tags</a></li>
-          <li><a href="#">#Tags</a></li>
-          <li><a href="#">#Tags</a></li>
+        <ul>ubu
+          <li><a href="/search?tab={{ activeTab }}&slug={{ slug }}&q=%23Tags">#Tags</a></li>
+          <li><a href="/search?tab={{ activeTab }}&slug={{ slug }}&q=%23Tags">#Tags</a></li>
+          <li><a href="/search?tab={{ activeTab }}&slug={{ slug }}&q=%23Tags">#Tags</a></li>
+          <li><a href="/search?tab={{ activeTab }}&slug={{ slug }}&q=%23Tags">#Tags</a></li>
         </ul>
       </section>
     @else

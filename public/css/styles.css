@@ -62,7 +62,7 @@
   pointer-events: auto;
 }
 
-/* --- Sidebar content styling (same as before) --- */
+/* --- Sidebar content styling --- */
 
 .sidebar-profile {
   display: flex;
@@ -105,6 +105,36 @@
   margin-top: 0.75rem;
 }
 
+.sidebar-guest {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1.2rem;
+  padding: 0.5rem 0.25rem;
+  color: #5c2c2e;
+}
+
+.sidebar-hello {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-guest-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.sidebar-link-accent {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: #8a3036;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
 /* Main content */
 .intro-main {
   background: #fdf5f5;
@@ -124,12 +154,6 @@
   background: #b1585f;
   color: #fff;
   padding: 1rem;
-}
-
-.donation-placeholder-line {
-  height: 2px;
-  background: rgba(255, 255, 255, 0.6);
-  margin-top: 0.75rem;
 }
 
 .intro-search-media {
@@ -189,7 +213,7 @@
   gap: 0.75rem;
 }
 
-.intro-card-placeholder {
+.fandom-card {
   background: #edd4d6;
   border-radius: 18px;
   aspect-ratio: 4 / 3;
@@ -932,3 +956,297 @@
 .profile-sidebar-section a:hover {
   text-decoration: underline;
 }
+
+/* ===== AUTH MODAL OVERLAY ===== */
+
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  display: none;
+  z-index: 60; /* above sidebar & its overlay */
+}
+
+.auth-modal-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  display: block;
+}
+
+/* ===== AUTH MODAL CARD ===== */
+
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+}
+
+.auth-modal.is-open {
+  display: flex; 
+}
+
+.auth-modal-content {
+  background: #fdf7f7;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem 2.5rem 2.2rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  position: relative;
+  display: none; /* JS will set block on active mode */
+}
+
+
+/* Close button */
+.auth-modal-close {
+  position: absolute;
+  top: 0.9rem;
+  left: 1rem;
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #5c2c2e;
+  line-height: 1;
+}
+
+/* Titles */
+.auth-modal-title {
+  margin: 0 0 0.25rem;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #5c2c2e;
+}
+
+.auth-modal-subtitle {
+  margin: 0 0 1.25rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #5c2c2e;
+}
+
+/* Form */
+.auth-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.auth-modal-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #5c2c2e;
+}
+
+.auth-modal-input {
+  background: #f7cfd3;
+  border: 1px solid #e19aa3;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.auth-modal-button {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: #c76369;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-modal-button:hover {
+  filter: brightness(0.95);
+}
+
+/* Footer link */
+.auth-modal-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #5c2c2e;
+}
+
+.auth-inline-link {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: #8a3036;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* ===== CREATE POST MODAL ===== */
+
+.post-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  backdrop-filter: blur(4px);
+}
+
+.post-overlay.is-visible {
+  display: flex;
+}
+
+.post-modal {
+  max-width: 720px;
+  width: 90%;
+  border-radius: 20px;
+  background: #fef6f6;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+.post-modal-inner {
+  position: relative;
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.post-close {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.9rem;
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #5c2c2e;
+}
+
+.post-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1.5rem; /* to visually offset from the X */
+  margin-bottom: 0.75rem;
+}
+
+.post-user-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.post-user-mini .avatar-circle {
+  width: 40px;
+  height: 40px;
+}
+
+.post-type-wrapper {
+  font-size: 0.9rem;
+}
+
+.post-type-select {
+  border: none;
+  background: transparent;
+  color: #5c2c2e;
+  font-weight: 600;
+  padding: 0.25rem 0.4rem;
+  border-radius: 999px;
+}
+
+.post-modal-body {
+  padding-left: 1.5rem;
+  padding-right: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.post-content-input {
+  width: 100%;
+  min-height: 150px;
+  border: none;
+  resize: vertical;
+  background: #f6e4e4;
+  border-radius: 14px;
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+}
+
+.post-tags-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.post-tags-input label {
+  color: #5c2c2e;
+}
+
+.post-tags-input input {
+  flex: 1;
+  border: none;
+  border-bottom: 1px solid #d9a3a6;
+  background: transparent;
+  padding: 0.25rem 0.1rem;
+}
+
+.post-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #edd4d6;
+  padding: 0.6rem 1.5rem 0.4rem;
+}
+
+.post-icon-btn {
+  font-size: 1.1rem;
+}
+
+.post-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.post-tab-select {
+  border-radius: 999px;
+  border: 1px solid #d58a8f;
+  background: #f6d0d3;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.9rem;
+  color: #5c2c2e;
+}
+
+.post-submit-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 1.2rem;
+  background: #c76369;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* screen-reader-only helper class, if not already defined */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+

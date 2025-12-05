@@ -1,0 +1,75 @@
+<div class="auth-modal-overlay" id="authOverlay"></div>
+
+<div class="auth-modal" id="authModal">
+  
+
+  {{-- LOGIN CONTENT --}}
+  <div class="auth-modal-content" id="authLogin">
+    <button class="auth-modal-close" id="authModalClose">×
+    </button>
+    <h2 class="auth-modal-title">Log In</h2>
+    <p class="auth-modal-subtitle">to your Space</p>
+
+    <form class="auth-modal-form" method="POST" action="/login">
+      {{-- later: @csrf --}}
+      <label class="auth-modal-label">
+        Username
+        <input type="text" name="username" class="auth-modal-input" required />
+      </label>
+
+      <label class="auth-modal-label">
+        Password
+        <input type="password" name="password" class="auth-modal-input" required />
+      </label>
+
+      <button type="submit" class="auth-modal-button">
+        Log In
+      </button>
+    </form>
+
+    <p class="auth-modal-footer">
+      Don't have an account?
+      <button
+        type="button"
+        class="auth-inline-link js-open-auth"
+        data-auth-mode="signup"
+      >
+        Sign up now!
+      </button>
+    </p>
+  </div>
+
+  {{-- SIGN UP CONTENT --}}
+  <div class="auth-modal-content" id="authSignup">
+    <button class="auth-modal-close" id="authModalClose">×
+    </button>
+    <h2 class="auth-modal-title">Create your account</h2>
+
+    <form class="auth-modal-form" method="POST" action="/register">
+      {{-- later: @csrf --}}
+      <label class="auth-modal-label">
+        Username
+        <input type="text" name="username" class="auth-modal-input" required />
+      </label>
+
+      <label class="auth-modal-label">
+        Email
+        <input type="email" name="email" class="auth-modal-input" required />
+      </label>
+
+      <label class="auth-modal-label">
+        Password
+        <input type="password" name="password" class="auth-modal-input" required />
+      </label>
+
+      <label class="auth-modal-label">
+        Confirm Password
+        <input type="password" name="password_confirm" class="auth-modal-input" required />
+      </label>
+
+      <button type="submit" class="auth-modal-button">
+        Sign Up
+      </button>
+    </form>
+  </div>
+</div>

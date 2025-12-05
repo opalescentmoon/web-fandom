@@ -1,8 +1,10 @@
 @layout.fandom({
-  title: 'Fandom – Fanworks',
-  fandomName: 'Fandom Name',
+  title: title,
+  fandomName: fandomName,
   activeTab: 'fanworks',
-  hasJoined: false   // change to true to show POST
+  hasJoined: hasJoined,
+  slug: slug,
+  user: user   
 })
 
   @slot('main')

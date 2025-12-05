@@ -1,4 +1,4 @@
-@layout.intro({ title: 'Introduction' })
+@layout.intro({ title: 'Introduction', user})
 
 @slot('main')
   <section class="intro-top">
@@ -29,47 +29,83 @@
     </div>
   </section>
 
-  <section class="intro-section">
+  @if(!user)
+    <section class="intro-section">
+      <h2>POPULAR FANDOMS</h2>
+      <div class="intro-card-grid">
+        @each(fandom in popularFandoms)
+          <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
+            <div class="fandom-card">
+              <span class="fandom-card-name">{{ fandom.name }}</span>
+            </div>
+          </a>
+        @endeach
+      </div>
+    </section>
+  @else
+    @if(recentFandoms && recentFandoms.length)
+      <section class="intro-section">
+        <h2>RECENT</h2>
+        <div class="intro-card-grid">
+          @each(fandom in recentFandoms)
+            <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
+              <div class="fandom-card">
+                <span class="fandom-card-name">{{ fandom.name }}</span>
+              </div>
+            </a>
+          @endeach
+        </div>
+      </section>
+    @endif
+
+    @if(forYouFandoms && forYouFandoms.length)
+      <section class="intro-section">
+        <h2>FOR YOU</h2>
+        <div class="intro-card-grid">
+          @each(fandom in forYouFandoms)
+            <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
+              <div class="fandom-card">
+                <span class="fandom-card-name">{{ fandom.name }}</span>
+              </div>
+            </a>
+          @endeach
+        </div>
+      </section>
+    @endif
+
+    {{-- if no recents *and* no for-you yet, fall back to POPULAR --}}
+    @if((!recentFandoms || !recentFandoms.length) && (!forYouFandoms || !forYouFandoms.length))
+      <section class="intro-section">
+        <h2>POPULAR FANDOMS</h2>
+        <div class="intro-card-grid">
+          @each(fandom in popularFandoms)
+            <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
+              <div class="fandom-card">
+                <span class="fandom-card-name">{{ fandom.name }}</span>
+              </div>
+            </a>
+          @endeach
+        </div>
+      </section>
+    @endif
+  @endif
+
+  {{--<section class="intro-section">
     <h2>RECENT</h2>
     <div class="intro-card-grid">
       <a href="/fanworks" class="intro-fandom-card-link">
-      <div class="intro-card-placeholder">
+      <div class="fandom-card">
         <span class="fandom-card-name">Fandom name</span>
       </div>
       </a>
       <a href="/fanworks" class="intro-fandom-card-link">
-      <div class="intro-card-placeholder">
+      <div class="fandom-card">
         <span class="fandom-card-name">Fandom name</span>
       </div>
       </a>
     </div>
-  </section>
+  </section>--}}
 
-  <section class="intro-section">
-    <h2>FOR YOU</h2>
-    <div class="intro-card-grid">
-      <a href="/fanworks" class="intro-fandom-card-link">
-      <div class="intro-card-placeholder">
-        <span class="fandom-card-name">Fandom name</span>
-      </div>
-      </a>
-      <a href="/fanworks" class="intro-fandom-card-link">
-      <div class="intro-card-placeholder">
-        <span class="fandom-card-name">Fandom name</span>
-      </div>
-      </a>
-      <a href="/fanworks" class="intro-fandom-card-link">
-      <div class="intro-card-placeholder">
-        <span class="fandom-card-name">Fandom name</span>
-      </div>
-      </a>
-      <a href="/fanworks" class="intro-fandom-card-link">
-      <div class="intro-card-placeholder">
-        <span class="fandom-card-name">Fandom name</span>
-      </div>
-      </a>
-    </div>
-  </section>
 @endslot
 
 @end

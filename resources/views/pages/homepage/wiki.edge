@@ -1,8 +1,10 @@
 @layout.fandom({
-  title: 'Wiki',
-  fandomName: 'Fandom Name',
+  title: title,
+  fandomName: fandomName,
   activeTab: 'wiki',
-  hasJoined: true
+  hasJoined: hasJoined,
+  slug: slug,
+  user: user   
 })
   @slot('main')
     <!-- wiki-style cards, your “announcement / lore / world building” blocks -->

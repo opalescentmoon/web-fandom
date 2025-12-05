@@ -26,11 +26,12 @@
     <div class="intro-layout">
       <!-- Sidebar -->
       <aside class="intro-sidebar" id="introSidebar">
+        @if(user)
         <a href="/profile" class="sidebar-profile">
           <div class="avatar-circle"></div>
           <div class="profile-text">
-            <div  class="display-name">Display name</div>
-            <div class="username">@Username</div>
+            <div  class="display-name">{{ user.displayName || 'Display name' }}</div>
+            <div class="username">{{ '@' + (user.username || 'username') }}</div>
           </div>
         </a>
 
@@ -41,7 +42,25 @@
           <a href="#" class="sidebar-link">Settings</a>
           <a href="#" class="sidebar-link sidebar-link-danger">Log Out</a>
         </nav>
+        @else
+        <div class="sidebar-guest">
+      <p class="sidebar-hello">Hi there! ヾ(｡･▽･｡)</p>
+      <p>Welcome to Space.</p>
+
+      <p class="sidebar-guest-text">
+        <a data-requires-auth="true" class="sidebar-link-accent">Log in</a>
+        to interact with your fandom!
+      </p>
+
+      <p class="sidebar-guest-text">
+        No account yet?<br />
+        <a class="auth-inline-link js-open-auth"
+        data-auth-mode="signup" class="sidebar-link-accent">Create one now.</a>
+      </p>
+    </div>
+        @end
       </aside>
+      
 
       <!-- Dark overlay behind sidebar -->
       <div class="intro-overlay" id="introOverlay"></div>
@@ -51,6 +70,8 @@
         {{{ await $slots.main() }}}
       </main>
     </div>
+
+    @include('components/auth_modal')
 
     <script>
       const sidebar = document.getElementById('introSidebar')
@@ -83,6 +104,78 @@
         if (event.key === 'Escape') {
           setSidebarOpen(false)
         }
+      })
+
+       // tells JS whether user is logged in (Edge will insert true/false)
+      window.IS_LOGGED_IN = {{ user ? 'true' : 'false' }};
+
+      // ===== AUTH MODAL JS =====
+      const authOverlay = document.getElementById('authOverlay')
+      const authModal = document.getElementById('authModal')
+      const authLogin = document.getElementById('authLogin')
+      const authSignup = document.getElementById('authSignup')
+
+      function openAuthModal (mode) {
+        if (!authModal || !authOverlay) return
+
+        authModal.classList.add('is-open')
+        authOverlay.classList.add('is-visible')
+
+        if (authLogin && authSignup) {
+          authLogin.style.display = mode === 'signup' ? 'none' : 'block'
+          authSignup.style.display = mode === 'signup' ? 'block' : 'none'
+        }
+      }
+
+      function closeAuthModal () {
+        if (!authModal || !authOverlay) return
+        authModal.classList.remove('is-open')
+        authOverlay.classList.remove('is-visible')
+
+        if (authLogin) authLogin.style.display = 'none'
+        if (authSignup) authSignup.style.display = 'none'
+      }
+
+      // open from any element with .js-open-auth
+      document.querySelectorAll('.js-open-auth').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          event.preventDefault()
+          const mode = btn.getAttribute('data-auth-mode') || 'login'
+          openAuthModal(mode)
+        })
+      })
+
+      document.querySelectorAll('.auth-modal-close').forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+          event.preventDefault()
+          closeAuthModal()
+        })
+      })
+
+      if (authModal) {
+  authModal.addEventListener('click', (event) => {
+    // only close if you clicked the backdrop, not inside the card
+    if (event.target === authModal) {
+      closeAuthModal()
+    }
+  })
+}
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeAuthModal()
+        }
+      })
+
+      // ===== REQUIRE-AUTH CLICK GUARD =====
+      document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
+        el.addEventListener('click', (event) => {
+          if (!window.IS_LOGGED_IN) {
+            event.preventDefault()
+            const mode = el.getAttribute('data-auth-mode') || 'login'
+            openAuthModal(mode)
+          }
+        })
       })
     </script>
   </body>
