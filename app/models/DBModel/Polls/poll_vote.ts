@@ -8,14 +8,14 @@ export default class PollVote extends BaseModel {
   declare id: number
 
   @column()
-  declare poll_option_id: number
+  declare pollOptionId: number
 
-  @belongsTo(() => PollOption)
-  public poll_option!: BelongsTo<typeof PollOption>
+  @belongsTo(() => PollOption, { foreignKey: 'pollOptionId' })
+  public pollOption!: BelongsTo<typeof PollOption>
 
   @column()
-  declare user_id: number
+  declare userId: number
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   public user!: BelongsTo<typeof User>
 }

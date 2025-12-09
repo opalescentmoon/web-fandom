@@ -1,19 +1,13 @@
 import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
-import User from './user.js'
-import Fandom from '#models/DBModel/fandom'
-import Media from '#models/DBModel/media'
+import User from '../User/user.js'
+import Fandom from '../fandom.js'
 import Content from '../content.js'
 
-export default class Post extends BaseModel {
+export default class Wiki extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
-
-  @column()
-  declare userId: number
 
   @column()
   declare fandomId: number
@@ -22,26 +16,32 @@ export default class Post extends BaseModel {
   declare contentId: number
 
   @column()
-  declare postType: string
+  declare title: string
 
   @column()
-  declare parentId: number
+  declare createdBy: number
 
   @column()
-  declare caption: string
+  declare content: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @belongsTo(() => User, { foreignKey: 'userId' })
-  public user!: BelongsTo<typeof User>
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+
+  @column()
+  declare approvedBy: number
+
+  @belongsTo(() => User, { foreignKey: 'createdBy' })
+  public userCreated!: BelongsTo<typeof User>
+
+  @belongsTo(() => User, { foreignKey: 'approvedBy' })
+  public userApproved!: BelongsTo<typeof User>
 
   @belongsTo(() => Fandom, { foreignKey: 'fandomId' })
   public fandom!: BelongsTo<typeof Fandom>
 
   @belongsTo(() => Content, { foreignKey: 'contentId' })
-  public content!: BelongsTo<typeof Content>
-
-  @hasMany(() => Media)
-  public media!: HasMany<typeof Media>
+  public contentRelation!: BelongsTo<typeof Content>
 }

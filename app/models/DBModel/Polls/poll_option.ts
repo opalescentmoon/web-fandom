@@ -7,11 +7,11 @@ export default class PollOption extends BaseModel {
   declare id: number
 
   @column()
-  declare poll_id: number
+  declare pollId: number
 
-  @belongsTo(() => Poll)
+  @belongsTo(() => Poll, { foreignKey: 'pollId' })
   public poll!: BelongsTo<typeof Poll>
 
   @column()
-  declare option_text: string
+  declare optionText: string
 }

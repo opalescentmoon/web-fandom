@@ -15,6 +15,6 @@ export default class Media extends BaseModel {
   @column()
   declare postId: number
 
-  @belongsTo(() => Post)
+  @belongsTo(() => Post, { foreignKey: 'postId' })
   public post!: BelongsTo<typeof Post>
 }

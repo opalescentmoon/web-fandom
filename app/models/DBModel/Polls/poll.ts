@@ -7,7 +7,7 @@ export default class Poll extends BaseModel {
   declare id: number
 
   @column()
-  declare post_id: number
+  declare postId: number
 
   @belongsTo(() => Post)
   public post!: BelongsTo<typeof Post>

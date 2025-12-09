@@ -14,7 +14,7 @@ export default class SessionController {
       return { error: 'Invalid credentials' }
     }
 
-    const payload = { sub: user.user_id, email: user.email }
+    const payload = { sub: user.userId, email: user.email }
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })
 
     return { token, user }

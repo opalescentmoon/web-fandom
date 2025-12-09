@@ -6,9 +6,14 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
-      table.integer('fandom_id').unsigned().references('id').inTable('fandoms').onDelete('CASCADE')
-      table.integer('content_id').unsigned()
+      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
+      table
+        .integer('fandom_id')
+        .unsigned()
+        .references('fandom_id')
+        .inTable('fandoms')
+        .onDelete('CASCADE')
+      table.integer('content_id').unsigned().references('id').inTable('content').onDelete('CASCADE')
       table.string('post_type')
       table.integer('parent_id').unsigned().nullable()
       table.text('caption').nullable()

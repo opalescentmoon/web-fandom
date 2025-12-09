@@ -16,6 +16,9 @@ export default class Relationship extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare timestamp: DateTime
 
-  @belongsTo(() => User)
-  public user!: BelongsTo<typeof User>
+  @belongsTo(() => User, { foreignKey: 'userFollow' })
+  public following!: BelongsTo<typeof User>
+
+  @belongsTo(() => User, { foreignKey: 'userFollowed' })
+  public follower!: BelongsTo<typeof User>
 }
