@@ -51,9 +51,9 @@ export default class AuthController {
         message: 'User registered successfully',
         data: {
           user: {
-            userId: user.userId,
-            username: user.username,
-            displayName: user.displayName,
+            user_id: user.userId,
+            user_name: user.username,
+            display_name: user.displayName,
             email: user.email,
             bio: user.bio,
           },

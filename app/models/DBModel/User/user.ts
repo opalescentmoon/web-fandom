@@ -11,25 +11,25 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 })
 
 export default class User extends compose(BaseModel, AuthFinder) {
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'user_id' })
   declare userId: number
 
-  @column()
+  @column({ columnName: 'user_name' })
   declare username: string
 
-  @column()
+  @column({ columnName: 'display_name' })
   declare displayName: string
 
-  @column()
+  @column({ columnName: 'email' })
   declare email: string
 
   @column({ serializeAs: null })
   declare password: string
 
-  @column()
+  @column({ columnName: 'bio' })
   declare bio: string
 
-  @column()
+  @column({ columnName: 'profile_picture' })
   declare profilePicture: URL
 
   @column.dateTime({ autoCreate: true })
