@@ -1,15 +1,27 @@
-
-
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/middleware'
+const AuthController = () => import('#controllers/auth_controller')
 
+/**
+ * AUTH ROUTES
+ */
+
+router.post('/auth/register', [AuthController, 'register'])
+router.post('/auth/login', [AuthController, 'login'])
+router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth())
+router.get('/auth/profile', [AuthController, 'getProfile']).use(middleware.auth())
+
+/**
+ * HOME AND MAIN ROUTES
+ */
 router.get('/', async ({ view, auth }) => {
-  const user = auth.user   // null if not logged in
+  const user = auth.user // null if not logged in
 
   // later: real queries from DB
   const recentFandoms = user
     ? [] // fill with last visited fandoms when ready
     : []
-    
+
   const forYouFandoms = user
     ? [] // personalised recommendations
     : []
@@ -43,13 +55,13 @@ router.get('/fanworks/:slug?', async ({ params, view, auth }) => {
 
   return view.render('pages/homepage/fanworks', {
     title: fandomName,
-  fandomName,
-  activeTab: 'fanworks',
-  slug,
-  hasJoined: false,
-  user: auth.user,
-  isSearch: false,
-  query: '',
+    fandomName,
+    activeTab: 'fanworks',
+    slug,
+    hasJoined: false,
+    user: auth.user,
+    isSearch: false,
+    query: '',
   })
 })
 
@@ -59,14 +71,14 @@ router.get('/wiki/:slug?', async ({ params, view, auth }) => {
   const fandomName = makeFandomName(slug)
 
   return view.render('pages/homepage/wiki', {
-  title: fandomName,
-  fandomName,
-  activeTab: 'wiki',
-  slug,
-  hasJoined: false,
-  user: auth.user,
-  isSearch: false,
-  query: '',
+    title: fandomName,
+    fandomName,
+    activeTab: 'wiki',
+    slug,
+    hasJoined: false,
+    user: auth.user,
+    isSearch: false,
+    query: '',
   })
 })
 
@@ -76,14 +88,14 @@ router.get('/forum/:slug?', async ({ params, view, auth }) => {
   const fandomName = makeFandomName(slug)
 
   return view.render('pages/homepage/forum', {
-  title: fandomName,
-  fandomName,
-  activeTab: 'forum',
-  slug,
-  hasJoined: false,
-  user: auth.user,
-  isSearch: false,
-  query: '',
+    title: fandomName,
+    fandomName,
+    activeTab: 'forum',
+    slug,
+    hasJoined: false,
+    user: auth.user,
+    isSearch: false,
+    query: '',
   })
 })
 

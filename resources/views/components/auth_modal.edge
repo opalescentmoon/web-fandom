@@ -10,8 +10,8 @@
     <h2 class="auth-modal-title">Log In</h2>
     <p class="auth-modal-subtitle">to your Space</p>
 
-    <form class="auth-modal-form" method="POST" action="/login">
-      {{-- later: @csrf --}}
+    <form class="auth-modal-form" method="POST" action="/auth/login">
+      {{ csrfField() }}
       <label class="auth-modal-label">
         Username
         <input type="text" name="username" class="auth-modal-input" required />
@@ -45,8 +45,8 @@
     </button>
     <h2 class="auth-modal-title">Create your account</h2>
 
-    <form class="auth-modal-form" method="POST" action="/register">
-      {{-- later: @csrf --}}
+    <form class="auth-modal-form" method="POST" action="/auth/register">
+      {{ csrfField() }}
       <label class="auth-modal-label">
         Username
         <input type="text" name="username" class="auth-modal-input" required />
@@ -64,7 +64,7 @@
 
       <label class="auth-modal-label">
         Confirm Password
-        <input type="password" name="password_confirm" class="auth-modal-input" required />
+        <input type="password" name="passwordConfirmation" class="auth-modal-input" required />
       </label>
 
       <button type="submit" class="auth-modal-button">
@@ -73,3 +73,99 @@
     </form>
   </div>
 </div>
+
+<script>
+  // Helper: show message in feedback element
+  function showFeedback(el, message, isError = false) {
+    if (!el) return
+    el.textContent = message
+    el.style.color = isError ? 'var(--color-danger, #d9534f)' : 'var(--color-success, #28a745)'
+  }
+
+  // Submit handler for login
+  const loginForm = document.getElementById('loginForm')
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault()
+      const feedback = document.getElementById('loginFeedback')
+      showFeedback(feedback, 'Logging in...')
+
+      const formData = new FormData(loginForm)
+      const payload = {
+        email: formData.get('email'),
+        password: formData.get('password'),
+      }
+
+      try {
+        const res = await fetch(loginForm.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+
+        const body = await res.json()
+        if (!res.ok) {
+          showFeedback(feedback, body?.message || 'Login failed', true)
+          return
+        }
+
+        // Save token and reload to reflect auth state
+        if (body?.data?.token?.token) {
+          localStorage.setItem('accessToken', body.data.token.token)
+        }
+        showFeedback(feedback, 'Login successful')
+        setTimeout(() => location.reload(), 600)
+      } catch (err) {
+        showFeedback(feedback, 'Network error', true)
+      }
+    })
+  }
+
+  // Submit handler for register
+  const registerForm = document.getElementById('registerForm')
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault()
+      const feedback = document.getElementById('registerFeedback')
+      showFeedback(feedback, 'Creating account...')
+
+      const formData = new FormData(registerForm)
+      const payload = {
+        name: formData.get('name'),
+        displayName: formData.get('displayName') || formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        passwordConfirmation: formData.get('passwordConfirmation'),
+      }
+
+      try {
+        const res = await fetch(registerForm.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+
+        const body = await res.json()
+        if (!res.ok) {
+          showFeedback(feedback, body?.message || 'Registration failed', true)
+          return
+        }
+
+        // Save token and reload
+        if (body?.data?.token?.token) {
+          localStorage.setItem('accessToken', body.data.token.token)
+        }
+        showFeedback(feedback, 'Account created')
+        setTimeout(() => location.reload(), 800)
+      } catch (err) {
+        showFeedback(feedback, 'Network error', true)
+      }
+    })
+  }
+</script>
