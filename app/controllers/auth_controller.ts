@@ -9,8 +9,8 @@ export default class AuthController {
   async register({ request, response }: HttpContext) {
     try {
       // Validate input
-      const { name, displayName, email, password, passwordConfirmation } = request.only([
-        'name',
+      const { username, displayName, email, password, passwordConfirmation } = request.only([
+        'username',
         'displayName',
         'email',
         'password',
@@ -36,8 +36,8 @@ export default class AuthController {
 
       // Create new user
       const user = await User.create({
-        name,
-        displayName: displayName || name,
+        username,
+        displayName: displayName || username,
         email,
         password,
         bio: '',
@@ -52,7 +52,7 @@ export default class AuthController {
         data: {
           user: {
             userId: user.userId,
-            name: user.name,
+            username: user.username,
             displayName: user.displayName,
             email: user.email,
             bio: user.bio,
@@ -106,7 +106,7 @@ export default class AuthController {
         data: {
           user: {
             userId: user.userId,
-            name: user.name,
+            username: user.username,
             displayName: user.displayName,
             email: user.email,
             bio: user.bio,
@@ -168,7 +168,7 @@ export default class AuthController {
         success: true,
         data: {
           userId: user.userId,
-          name: user.name,
+          username: user.username,
           displayName: user.displayName,
           email: user.email,
           bio: user.bio,

@@ -12,7 +12,7 @@ export default class UserRepository {
   }
 
   async create(data: {
-    name: string
+    username: string
     email: string
     passwordHash: string
     displayName?: string
@@ -29,9 +29,9 @@ export default class UserRepository {
     return user
   }
 
-  async updateName(id: number, name: string) {
+  async updateName(id: number, username: string) {
     const user = await User.findOrFail(id)
-    user.name = name
+    user.username = username
     await user.save()
     return user
   }
