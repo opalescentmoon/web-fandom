@@ -26,40 +26,44 @@
     <div class="intro-layout">
       <!-- Sidebar -->
       <aside class="intro-sidebar" id="introSidebar">
-        @if(user)
+        
+      <!-- logged in ver -->
+      <div id="sidebarLoggedIn" class="sidebar-logged-in" style="display: none;">
         <a href="/profile" class="sidebar-profile">
           <div class="avatar-circle"></div>
           <div class="profile-text">
-            <div  class="display-name">{{ user.displayName || 'Display name' }}</div>
-            <div class="username">{{ '@' + (user.username || 'username') }}</div>
+            <div  class="display-name"data-display-name>Display name</div>
+        <div class="username" data-username>@username</div>
           </div>
         </a>
 
         <nav class="sidebar-menu">
-          <a href="/profile" class="sidebar-link">Profile</a>
-          <a href="/chats" class="sidebar-link">Chats</a>
+          <a href="/profile" class="sidebar-link" data-requires-auth="true">Profile</a>
+          <a href="/chats" class="sidebar-link" data-requires-auth="true">Chats</a>
           <a href="#" class="sidebar-link">Follower Request</a>
           <a href="#" class="sidebar-link">Settings</a>
-          <a href="#" class="sidebar-link sidebar-link-danger">Log Out</a>
+          <a href="#" class="sidebar-link sidebar-link-danger" id="sidebarLogoutLink">Log Out</a>
         </nav>
-        @else
-        <div class="sidebar-guest">
+      </div>
+      
+      <!-- guest ver -->
+      <div id="sidebarGuest" class="sidebar-guest">
       <p class="sidebar-hello">Hi there! ヾ(｡･▽･｡)</p>
       <p>Welcome to Space.</p>
 
       <p class="sidebar-guest-text">
-        <a data-requires-auth="true" class="sidebar-link-accent">Log in</a>
+        <a class="sidebar-link-accent js-open-auth" data-auth-mode="login">Log in</a>
         to interact with your fandom!
       </p>
 
       <p class="sidebar-guest-text">
         No account yet?<br />
-        <a class="auth-inline-link js-open-auth"
-        data-auth-mode="signup" class="sidebar-link-accent">Create one now.</a>
+        <a class="auth-inline-link js-open-auth sidebar-link-accent"
+         data-auth-mode="signup">Create one now.</a>
       </p>
     </div>
-        @end
-      </aside>
+      
+    </aside>
       
 
       <!-- Dark overlay behind sidebar -->
@@ -106,8 +110,80 @@
         }
       })
 
-       // tells JS whether user is logged in (Edge will insert true/false)
-      window.IS_LOGGED_IN = {{ user ? 'true' : 'false' }};
+      // tells JS whether user is logged in (Edge will insert true/false)
+      const token = localStorage.getItem('accessToken')
+      window.IS_LOGGED_IN = !!token
+
+      // ===== SIDEBAR USER DISPLAY & LOGOUT =====
+;(function () {
+  const loggedInBox = document.getElementById('sidebarLoggedIn')
+  const guestBox = document.getElementById('sidebarGuest')
+  const displayNameEl = document.querySelector('[data-display-name]')
+  const usernameEl = document.querySelector('[data-username]')
+  const logoutLink = document.getElementById('sidebarLogoutLink')
+
+  let currentUser = null
+  const rawUser = localStorage.getItem('currentUser')
+  if (rawUser) {
+    try {
+      currentUser = JSON.parse(rawUser)
+    } catch (e) {
+      console.warn('Failed to parse currentUser from localStorage', e)
+    }
+  }
+
+  if (window.IS_LOGGED_IN && currentUser && loggedInBox && guestBox) {
+    // Pick display name / username from either snake_case or camelCase
+    const displayName =
+      currentUser.display_name ||
+      currentUser.displayName ||
+      currentUser.user_name ||
+      currentUser.username ||
+      'User'
+
+    const username =
+      currentUser.user_name ||
+      currentUser.username ||
+      ''
+
+    if (displayNameEl) displayNameEl.textContent = displayName
+    if (usernameEl) usernameEl.textContent = username ? '@' + username : ''
+
+    loggedInBox.style.display = 'block'
+    guestBox.style.display = 'none'
+  } else {
+    // show guest view
+    if (loggedInBox) loggedInBox.style.display = 'none'
+    if (guestBox) guestBox.style.display = 'block'
+  }
+
+  // Logout handler: clear token + local user, optionally call backend
+  if (logoutLink) {
+    logoutLink.addEventListener('click', async (event) => {
+      event.preventDefault()
+
+      const token = localStorage.getItem('accessToken')
+      try {
+        if (token) {
+          await fetch('/auth/logout', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/json',
+            },
+          })
+        }
+      } catch (err) {
+        console.warn('Logout request failed (will still clear local data)', err)
+      }
+
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('currentUser')
+      window.IS_LOGGED_IN = false
+      location.reload()
+    })
+  }
+})()
 
       // ===== AUTH MODAL JS =====
       const authOverlay = document.getElementById('authOverlay')

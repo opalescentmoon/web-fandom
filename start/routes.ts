@@ -1,6 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/middleware'
 const AuthController = () => import('#controllers/auth_controller')
+const LikesController = () => import('#controllers/likes_controller')
 
 /**
  * AUTH ROUTES
@@ -119,3 +120,6 @@ router.get('/search', async ({ request, view, auth }) => {
     isSearch: true,
   })
 })
+
+// LIKE ROUTES
+router.post('/likes/toggle', [LikesController, 'toggle']).middleware([middleware.auth()])

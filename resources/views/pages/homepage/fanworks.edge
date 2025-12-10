@@ -32,7 +32,16 @@
             <span>#tags</span>
           </div>
           <div class="post-actions">
-            <button>♡</button>
+            <button
+            type="button"
+            class="post-like-btn"
+            data-requires-auth="true"
+            data-like-url="/likes/toggle"   {{-- ask your friend if this is the route --}}
+            data-post-id="1"                {{-- replace with actual post ID data-post-id="{ {post.id } }" --}}
+            data-liked="false">
+              <span class="post-like-icon">♡</span>
+              <span class="post-like-count">3</span>   {{-- replace with actual like count { { post.likeCount } } --}}
+            </button>
             <button>↻</button>
           </div>
         </footer>

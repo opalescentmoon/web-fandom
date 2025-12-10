@@ -10,7 +10,7 @@
     <h2 class="auth-modal-title">Log In</h2>
     <p class="auth-modal-subtitle">to your Space</p>
 
-    <form class="auth-modal-form" method="POST" action="/auth/login">
+    <form id="loginForm" class="auth-modal-form" method="POST" action="/auth/login">
       {{ csrfField() }}
       <label class="auth-modal-label">
         Username
@@ -26,6 +26,8 @@
         Log In
       </button>
     </form>
+
+    <p id="loginFeedback" class="auth-modal-feedback"></p> 
 
     <p class="auth-modal-footer">
       Don't have an account?
@@ -45,7 +47,7 @@
     </button>
     <h2 class="auth-modal-title">Create your account</h2>
 
-    <form class="auth-modal-form" method="POST" action="/auth/register">
+    <form id="registerForm" class="auth-modal-form" method="POST" action="/auth/register">
       {{ csrfField() }}
       <label class="auth-modal-label">
         Username
@@ -71,101 +73,131 @@
         Sign Up
       </button>
     </form>
+
+    <p id="registerFeedback" class="auth-modal-feedback"></p>
   </div>
 </div>
 
 <script>
-  // Helper: show message in feedback element
-  function showFeedback(el, message, isError = false) {
-    if (!el) return
-    el.textContent = message
-    el.style.color = isError ? 'var(--color-danger, #d9534f)' : 'var(--color-success, #28a745)'
-  }
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('auth modal script loaded')
 
-  // Submit handler for login
-  const loginForm = document.getElementById('loginForm')
-  if (loginForm) {
-    loginForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault()
-      const feedback = document.getElementById('loginFeedback')
-      showFeedback(feedback, 'Logging in...')
+    // Helper
+    function showFeedback(el, message, isError = false) {
+      if (!el) return
+      el.textContent = message
+      el.style.color = isError ? 'var(--color-danger, #d9534f)' : 'var(--color-success, #28a745)'
+    }
 
-      const formData = new FormData(loginForm)
-      const payload = {
-        email: formData.get('email'),
-        password: formData.get('password'),
-      }
+    // ===== LOGIN FORM =====
+    const loginForm = document.getElementById('loginForm')
+    console.log('loginForm is', loginForm)
 
-      try {
-        const res = await fetch(loginForm.action, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (ev) => {
+        ev.preventDefault()
+        console.log('login submit intercepted')
 
-        const body = await res.json()
-        if (!res.ok) {
-          showFeedback(feedback, body?.message || 'Login failed', true)
-          return
+        const feedback = document.getElementById('loginFeedback')
+        showFeedback(feedback, 'Logging in...')
+
+        const formData = new FormData(loginForm)
+
+        try {
+          const res = await fetch(loginForm.action, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+            },
+            body: formData,
+          })
+
+          let body
+          try{
+            body = await res.json()
+          } catch (e) {
+            const text = await res.text()
+            console.error('Non-JSON response:', text)
+            showFeedback(feedback, 'Unexpected response from server', true)
+            return
+          }
+
+          if (!res.ok || !body.success) {
+            showFeedback(feedback, body?.message || 'Login failed', true)
+            return
+          }
+
+          if (body?.data?.token?.token) {
+            localStorage.setItem('accessToken', body.data.token.token)
+          }
+          if (body?.data?.user) {
+            localStorage.setItem('currentUser', JSON.stringify(body.data.user))
+          }
+
+          showFeedback(feedback, 'Login successful')
+          setTimeout(() => location.reload(), 600)
+        } catch (err) {
+          console.error(err)
+          showFeedback(feedback, 'Network error', true)
         }
+      })
+    }
 
-        // Save token and reload to reflect auth state
-        if (body?.data?.token?.token) {
-          localStorage.setItem('accessToken', body.data.token.token)
+    // ===== REGISTER FORM =====
+    const registerForm = document.getElementById('registerForm')
+    console.log('registerForm is', registerForm)
+
+    if (registerForm) {
+      registerForm.addEventListener('submit', async (ev) => {
+        ev.preventDefault()
+        console.log('register submit intercepted')
+
+        const feedback = document.getElementById('registerFeedback')
+        showFeedback(feedback, 'Creating account...')
+
+        const formData = new FormData(registerForm)
+        
+
+        try {
+          const res = await fetch(registerForm.action, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+            },
+            body: formData,
+          })
+
+          let body
+          try{
+            body = await res.json()
+          } catch (e) {
+            const text = await res.text()
+            console.error('Non-JSON response:', text)
+            showFeedback(feedback, 'Unexpected response from server', true)
+            return
+          }
+
+          if (!res.ok || !body.success) {
+            showFeedback(feedback, body?.message || 'Registration failed', true)
+            return
+          }
+
+          if (body?.data?.token?.token) {
+            localStorage.setItem('accessToken', body.data.token.token)
+          }
+          if (body?.data?.user) {
+            localStorage.setItem('currentUser', JSON.stringify(body.data.user))
+          }
+
+          showFeedback(feedback, 'Account created')
+          setTimeout(() => location.reload(), 800)
+        } catch (err) {
+          console.error(err)
+          showFeedback(feedback, 'Network error', true)
         }
-        showFeedback(feedback, 'Login successful')
-        setTimeout(() => location.reload(), 600)
-      } catch (err) {
-        showFeedback(feedback, 'Network error', true)
-      }
-    })
-  }
-
-  // Submit handler for register
-  const registerForm = document.getElementById('registerForm')
-  if (registerForm) {
-    registerForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault()
-      const feedback = document.getElementById('registerFeedback')
-      showFeedback(feedback, 'Creating account...')
-
-      const formData = new FormData(registerForm)
-      const payload = {
-        name: formData.get('name'),
-        displayName: formData.get('displayName') || formData.get('name'),
-        email: formData.get('email'),
-        password: formData.get('password'),
-        passwordConfirmation: formData.get('passwordConfirmation'),
-      }
-
-      try {
-        const res = await fetch(registerForm.action, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
-
-        const body = await res.json()
-        if (!res.ok) {
-          showFeedback(feedback, body?.message || 'Registration failed', true)
-          return
-        }
-
-        // Save token and reload
-        if (body?.data?.token?.token) {
-          localStorage.setItem('accessToken', body.data.token.token)
-        }
-        showFeedback(feedback, 'Account created')
-        setTimeout(() => location.reload(), 800)
-      } catch (err) {
-        showFeedback(feedback, 'Network error', true)
-      }
-    })
-  }
+      })
+    } else {
+      console.log('no registerForm found on this page')
+    }
+  })
 </script>
