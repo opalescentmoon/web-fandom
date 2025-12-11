@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.integer('post_id').unsigned().references('id').inTable('posts').onDelete('CASCADE')
       table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
 
-      table.timestamp('timestamp')
+      table.timestamp('time')
       table.unique(['post_id', 'user_id'])
     })
   }
