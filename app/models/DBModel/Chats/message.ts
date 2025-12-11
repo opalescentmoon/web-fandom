@@ -1,24 +1,24 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Media from './media.js'
-import User from './User/user.js'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import Media from '../media.js'
+import User from '../User/user.js'
 import Chat from './chat.js'
 
 export default class Message extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'chat_id' })
   declare chatId: number
 
-  @column()
+  @column({ columnName: 'sender_id' })
   declare senderId: number
 
-  @column()
+  @column({ columnName: 'message_text' })
   declare messageText: string
 
-  @column()
+  @column({ columnName: 'media_id' })
   declare mediaId: number | null
 
   @belongsTo(() => Chat, { foreignKey: 'chatId' })
@@ -38,4 +38,7 @@ export default class Message extends BaseModel {
 
   @column.dateTime({ serializeAs: null })
   declare deletedAt: DateTime | null
+
+  @hasMany(() => User)
+  public user!: HasMany<typeof User>
 }

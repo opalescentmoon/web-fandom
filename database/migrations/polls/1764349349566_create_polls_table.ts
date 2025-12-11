@@ -8,6 +8,7 @@ export default class extends BaseSchema {
       table.increments('id')
       table.integer('post_id').unsigned().references('id').inTable('posts').onDelete('CASCADE')
       table.text('question')
+      table.unique(['post_id'])
     })
   }
 

@@ -13,16 +13,18 @@ export default class extends BaseSchema {
         .integer('sender_id')
         .unsigned()
         .references('user_id')
-        .inTable('user')
+        .inTable('users')
         .onDelete('CASCADE')
 
       table.text('message_text')
 
-      table.integer('media_id').unsigned().references('id').inTable('media_id').onDelete('CASCADE')
+      table.integer('media_id').unsigned().references('id').inTable('media').onDelete('CASCADE')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')
       table.timestamp('deleted_at')
+
+      table.unique(['message_id'])
     })
   }
 

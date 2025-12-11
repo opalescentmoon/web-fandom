@@ -7,28 +7,25 @@ export default class LikesController {
   /**
    * Create/add a like. Expects `userId` and `postId` in the request body.
    */
-  public async store({ request }: HttpContext) {
-    const { userId, postId } = request.only(['userId', 'postId'])
-    const like = await this.service.addLike(Number(userId), Number(postId))
-    return like
+  public async store({ request, auth }: HttpContext) {
+    const userId = auth.user!.userId
+    const postId = request.input('post_id')
+
+    return await this.service.addLike(userId, postId)
   }
 
-  /**
-   * Remove a like. Expects `userId` and `postId` in the request body.
-   */
-  public async destroy({ request }: HttpContext) {
-    const { userId, postId } = request.only(['userId', 'postId'])
-    const removed = await this.service.removeLike(Number(userId), Number(postId))
-    return { removed }
+  public async destroy({ request, auth }: HttpContext) {
+    const userId = auth.user!.userId
+    const postId = request.input('post_id')
+
+    return { removed: await this.service.removeLike(userId, postId) }
   }
 
-  /**
-   * Toggle like state for a user on a post. Expects `userId` and `postId` in body.
-   */
-  public async toggle({ request }: HttpContext) {
-    const { userId, postId } = request.only(['userId', 'postId'])
-    const result = await this.service.toggleLike(Number(userId), Number(postId))
-    return result
+  public async toggle({ request, auth }: HttpContext) {
+    const userId = auth.user!.userId
+    const postId = request.input('post_id')
+
+    return await this.service.toggleLike(userId, postId)
   }
 
   /**

@@ -6,8 +6,13 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('fandom_id')
-
       table.string('fandom_name')
+      table
+        .integer('category_id')
+        .unsigned()
+        .references('id')
+        .inTable('categories')
+        .onDelete('CASCADE')
     })
   }
 

@@ -6,12 +6,14 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
+
       table
         .integer('follow_id')
         .unsigned()
         .references('user_id')
         .inTable('users')
         .onDelete('CASCADE')
+
       table
         .integer('followed_id')
         .unsigned()
@@ -19,7 +21,7 @@ export default class extends BaseSchema {
         .inTable('users')
         .onDelete('CASCADE')
 
-      table.unique(['post_id', 'media_id'])
+      table.unique(['follow_id', 'followed_id'])
 
       table.timestamp('timestamp')
     })

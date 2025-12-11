@@ -1,16 +1,23 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'likes'
+  protected tableName = 'moderators'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
-      table.integer('post_id').unsigned().references('id').inTable('posts').onDelete('CASCADE')
+      table.increments('mod_id')
       table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
 
-      table.timestamp('timestamp')
-      table.unique(['post_id', 'user_id'])
+      table
+        .integer('fandom_id')
+        .unsigned()
+        .references('fandom_id')
+        .inTable('fandoms')
+        .onDelete('CASCADE')
+
+      table.timestamp('assigned_at')
+
+      table.unique(['fandom_id', 'user_id'])
     })
   }
 

@@ -8,10 +8,10 @@ export default class Like extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'user_id' })
   declare userId: number
 
-  @column()
+  @column({ columnName: 'post_id' })
   declare postId: number
 
   @column.dateTime({ autoCreate: true })

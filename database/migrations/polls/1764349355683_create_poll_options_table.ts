@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('poll_id').unsigned().references('id').inTable('poll').onDelete('CASCADE')
+      table.integer('poll_id').unsigned().references('id').inTable('polls').onDelete('CASCADE')
       table.string('option_text')
     })
   }

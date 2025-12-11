@@ -10,14 +10,14 @@ export default class extends BaseSchema {
         .integer('fandom_id')
         .unsigned()
         .references('fandom_id')
-        .inTable('fandom')
+        .inTable('fandoms')
         .onDelete('CASCADE')
 
       table
         .integer('content_id')
         .unsigned()
         .references('content_id')
-        .inTable('content')
+        .inTable('contents')
         .onDelete('CASCADE')
 
       table.string('title')
@@ -28,14 +28,14 @@ export default class extends BaseSchema {
         .integer('created_by')
         .unsigned()
         .references('user_id')
-        .inTable('user')
+        .inTable('users')
         .onDelete('CASCADE')
 
       table
         .integer('approved_by')
         .unsigned()
         .references('user_id')
-        .inTable('user')
+        .inTable('users')
         .onDelete('CASCADE')
 
       table.timestamp('created_at')

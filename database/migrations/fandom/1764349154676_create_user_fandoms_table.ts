@@ -11,10 +11,10 @@ export default class extends BaseSchema {
         .integer('fandom_id')
         .unsigned()
         .references('fandom_id')
-        .inTable('fandom')
+        .inTable('fandoms')
         .onDelete('CASCADE')
 
-      table.integer('user_id').unsigned().references('user_id').inTable('user').onDelete('CASCADE')
+      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
 
       table.unique(['fandom_id', 'user_id'])
     })

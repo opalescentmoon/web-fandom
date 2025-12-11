@@ -13,7 +13,7 @@ export default class extends BaseSchema {
         .integer('editor_id')
         .unsigned()
         .references('user_id')
-        .inTable('user')
+        .inTable('users')
         .onDelete('CASCADE')
 
       table.text('content')
@@ -24,7 +24,7 @@ export default class extends BaseSchema {
         .integer('reviewed_by')
         .unsigned()
         .references('user_id')
-        .inTable('user')
+        .inTable('users')
         .onDelete('CASCADE')
 
       table.timestamp('created_at')

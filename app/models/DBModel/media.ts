@@ -6,13 +6,13 @@ export default class Media extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'file_url' })
   declare fileUrl: string
 
-  @column()
+  @column({ columnName: 'media_type' })
   declare mediaType: string
 
-  @column()
+  @column({ columnName: 'post_id' })
   declare postId: number
 
   @belongsTo(() => Post, { foreignKey: 'postId' })

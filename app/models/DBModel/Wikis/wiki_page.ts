@@ -5,23 +5,23 @@ import User from '../User/user.js'
 import Fandom from '../fandom.js'
 import Content from '../content.js'
 
-export default class Wiki extends BaseModel {
+export default class WikiPages extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'fandom_id' })
   declare fandomId: number
 
-  @column()
+  @column({ columnName: 'content_id' })
   declare contentId: number
 
-  @column()
+  @column({ columnName: 'title' })
   declare title: string
 
-  @column()
+  @column({ columnName: 'created_by' })
   declare createdBy: number
 
-  @column()
+  @column({ columnName: 'content' })
   declare content: string
 
   @column.dateTime({ autoCreate: true })
@@ -30,11 +30,11 @@ export default class Wiki extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @column()
+  @column({ columnName: 'approved_by' })
   declare approvedBy: number
 
   @belongsTo(() => User, { foreignKey: 'createdBy' })
-  public userCreated!: BelongsTo<typeof User>
+  public userCreator!: BelongsTo<typeof User>
 
   @belongsTo(() => User, { foreignKey: 'approvedBy' })
   public userApproved!: BelongsTo<typeof User>

@@ -14,7 +14,7 @@ export default class extends BaseSchema {
         .inTable('message')
         .onDelete('CASCADE')
 
-      table.integer('user_id').unsigned().references('user_id').inTable('user').onDelete('CASCADE')
+      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
 
       table.string('status').notNullable()
       table.check('status IN ("sent", "delivered", "read", "failed")')

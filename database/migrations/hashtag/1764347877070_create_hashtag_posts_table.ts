@@ -14,7 +14,7 @@ export default class extends BaseSchema {
         .inTable('hashtags')
         .onDelete('CASCADE')
 
-      table.integer('user_id').unsigned().references('user_id').inTable('user').onDelete('CASCADE')
+      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
 
       table.unique(['user_id', 'hashtag_id'])
     })
