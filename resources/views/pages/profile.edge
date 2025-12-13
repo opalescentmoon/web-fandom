@@ -28,9 +28,9 @@
         <section class="profile-banner">
           <div class="profile-avatar"></div>
 
-          <div class="profile-info-text">
-            <h1 class="profile-name">Display name</h1>
-            <div class="profile-username">@Username</div>
+          <div class="profile-info-text" id="sidebarLoggedIn">
+            <h1 class="profile-name" data-display-name>Display name</h1>
+            <div class="profile-username" data-username>@Username</div>
 
             <div class="profile-stats">
               <span>XX Follower</span>
@@ -126,6 +126,8 @@
     </div>
 
     <script>
+
+
       // Back button: behave like chat page
       const profileBackBtn = document.getElementById('profileBackButton')
       if (profileBackBtn) {
@@ -137,6 +139,49 @@
           }
         })
       }
+
+ const token = localStorage.getItem('accessToken')
+      window.IS_LOGGED_IN = !!token
+
+      
+;(function () {
+  const token = localStorage.getItem('accessToken')
+  window.IS_LOGGED_IN = !!token
+
+  const displayNameEl = document.querySelector('[data-display-name]')
+  const usernameEl = document.querySelector('[data-username]')
+
+  let currentUser = null
+  const rawUser = localStorage.getItem('currentUser')
+  if (rawUser) {
+    try {
+      currentUser = JSON.parse(rawUser)
+    } catch (e) {
+      console.warn('Failed to parse currentUser from localStorage', e)
+    }
+  }
+
+  if (!window.IS_LOGGED_IN || !currentUser) {
+    // optional: redirect guests away from profile
+    // window.location.href = '/'
+    return
+  }
+
+  const displayName =
+    currentUser.display_name ||
+    currentUser.displayName ||
+    currentUser.user_name ||
+    currentUser.username ||
+    'User'
+
+  const username =
+    currentUser.user_name ||
+    currentUser.username ||
+    ''
+
+  if (displayNameEl) displayNameEl.textContent = displayName
+  if (usernameEl) usernameEl.textContent = username ? '@' + username : ''
+})()
     </script>
   </body>
 </html>

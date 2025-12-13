@@ -113,7 +113,7 @@ export default class AuthController {
           },
           token: {
             type: 'bearer',
-            token: token.value,
+            token: token.value!.release(),
           },
         },
       })

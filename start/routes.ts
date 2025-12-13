@@ -204,7 +204,7 @@ router
 // RELATIONSHIP ROUTES
 router
   .group(() => {
-    router.post('/follow', [RelationshipController, 'follow']).middleware([middleware.auth])
+    router.post('/follow', [RelationshipController, 'follow']).middleware([middleware.auth()])
     router.post('/unfollow', [RelationshipController, 'unfollow']).middleware([middleware.auth()])
     router.post('/toggle', [RelationshipController, 'toggle']).middleware([middleware.auth()])
     router.get('/followers', [RelationshipController, 'followers'])
@@ -236,7 +236,7 @@ router
 
 router
   .group(() => {
-    router.post('/', [PostsController, 'create'])
+    router.post('/', [PostsController, 'create']).middleware([middleware.auth()])
     router.get('/', [PostsController, 'getAll'])
     router.get('/:postId', [PostsController, 'get'])
     router.delete('/:postId', [PostsController, 'delete'])

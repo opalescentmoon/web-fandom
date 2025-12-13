@@ -1,82 +1,31 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import type { Authenticators } from '@adonisjs/auth/types'
 
-/**
- * Auth middleware is used authenticate HTTP requests and deny
- * access to unauthenticated users.
- */
 export default class AuthMiddleware {
-  /**
-   * The URL to redirect to, when authentication fails
-   */
-  redirectTo = '/login'
+  public async handle(ctx: HttpContext, next: NextFn) {
+    // IMPORTANT: ctx.auth MUST exist after initialize_auth_middleware
+    // If it doesn't, we throw a clear error instead of "undefined.authenticate"
+    if (!ctx.auth) {
+      ctx.logger.error('ctx.auth is undefined. Check that initialize_auth_middleware runs before auth middleware.')
+      return ctx.response.status(500).json({ error: 'Auth not initialized (ctx.auth missing)' })
+    }
 
-  async handle(
-    ctx: HttpContext,
-    next: NextFn,
-    options: {
-      guards?: (keyof Authenticators)[]
-    } = {}
-  ) {
-    // Attempt authentication using specified guards or default
-    const isAuthenticated = await this.authenticate(ctx, options.guards)
+    try {
+      await ctx.auth.authenticate()
+    } catch {
+      // Return JSON if request expects JSON
+      const accept = ctx.request.header('accept') || ''
+      const contentType = ctx.request.header('content-type') || ''
+      const wantsJson =
+        accept.includes('application/json') || contentType.includes('application/json')
 
-    if (!isAuthenticated) {
-      // Check if this is an API request or web request
-      if (this.isApiRequest(ctx)) {
-        return ctx.response.status(401).json({
-          success: false,
-          message: 'Unauthorized - Please provide a valid authentication token',
-          error: 'UNAUTHENTICATED',
-        })
+      if (wantsJson) {
+        return ctx.response.unauthorized({ error: 'Unauthorized' })
       }
 
-      // Redirect web requests to login page
-      return ctx.response.redirect(this.redirectTo)
+      return ctx.response.redirect('/login')
     }
 
-    // User is authenticated, proceed to next middleware/route
     return next()
-  }
-
-  /**
-   * Attempt to authenticate the user
-   */
-  private async authenticate(
-    ctx: HttpContext,
-    guards?: (keyof Authenticators)[]
-  ): Promise<boolean> {
-    try {
-      // Use specified guards or default guard
-      await ctx.auth.authenticateUsing(guards, { loginRoute: this.redirectTo })
-      return !!ctx.auth.user
-    } catch (error) {
-      return false
-    }
-  }
-
-  /**
-   * Determine if the request is an API request
-   */
-  private isApiRequest(ctx: HttpContext): boolean {
-    // Check Accept header for JSON
-    const accept = ctx.request.header('accept') || ''
-    if (accept.includes('application/json')) {
-      return true
-    }
-
-    // Check if path starts with /api
-    if (ctx.request.url().startsWith('/api') || ctx.request.url().startsWith('/auth')) {
-      return true
-    }
-
-    // Check Content-Type header
-    const contentType = ctx.request.header('content-type') || ''
-    if (contentType.includes('application/json')) {
-      return true
-    }
-
-    return false
   }
 }

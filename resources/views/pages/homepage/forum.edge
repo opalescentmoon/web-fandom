@@ -8,8 +8,9 @@
 })
   @slot('main')
     <!-- forum-style cards -->
-    <article class="post-card">
-      <header class="post-header">
+    <article class="post-card" id="feedSection">
+     <div class="feed-loading">Loading posts...</div>
+      {{-- <header class="post-header">
         <div class="post-user">
           <div class="avatar-circle small"></div>
           <div class="post-user-text">
@@ -31,10 +32,19 @@
           <span>#tags</span>
         </div>
         <div class="post-actions">
-            <button>♡</button>
+            <button
+            type="button"
+            class="post-like-btn"
+            data-requires-auth="true"
+            data-like-url="/likes/toggle"   {{-- ask your friend if this is the route --}}
+            data-post-id="1"                {{-- replace with actual post ID data-post-id="{ {post.id } }" --}}
+            data-liked="false">
+              <span class="post-like-icon">♡</span>
+              <span class="post-like-count">3</span>   {{-- replace with actual like count { { post.likeCount } } --}}
+            </button>
             <button>↻</button>
           </div>
-      </footer>
+      </footer>--}}
     </article>
   @endslot
 

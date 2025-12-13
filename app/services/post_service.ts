@@ -1,6 +1,6 @@
 import Post from '#models/DBModel/User/post'
-import Fandom from '#models/DBModel/fandom'
 import Media from '#models/DBModel/media'
+import User from '#models/DBModel/User/user'
 
 export class PostService {
   // main post service
@@ -12,8 +12,11 @@ export class PostService {
     postType: string,
     contentId: number
   ) {
-    const isMember = await Fandom.query()
-      .where('user_id', userId)
+    const user = await User.findOrFail(userId)
+
+    const isMember = await user
+      .related('fandoms')
+      .query()
       .where('fandom_id', fandomId)
       .first()
 

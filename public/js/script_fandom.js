@@ -87,6 +87,43 @@
 
 
   // ===== JOIN / POST BUTTON LOGIC =====
+  function authHeaders () {
+  const token = localStorage.getItem('accessToken')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+function titleCaseFromSlug (slug) {
+  return slug
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+// cache fandomId so we don’t keep requesting it
+async function getFandomIdFromSlug (slug) {
+  const cacheKey = `fandomId:${slug}`
+  const cached = sessionStorage.getItem(cacheKey)
+  if (cached) return Number(cached)
+
+  const fandomName = titleCaseFromSlug(slug)
+
+  // backend expects "fandomName"
+  const res = await fetch(`/fandom/name?fandomName=${encodeURIComponent(fandomName)}`)
+  const text = await res.text()
+let data
+try { data = JSON.parse(text) } catch { data = { error: text } }
+
+if (!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`)
+  if (!res.ok) throw new Error(data?.error || 'Failed to resolve fandomId')
+
+  const fandom = Array.isArray(data) ? data[0] : data
+  const fandomId = fandom?.fandomId ?? fandom?.fandom_id ?? fandom?.id
+  if (!fandomId) throw new Error('Fandom not found in DB (name mismatch?)')
+
+  sessionStorage.setItem(cacheKey, String(fandomId))
+  return fandomId
+}
+
   function getJoinedFandoms () {
     try {
       const raw = window.localStorage.getItem('joinedFandoms')
@@ -105,6 +142,86 @@
       console.error('Failed to save joinedFandoms to localStorage', err)
     }
   }
+
+  function escapeHtml (str) {
+  return String(str || '').replace(/[&<>"']/g, (m) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  }[m]))
+}
+
+function renderPostCard (p) {
+  const postId = p.postId ?? p.id
+  const caption = p.caption ?? ''
+  const postType = p.postType ?? p.post_type ?? ''
+  const liked = false
+  const likeCount = 0
+
+  return `
+    <article class="post-card" data-post-id="${postId}">
+      <header class="post-header">
+        <div class="post-user-mini">
+          <div class="avatar-circle"></div>
+          <div class="post-user-text">
+            <div class="post-username">Username</div>
+          </div>
+        </div>
+        <div class="post-tag">${escapeHtml(postType)}</div>
+      </header>
+
+      <main class="post-body">
+        <p>${escapeHtml(caption)}</p>
+      </main>
+
+      <footer class="post-footer">
+        <div class="post-actions">
+          <button
+            class="post-like-btn"
+            data-like-url="/likes/toggle"
+            data-post-id="${postId}"
+            data-liked="${liked ? 'true' : 'false'}"
+            data-requires-auth="true"
+            data-auth-mode="login"
+          >
+            <span class="post-like-icon">${liked ? '♥' : '♡'}</span>
+            <span class="post-like-count">${likeCount}</span>
+          </button>
+        </div>
+      </footer>
+    </article>
+  `
+}
+
+async function loadFeed () {
+  const feed = document.getElementById('feedSection')
+  if (!feed) return
+
+  const body = document.body
+  const slug = body.dataset.fandomSlug || 'default-fandom'
+  const activeTab = body.dataset.activeTab || 'fanworks'
+
+  const fandomId = await getFandomIdFromSlug(slug)
+
+  const res = await fetch(`/posts/fandom/${fandomId}`)
+  const posts = await res.json()
+
+  if (!res.ok) {
+    feed.innerHTML = `<div class="feed-loading">Failed to load posts</div>`
+    return
+  }
+
+  // filter by tab (because you are storing tab as postType)
+  const filtered = (Array.isArray(posts) ? posts : []).filter((p) => {
+    return (p.postType ?? p.post_type) === activeTab
+  })
+
+  if (!filtered.length) {
+    feed.innerHTML = `<div class="feed-loading">No posts yet</div>`
+    return
+  }
+
+  feed.innerHTML = filtered.map(renderPostCard).join('')
+}
+
 
   document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('accessToken')
@@ -127,7 +244,7 @@
 
     updateJoinButton()
 
-    joinBtn.addEventListener('click', (event) => {
+    joinBtn.addEventListener('click', async(event) => {
       event.preventDefault()
 
       // if user not logged in → open auth modal
@@ -142,10 +259,29 @@
 
       // logged in but not joined yet → JOIN
       if (!hasJoined) {
-        hasJoined = true
-        joinedMap[slug] = true
-        saveJoinedFandoms(joinedMap)
-        updateJoinButton()
+        try {
+    const fandomId = await getFandomIdFromSlug(slug)
+
+    const res = await fetch('/fandom/join', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ fandomId }),
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data?.error || data?.message || 'Join failed')
+
+    hasJoined = true
+    joinedMap[slug] = true
+    saveJoinedFandoms(joinedMap)
+    updateJoinButton()
+    } catch (err) {
+    alert(err.message)
+  }
         // later you can also show a toast like "Joined this fandom!"
         return
       }
@@ -157,6 +293,7 @@
     })
 
     setupPostModal()
+    loadFeed().catch(console.error)
   })
 
   const POST_CONTENT_TYPES = {
@@ -237,21 +374,109 @@
       }
     })
 
-    // fake submit for now – you’ll hook this to backend later
-    submitBtn.addEventListener('click', (event) => {
-      event.preventDefault()
-      const payload = {
-        slug,
-        tab: tabSelect.value,
-        type: typeSelect.value,
-        content: contentInput.value.trim(),
-        tags: tagsInput.value.trim()
-      }
-      console.log('Would submit post:', payload)
-      // TODO: send payload to backend with fetch() later
-      closePostModal()
+    submitBtn.addEventListener('click', async (event) => {
+  event.preventDefault()
+
+  const caption = contentInput.value.trim()
+  const tagsRaw = tagsInput.value.trim()
+  const tab = tabSelect.value          // fanworks / wiki / forum
+  const type = typeSelect.value        // your dropdown value
+
+  if (!caption) return
+
+  try {
+    const fandomId = await getFandomIdFromSlug(slug)
+
+    // 1) Create the post
+    const res = await fetch('/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({
+        caption,
+        fandomId,
+        parentId: 0,
+        contentId: 0,
+        postType: tab,     // IMPORTANT: keep it URL-safe + consistent (fanworks/wiki/forum)
+      }),
     })
+
+    const post = await res.json()
+    if (!res.ok) throw new Error(post?.error || 'Create post failed')
+
+    // 2) Turn “type” into a hashtag too (optional but nice)
+    //    Example: "Fanfiction" or "#Fanfiction" → "Fanfiction"
+    const autoTag = String(type || '').replace(/^#/, '').trim()
+
+    // 3) Parse user tags "#a #b,c" → ["a","b","c"]
+    const tagList = []
+    if (autoTag) tagList.push(autoTag)
+
+    if (tagsRaw) {
+      const cleaned = tagsRaw
+        .split(/[\s,]+/)
+        .map(t => t.replace(/^#/, '').trim())
+        .filter(Boolean)
+      tagList.push(...cleaned)
+    }
+
+    // 4) Find-or-create hashtags, then attach to post
+    for (const tag of tagList) {
+      const hRes = await fetch('/hashtags/find-or-create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ tag }),
+      })
+      const hashtag = await hRes.json()
+      if (!hRes.ok) continue // don’t block posting if a hashtag fails
+
+      await fetch(`/posts/${post.postId || post.id}/hashtags`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ hashtagId: hashtag.hashtagId || hashtag.id }),
+      })
+    }
+
+    // 5) Update UI: either prepend, or reload feed
+    // If you already render posts via JS, prepend. If not, reload.
+    if (typeof window.prependPostToFeed === 'function') {
+      window.prependPostToFeed(post)
+    } else {
+      // fallback: reload current feed if you have a load function
+      if (typeof window.loadFandomFeed === 'function') {
+        window.loadFandomFeed(fandomId)
+      } else {
+        // worst-case fallback
+        location.reload()
+      }
+    }
+
+    const feed = document.getElementById('feedSection')
+if (feed) {
+  const loading = feed.querySelector('.feed-loading')
+  if (loading) loading.remove()
+  feed.insertAdjacentHTML('afterbegin', renderPostCard(post))
+}
+
+
+    closePostModal()
+  } catch (err) {
+    alert(err.message)
   }
+})
+
+}
 
   // ===== LIKE BUTTON LOGIC =====
 document.addEventListener('DOMContentLoaded', () => {

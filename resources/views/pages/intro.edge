@@ -29,7 +29,6 @@
     </div>
   </section>
 
-  @if(!user)
     <section class="intro-section">
       <h2>POPULAR FANDOMS</h2>
       <div class="intro-card-grid">
@@ -42,55 +41,16 @@
         @endeach
       </div>
     </section>
-  @else
-    @if(recentFandoms && recentFandoms.length)
-      <section class="intro-section">
-        <h2>RECENT</h2>
-        <div class="intro-card-grid">
-          @each(fandom in recentFandoms)
-            <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
-              <div class="fandom-card">
-                <span class="fandom-card-name">{{ fandom.name }}</span>
-              </div>
-            </a>
-          @endeach
-        </div>
-      </section>
-    @endif
 
-    @if(forYouFandoms && forYouFandoms.length)
-      <section class="intro-section">
-        <h2>FOR YOU</h2>
-        <div class="intro-card-grid">
-          @each(fandom in forYouFandoms)
-            <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
-              <div class="fandom-card">
-                <span class="fandom-card-name">{{ fandom.name }}</span>
-              </div>
-            </a>
-          @endeach
-        </div>
-      </section>
-    @endif
+    
 
-    {{-- if no recents *and* no for-you yet, fall back to POPULAR --}}
-    @if((!recentFandoms || !recentFandoms.length) && (!forYouFandoms || !forYouFandoms.length))
-      <section class="intro-section">
-        <h2>POPULAR FANDOMS</h2>
-        <div class="intro-card-grid">
-          @each(fandom in popularFandoms)
-            <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
-              <div class="fandom-card">
-                <span class="fandom-card-name">{{ fandom.name }}</span>
-              </div>
-            </a>
-          @endeach
-        </div>
-      </section>
-    @endif
-  @endif
+    
 
-  {{--<section class="intro-section">
+@endslot
+
+@end
+
+ {{--<section class="intro-section">
     <h2>RECENT</h2>
     <div class="intro-card-grid">
       <a href="/fanworks" class="intro-fandom-card-link">
@@ -104,8 +64,51 @@
       </div>
       </a>
     </div>
-  </section>--}}
+  </section>
+  
+  @ if(recentFandoms && recentFandoms.length)
+      <section class="intro-section">
+        <h2>RECENT</h2>
+        <div class="intro-card-grid">
+          @ each(fandom in recentFandoms)
+            <a href="/fanworks/{ { fandom.slug }}" class="intro-fandom-card-link">
+              <div class="fandom-card">
+                <span class="fandom-card-name">{ { fandom.name }}</span>
+              </div>
+            </a>
+          @ endeach
+        </div>
+      </section>
+    @ endif
 
-@endslot
+  @ if(forYouFandoms && forYouFandoms.length)
+      <section class="intro-section">
+        <h2>FOR YOU</h2>
+        <div class="intro-card-grid">
+          @ each(fandom in forYouFandoms)
+            <a href="/fanworks/{ { fandom.slug }}" class="intro-fandom-card-link">
+              <div class="fandom-card">
+                <span class="fandom-card-name">{ { fandom.name }}</span>
+              </div>
+            </a>
+          @ endeach
+        </div>
+      </section>
+    @ endif
 
-@end
+    {{-- if no recents *and* no for-you yet, fall back to POPULAR --}}
+    @ if((!recentFandoms || !recentFandoms.length) && (!forYouFandoms || !forYouFandoms.length))
+      <section class="intro-section">
+        <h2>POPULAR FANDOMS</h2>
+        <div class="intro-card-grid">
+          @e ach(fandom in popularFandoms)
+            <a href="/fanworks/{ { fandom.slug }}" class="intro-fandom-card-link">
+              <div class="fandom-card">
+                <span class="fandom-card-name">{ { fandom.name }}</span>
+              </div>
+            </a>
+          @ endeach
+        </div>
+      </section>
+    @ endif
+  @endif--}}

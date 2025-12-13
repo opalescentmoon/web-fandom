@@ -22,11 +22,11 @@ export default class PostsController {
 
       const post = await this.postService.createPost(
         user.userId,
-        caption,
-        postType || 'post',
-        contentId || 0,
         fandomId,
-        parentId || 0
+        caption,
+        parentId || 0,
+        postType || 'post',
+        contentId || 0
       )
 
       return response.ok(post)

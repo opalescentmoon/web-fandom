@@ -8,8 +8,9 @@
 })
 
   @slot('main')
-    <section class="feed-section">
-      <article class="post-card">
+    <section class="feed-section" id="feedSection">
+      <div class="feed-loading">Loading posts...</div>
+      {{--<article class="post-card">
         <header class="post-header">
           <div class="post-user">
             <div class="avatar-circle small"></div>
@@ -48,7 +49,7 @@
       </article>
 
       <!-- duplicate a few dummy cards to match your mockup -->
-      <article class="post-card">…</article>
+      <article class="post-card">…</article>--}}
     </section>
   @endslot
 
