@@ -44,7 +44,7 @@ export default class PostRepository {
 
     const media = await Media.create({
       ...mediaData,
-      postId: post.id, // connect media to post
+      postId: post.postId, // connect media to post
     })
 
     return media

@@ -10,14 +10,14 @@ export default class extends BaseSchema {
       table
         .integer('message_id')
         .unsigned()
-        .references('message_id')
-        .inTable('message')
-        .onDelete('CASCADE')
+        // .references('message_id')
+        // .inTable('message')
+        // .onDelete('CASCADE')
 
-      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
+      table.integer('user_id').unsigned() // .references('user_id').inTable('users').onDelete('CASCADE')
 
       table.string('status').notNullable()
-      table.check('status IN ("sent", "delivered", "read", "failed")')
+      table.check(`status IN ('sent', 'delivered', 'read', 'failed')`)
 
       table.timestamp('sent_at')
       table.timestamp('delivered_at')

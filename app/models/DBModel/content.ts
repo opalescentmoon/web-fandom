@@ -4,8 +4,8 @@ import type { HasMany } from '@adonisjs/lucid/types/relations'
 import WikiPages from './Wikis/wiki_page.js'
 
 export default class Content extends BaseModel {
-  @column({ isPrimary: true })
-  declare id: number
+  @column({ isPrimary: true, columnName: 'content_id' })
+  declare contentId: number
 
   @column({ columnName: 'content_name' })
   declare contentName: string

@@ -7,19 +7,15 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table
-        .integer('follow_id')
-        .unsigned()
-        .references('user_id')
-        .inTable('users')
-        .onDelete('CASCADE')
+      table.integer('follow_id').unsigned()
+      // .references('user_id')
+      // .inTable('users')
+      // .onDelete('CASCADE')
 
-      table
-        .integer('followed_id')
-        .unsigned()
-        .references('user_id')
-        .inTable('users')
-        .onDelete('CASCADE')
+      table.integer('followed_id').unsigned()
+      // .references('user_id')
+      // .inTable('users')
+      // .onDelete('CASCADE')
 
       table.unique(['follow_id', 'followed_id'])
 

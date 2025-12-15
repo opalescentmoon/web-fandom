@@ -9,7 +9,7 @@ export default class PostsController {
    */
   public async create({ auth, request, response }: HttpContext) {
     try {
-      const user = auth.user
+      const user = auth.getUserOrFail()
       if (!user) return response.unauthorized({ error: 'Not logged in' })
 
       const { caption, postType, contentId, fandomId, parentId } = request.only([
@@ -24,12 +24,18 @@ export default class PostsController {
         user.userId,
         fandomId,
         caption,
-        parentId || 0,
+        parentId || null,
         postType || 'post',
         contentId || 0
       )
 
-      return response.ok(post)
+      if (!post) {
+        return response.internalServerError({
+          error: 'Post service returned no data',
+        })
+      }
+
+      return response.created(post)
     } catch (error) {
       return response.badRequest({ error: error.message })
     }

@@ -26,6 +26,10 @@ export default class Fandom extends BaseModel {
 
   @manyToMany(() => User, {
     pivotTable: 'user_fandom',
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'fandom_id',
+    localKey: 'fandomId',
+    relatedKey: 'userId',
   })
   public users!: ManyToMany<typeof User>
 }

@@ -5,32 +5,28 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
-      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
+      table.increments('post_id')
+      table.integer('user_id').unsigned() // .references('user_id').inTable('users').onDelete('CASCADE')
 
-      table
-        .integer('fandom_id')
-        .unsigned()
-        .references('fandom_id')
-        .inTable('fandoms')
-        .onDelete('CASCADE')
+      table.integer('fandom_id').unsigned()
+      // .references('fandom_id')
+      // .inTable('fandoms')
+      // .onDelete('CASCADE')
 
-      table
-        .integer('content_id')
-        .unsigned()
-        .references('id')
-        .inTable('contents')
-        .onDelete('CASCADE')
+      table.integer('content_id').unsigned()
+      // .references('id')
+      // .inTable('contents')
+      // .onDelete('CASCADE')
 
       table.string('post_type').notNullable()
-      table.check('post_type IN ("normal", "poll")')
+      table.check(`post_type IN ('normal', 'poll')`)
 
       table
         .integer('parent_id')
         .unsigned()
-        .references('id')
-        .inTable('posts')
-        .onDelete('CASCADE')
+        // .references('post_id')
+        // .inTable('posts')
+        // .onDelete('CASCADE')
         .nullable()
 
       table.text('caption').nullable()

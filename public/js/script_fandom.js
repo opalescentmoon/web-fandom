@@ -108,7 +108,7 @@ async function getFandomIdFromSlug (slug) {
   const fandomName = titleCaseFromSlug(slug)
 
   // backend expects "fandomName"
-  const res = await fetch(`/fandom/name?fandomName=${encodeURIComponent(fandomName)}`)
+  const res = await fetch(`/api/fandom/name?fandomName=${encodeURIComponent(fandomName)}`)
   const text = await res.text()
 let data
 try { data = JSON.parse(text) } catch { data = { error: text } }
@@ -201,7 +201,7 @@ async function loadFeed () {
 
   const fandomId = await getFandomIdFromSlug(slug)
 
-  const res = await fetch(`/posts/fandom/${fandomId}`)
+  const res = await fetch(`/api/posts/fandom/${fandomId}`)
   const posts = await res.json()
 
   if (!res.ok) {
@@ -262,7 +262,7 @@ async function loadFeed () {
         try {
     const fandomId = await getFandomIdFromSlug(slug)
 
-    const res = await fetch('/fandom/join', {
+    const res = await fetch('/api/fandom/join', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -388,22 +388,25 @@ async function loadFeed () {
     const fandomId = await getFandomIdFromSlug(slug)
 
     // 1) Create the post
-    const res = await fetch('/posts', {
+
+    const res = await fetch('/api/posts', {
       method: 'POST',
+      redirect: 'manual',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
         ...authHeaders(),
       },
       body: JSON.stringify({
         caption,
         fandomId,
-        parentId: 0,
-        contentId: 0,
-        postType: tab,     // IMPORTANT: keep it URL-safe + consistent (fanworks/wiki/forum)
+        parentId: null,
+        contentId: 1,
+        postType: 'normal',     // Always use 'normal' for regular posts, 'poll' for polls
       }),
     })
-
+    
     const post = await res.json()
     if (!res.ok) throw new Error(post?.error || 'Create post failed')
 
@@ -425,8 +428,9 @@ async function loadFeed () {
 
     // 4) Find-or-create hashtags, then attach to post
     for (const tag of tagList) {
-      const hRes = await fetch('/hashtags/find-or-create', {
+      const hRes = await fetch('/api/hashtags/find-or-create', {
         method: 'POST',
+        redirect: 'manual',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -434,9 +438,13 @@ async function loadFeed () {
         },
         body: JSON.stringify({ tag }),
       })
-      const hashtag = await hRes.json()
-      if (!hRes.ok) continue // don’t block posting if a hashtag fails
 
+      if (!hRes.ok) {
+        console.warn(`Failed to find/create hashtag "${tag}":`, hRes.status)
+        continue
+      }
+
+      const hashtag = await hRes.json()
       await fetch(`/posts/${post.postId || post.id}/hashtags`, {
         method: 'POST',
         headers: {

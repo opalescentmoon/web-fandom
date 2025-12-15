@@ -11,8 +11,8 @@ import Like from '../like.js'
 import Hashtag from '../hashtag.js'
 
 export default class Post extends BaseModel {
-  @column({ isPrimary: true })
-  declare id: number
+  @column({ isPrimary: true, columnName: 'post_id' })
+  declare postId: number
 
   @column({ columnName: 'user_id' })
   declare userId: number
@@ -27,7 +27,7 @@ export default class Post extends BaseModel {
   declare postType: string
 
   @column({ columnName: 'parent_id' })
-  declare parentId: number
+  declare parentId: number | null
 
   @column({ columnName: 'caption' })
   declare caption: string

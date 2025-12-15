@@ -45,6 +45,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @manyToMany(() => Fandom, {
     pivotTable: 'user_fandom',
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'fandom_id',
+    localKey: 'userId',
+    relatedKey: 'fandomId',
   })
   public fandoms!: ManyToMany<typeof Fandom>
 
@@ -63,5 +67,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
   public chats!: ManyToMany<typeof Chat>
 
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+  static accessTokens = DbAccessTokensProvider.forModel(User, {
+    expiresIn: '7 days',
+    prefix: 'oat_',
+    table: 'auth_access_tokens',
+    type: 'AccessToken',
+    tokenSecretLength: 40,
+  })
 }

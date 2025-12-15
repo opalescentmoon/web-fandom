@@ -35,11 +35,11 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   public async handle(error: unknown, ctx: HttpContext) {
-      const { response } = ctx
+    const { response } = ctx
 
-      if (error instanceof authErrors.E_UNAUTHORIZED_ACCESS) {
-    return response.unauthorized({ error: 'Unauthorized' })
-  }
+    if (error instanceof authErrors.E_UNAUTHORIZED_ACCESS) {
+      return response.unauthorized({ error: 'Unauthorized' })
+    }
     return super.handle(error, ctx)
   }
 
@@ -52,6 +52,4 @@ export default class HttpExceptionHandler extends ExceptionHandler {
   async report(error: unknown, ctx: HttpContext) {
     return super.report(error, ctx)
   }
-
-  
 }

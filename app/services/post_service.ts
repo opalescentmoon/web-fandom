@@ -8,7 +8,7 @@ export class PostService {
     userId: number,
     fandomId: number,
     caption: string,
-    parentId: number,
+    parentId: number | null,
     postType: string,
     contentId: number
   ) {
@@ -17,7 +17,7 @@ export class PostService {
     const isMember = await user
       .related('fandoms')
       .query()
-      .where('fandom_id', fandomId)
+      .where('user_fandom.fandom_id', fandomId)
       .first()
 
     if (!isMember) {

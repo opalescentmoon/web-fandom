@@ -1,5 +1,5 @@
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/middleware'
+import { middleware } from './kernel.js'
 const AuthController = () => import('#controllers/auth_controller')
 const LikesController = () => import('#controllers/likes_controller')
 const ModController = () => import('#controllers/Admin/mod_controller')
@@ -134,12 +134,12 @@ router.get('/search', async ({ request, view, auth }) => {
 // LIKE ROUTES
 router
   .group(() => {
-    router.post('/toggle', [LikesController, 'toggle']).middleware([middleware.auth()])
-    router.post('/add', [LikesController, 'store']).middleware([middleware.auth()])
+    router.post('/toggle', [LikesController, 'toggle']).use(middleware.auth())
+    router.post('/add', [LikesController, 'store']).use(middleware.auth())
     router.get('/count', [LikesController, 'count'])
-    router.delete('/delete', [LikesController, 'destroy']).middleware([middleware.auth()])
+    router.delete('/delete', [LikesController, 'destroy']).use(middleware.auth())
   })
-  .prefix('/likes')
+  .prefix('/api/likes')
 
 // MODERATOR ROUTES
 router
@@ -150,8 +150,8 @@ router
     router.get('/fandom/:fandomId', [ModController, 'byFandom'])
     router.delete('/:id', [ModController, 'delete'])
   })
-  .prefix('/mods')
-  .middleware([middleware.auth()])
+  .prefix('/api/mods')
+  .use(middleware.auth())
 
 // CHAT & MESSAGES ROUTES
 router
@@ -162,8 +162,8 @@ router
     router.post('/:chatId/remove', [ChatController, 'removeParticipant'])
     router.get('/:chatId', [ChatController, 'find'])
   })
-  .prefix('/chats')
-  .middleware([middleware.auth()])
+  .prefix('/api/chats')
+  .use(middleware.auth())
 
 router
   .group(() => {
@@ -173,8 +173,8 @@ router
     router.get('/:messageId/status', [MessageController, 'status'])
     router.post('/status/update', [MessageController, 'updateStatus'])
   })
-  .prefix('/messages')
-  .middleware([middleware.auth()])
+  .prefix('/api/messages')
+  .use(middleware.auth())
 
 // POLL ROUTES
 router
@@ -185,32 +185,32 @@ router
     router.post('/vote', [PollController, 'vote'])
     router.delete('/delete', [PollController, 'delete'])
   })
-  .prefix('/poll')
-  .middleware([middleware.auth()])
+  .prefix('/api/poll')
+  .use(middleware.auth())
 
 // FANDOM ROUTES
 router
   .group(() => {
-    router.post('/create', [FandomController, 'create']).middleware([middleware.auth()])
-    router.post('/join', [FandomController, 'join']).middleware([middleware.auth()])
+    router.post('/create', [FandomController, 'create']).use(middleware.auth())
+    router.post('/join', [FandomController, 'join']).use(middleware.auth())
     router.get('/category', [FandomController, 'getByCategory'])
     router.get('/name', [FandomController, 'getByName'])
-    router.put('/edit/name', [FandomController, 'editName']).middleware([middleware.auth()])
-    router.put('/edit/category', [FandomController, 'editCategory']).middleware([middleware.auth()])
-    router.delete('/delete', [FandomController, 'delete']).middleware([middleware.auth()])
+    router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
+    router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
+    router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
   })
-  .prefix('/fandom')
+  .prefix('/api/fandom')
 
 // RELATIONSHIP ROUTES
 router
   .group(() => {
-    router.post('/follow', [RelationshipController, 'follow']).middleware([middleware.auth()])
-    router.post('/unfollow', [RelationshipController, 'unfollow']).middleware([middleware.auth()])
-    router.post('/toggle', [RelationshipController, 'toggle']).middleware([middleware.auth()])
+    router.post('/follow', [RelationshipController, 'follow']).use(middleware.auth())
+    router.post('/unfollow', [RelationshipController, 'unfollow']).use(middleware.auth())
+    router.post('/toggle', [RelationshipController, 'toggle']).use(middleware.auth())
     router.get('/followers', [RelationshipController, 'followers'])
     router.get('/following', [RelationshipController, 'following'])
   })
-  .prefix('/relationship')
+  .prefix('/api/relationship')
 
 // HASHTAG ROUTES
 router
@@ -219,7 +219,7 @@ router
     router.get('/by-name', [HashtagController, 'getByName'])
     router.get('/all', [HashtagController, 'getAll'])
   })
-  .prefix('/hashtags')
+  .prefix('/api/hashtags')
 
 // USER ROUTES
 router
@@ -229,14 +229,14 @@ router
     router.put('/password', [UserController, 'changePassword'])
     router.delete('/delete', [UserController, 'deleteUser'])
   })
-  .prefix('/user')
-  .middleware([middleware.auth()])
+  .prefix('/api/user')
+  .use(middleware.auth())
 
 // POST ROUTES
 
 router
   .group(() => {
-    router.post('/', [PostsController, 'create']).middleware([middleware.auth()])
+    router.post('/', [PostsController, 'create']).use(middleware.auth())
     router.get('/', [PostsController, 'getAll'])
     router.get('/:postId', [PostsController, 'get'])
     router.delete('/:postId', [PostsController, 'delete'])
@@ -267,18 +267,18 @@ router
     router.get('/fandom/:fandomId', [PostsController, 'getByFandom'])
     router.get('/hashtag/:hashtagId', [PostsController, 'getByHashtag'])
   })
-  .prefix('/posts')
+  .prefix('/api/posts')
 
 /**
  * USER-BASED CONTENT
  */
-router.get('/posts/user/:userId', [PostsController, 'getByUser'])
+router.get('/api/posts/user/:userId', [PostsController, 'getByUser'])
 
 /**
  * COMMENT-RELATED
  */
-router.get('/comments/user/:userId', [PostsController, 'commentsByUser'])
-router.get('/comments', [PostsController, 'allComments'])
+router.get('/api/comments/user/:userId', [PostsController, 'commentsByUser'])
+router.get('/api/comments', [PostsController, 'allComments'])
 
 // WIKI ROUTES
 router
@@ -303,4 +303,4 @@ router
     router.post('/edits/:editId/approve', [WikisController, 'approveWikiEdit'])
     router.post('/edits/:editId/reject', [WikisController, 'rejectWikiEdit'])
   })
-  .prefix('/wikis')
+  .prefix('/api/wikis')

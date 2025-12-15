@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('chat_id')
 
       table.string('chat_type').notNullable()
-      table.check('chat_type IN ("dm", "group")')
+      table.check(`chat_type IN ('dm', 'group')`)
 
       table.string('chat_name')
       table.timestamp('created_at')
