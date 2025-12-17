@@ -12,10 +12,11 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
     <body class="fandom-body"
-    data-fandom-slug="{{ $props.slug || 'default-fandom' }}"
-    data-is-logged-in="false"
-    data-initial-has-joined="{{ $props.hasJoined ? 'true' : 'false' }}"
-    data-active-tab="{{ $props.activeTab || 'fanworks' }}"
+    data-fandom-id="{{ fandomId ?? '' }}"
+    data-fandom-name="{{ fandomName ?? '' }}"
+    data-is-logged-in="{{ user ? 'true' : 'false' }}"
+    data-initial-has-joined="{{ hasJoined ? 'true' : 'false' }}"
+    data-active-tab="{{ activeTab ?? 'fanworks' }}"
     >
     <!-- Top red header -->
     <header class="fandom-header">
@@ -39,12 +40,12 @@
       <!-- Left vertical sidebar -->
       <aside class="fandom-sidebar">
         <button class="sidebar-icon">
-            <a href="/fanworks/{{slug}}">
+            <a href="/fanworks?fandom_name={{ encodeURIComponent($props.fandomName) }}">
             <img src="/images/home.png" alt="Home" width="24" height="24" />
             </a>
         </button>
         <button class="sidebar-icon">
-            <a href="/search?tab={{ $props.activeTab || 'fanworks' }}&slug={{ slug }}">
+            <a href="/search?tab={{ $props.activeTab || 'fanworks' }}&fandom_name={{ encodeURIComponent($props.fandomName) }}">
             <img src="/images/loupe.png" alt="Search" width="24" height="24" />
             </a>
         </button>
@@ -68,21 +69,25 @@
       <section class="fandom-middle">
         <nav class="fandom-tabs">
           <a
-            href="{{ isSearch ? 
-            '/search?tab=fanworks&slug=' + slug + '&q=' + encodeURIComponent(currentQuery) 
-            : '/fanworks/' + slug }}"
+            href="{{ isSearch 
+            ? '/search?tab=fanworks&slug=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '') 
+            : '/fanworks?fandom_name=' + encodeURIComponent($props.fandomName) }}"
             class="fandom-tab {{ $props.activeTab === 'fanworks' ? 'is-active' : '' }}"
           >
             Fanworks
           </a>
           <a
-            href="{{ isSearch ? '/search?tab=wiki&slug=' + slug + '&q=' + encodeURIComponent(currentQuery) : '/wiki/' + slug }}"
+            href="{{ isSearch 
+            ? '/search?tab=wiki&slug=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '') 
+            : '/wiki?fandom_name=' + encodeURIComponent($props.fandomName)}}"
             class="fandom-tab {{ $props.activeTab === 'wiki' ? 'is-active' : '' }}"
           >
             Wiki
           </a>
           <a
-            href="{{ isSearch ? '/search?tab=forum&slug=' + slug + '&q=' + encodeURIComponent(currentQuery) : '/forum/' + slug }}"
+            href="{{ isSearch 
+            ? '/search?tab=forum&slug=' + slug + '&q=' + encodeURIComponent(currentQuery || '') 
+            : '/forum?fandom_name=' + encodeURIComponent($props.fandomName) }}"
             class="fandom-tab {{ $props.activeTab === 'forum' ? 'is-active' : '' }}"
           >
             Forum

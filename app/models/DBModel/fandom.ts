@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relat
 import User from './User/user.js'
 import Post from './User/post.js'
 import WikiPages from './Wikis/wiki_page.js'
+import Media from './media.js'
 
 export default class Fandom extends BaseModel {
   @column({ isPrimary: true, columnName: 'fandom_id' })
@@ -17,6 +18,12 @@ export default class Fandom extends BaseModel {
 
   @column({ columnName: 'thumbnail_media_id' })
   declare thumbnailMediaId: number
+
+  @belongsTo(() => Media, {
+    foreignKey: 'thumbnailMediaId', // fandom.thumbnail_media_id
+    localKey: 'id',            // media.media_id
+  })
+declare thumbnailMedia: BelongsTo<typeof Media>
 
   @belongsTo(() => Category, { foreignKey: 'categoryId' })
   public category!: BelongsTo<typeof Category>

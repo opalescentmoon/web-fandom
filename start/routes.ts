@@ -1,5 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+import Fandom from '#models/DBModel/fandom'
+import db from '@adonisjs/lucid/services/db'
 const AuthController = () => import('#controllers/auth_controller')
 const LikesController = () => import('#controllers/likes_controller')
 const ModController = () => import('#controllers/Admin/mod_controller')
@@ -23,53 +25,46 @@ router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth())
 router.get('/auth/profile', [AuthController, 'getProfile']).use(middleware.auth())
 
 /**
- * HOME AND MAIN ROUTES
+ * MAIN PAGES
  */
+//INTRO PAGE
 router.get('/', async ({ view, auth }) => {
   const user = auth.user // null if not logged in
 
-  // later: real queries from DB
-  const recentFandoms = user
-    ? [] // fill with last visited fandoms when ready
-    : []
-
-  const forYouFandoms = user
-    ? [] // personalised recommendations
-    : []
-
-  const popularFandoms = [
-    { name: 'Honkai Star Rail', slug: 'honkai-star-rail' },
-    { name: 'Reverse: 1999', slug: 'reverse:-1999' },
-    { name: 'Wuthering Waves', slug: 'wuthering-waves' },
-    { name: 'Zenless Zone Zero', slug: 'zenless-zone-zero' },
-  ]
+  const fandoms = await Fandom
+    .query()
+    .preload('thumbnailMedia')
+  
   return view.render('pages/intro', {
-    user,
-    recentFandoms,
-    forYouFandoms,
-    popularFandoms,
     title: 'Introduction',
+    user,
+    fandoms,
   })
 })
 
-function makeFandomName(slug: string) {
-  return slug
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-}
 
 // FANWORKS
-router.get('/fanworks/:slug?', async ({ params, view, auth }) => {
-  const slug = params.slug || 'default-fandom'
-  const fandomName = makeFandomName(slug)
+router.get('/fanworks', async ({ request, view, auth }) => {
+  const fandomName = request.input('fandom_name') || 'Fandom Name'
+  const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  const fandomId = fandom?.fandomId ?? null
+
+  let hasJoined = false
+  if (auth.user && fandomId !== null) {
+    const row = await db
+      .from('user_fandom')
+      .where('user_id', auth.user.userId)
+      .where('fandom_id', fandomId)
+      .first()
+    hasJoined = !!row
+  }
 
   return view.render('pages/homepage/fanworks', {
     title: fandomName,
     fandomName,
     activeTab: 'fanworks',
-    slug,
-    hasJoined: false,
+    fandomId,
+    hasJoined,
     user: auth.user,
     isSearch: false,
     query: '',
@@ -77,16 +72,27 @@ router.get('/fanworks/:slug?', async ({ params, view, auth }) => {
 })
 
 // WIKI
-router.get('/wiki/:slug?', async ({ params, view, auth }) => {
-  const slug = params.slug || 'default-fandom'
-  const fandomName = makeFandomName(slug)
+router.get('/wiki', async ({ request, view, auth }) => {
+  const fandomName = request.input('fandom_name') || 'Fandom Name'
+  const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  const fandomId = fandom?.fandomId ?? null
+
+  let hasJoined = false
+  if (auth.user && fandomId !== null) {
+    const row = await db
+      .from('user_fandom')
+      .where('user_id', auth.user.userId)
+      .where('fandom_id', fandomId)
+      .first()
+    hasJoined = !!row
+  }
 
   return view.render('pages/homepage/wiki', {
     title: fandomName,
     fandomName,
     activeTab: 'wiki',
-    slug,
-    hasJoined: false,
+    fandomId,
+    hasJoined,
     user: auth.user,
     isSearch: false,
     query: '',
@@ -94,16 +100,27 @@ router.get('/wiki/:slug?', async ({ params, view, auth }) => {
 })
 
 // FORUM
-router.get('/forum/:slug?', async ({ params, view, auth }) => {
-  const slug = params.slug || 'default-fandom'
-  const fandomName = makeFandomName(slug)
+router.get('/forum', async ({ request, view, auth }) => {
+  const fandomName = request.input('fandom_name') || 'Fandom Name'
+  const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  const fandomId = fandom?.fandomId ?? null
+
+  let hasJoined = false
+  if (auth.user && fandomId !== null) {
+    const row = await db
+      .from('user_fandom')
+      .where('user_id', auth.user.userId)
+      .where('fandom_id', fandomId)
+      .first()
+    hasJoined = !!row
+  }
 
   return view.render('pages/homepage/forum', {
     title: fandomName,
     fandomName,
     activeTab: 'forum',
-    slug,
-    hasJoined: false,
+    fandomId,
+    hasJoined,
     user: auth.user,
     isSearch: false,
     query: '',
@@ -114,8 +131,7 @@ router.on('/chats').render('pages/chats')
 router.on('/profile').render('pages/profile')
 
 router.get('/search', async ({ request, view, auth }) => {
-  const slug = request.input('slug') || 'default-fandom'
-  const fandomName = makeFandomName(slug)
+  const fandomName = request.input('fandom_name') || 'Fandom Name'
   const query = request.input('q')
   const activeTab = request.input('tab') || 'fanworks'
 
@@ -124,7 +140,6 @@ router.get('/search', async ({ request, view, auth }) => {
     query,
     activeTab,
     fandomName,
-    slug,
     hasJoined: false,
     user: auth.user,
     isSearch: true,
@@ -198,6 +213,20 @@ router
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
+    router.get('/join-status', async ({ request, auth }) => {
+      const fandomId = Number(request.input('fandomId'))
+      if (!Number.isFinite(fandomId)) return { hasJoined: false }
+
+      const user = auth.user! 
+
+      const row = await db
+        .from('user_fandom')
+        .where('user_id', user.userId)
+        .where('fandom_id', fandomId)
+        .first()
+
+      return { hasJoined: !!row }
+    }).use(middleware.auth())
   })
   .prefix('/api/fandom')
 

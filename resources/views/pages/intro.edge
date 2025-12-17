@@ -1,5 +1,4 @@
 @layout.intro({ title: 'Introduction', user})
-
 @slot('main')
   <section class="intro-top">
     <div class="intro-donations">
@@ -9,7 +8,7 @@
     </div>
 
     <div class="intro-search-media">
-      <form class="intro-search-bar">
+      <form class="intro-search-bar" method="GET" action="/search">
         <input type="text" placeholder="Search Fandoms..." />
       </form>
 
@@ -30,24 +29,29 @@
   </section>
 
     <section class="intro-section">
-      <h2>POPULAR FANDOMS</h2>
+      <h2>EXPLORE</h2>
       <div class="intro-card-grid">
-        @each(fandom in popularFandoms)
-          <a href="/fanworks/{{ fandom.slug }}" class="intro-fandom-card-link">
-            <div class="fandom-card">
-              <span class="fandom-card-name">{{ fandom.name }}</span>
+        @each(fandom in fandoms)
+          <a href="/fanworks?fandom_name={{ encodeURIComponent(fandom.fandomName) }}"
+           class="intro-fandom-card-link"
+          >
+            <div class="fandom-card"
+            style="
+            @if(fandom.thumbnailMedia)
+              background-image:
+                linear-gradient(to top, rgba(0,0,0,0.35), rgba(0,0,0,0)),
+                url('{{ fandom.thumbnailMedia.fileUrl }}');
+            @endif
+            ">
+              <span class="fandom-card-name">{{ fandom.fandomName }}</span>
             </div>
           </a>
         @endeach
       </div>
     </section>
 
-    
-
-    
 
 @endslot
-
 @end
 
  {{--<section class="intro-section">

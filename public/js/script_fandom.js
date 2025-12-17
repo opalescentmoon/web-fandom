@@ -1,149 +1,97 @@
- // simple collapse handler for wiki filters
-      document.addEventListener('click', (event) => {
-        const header = event.target.closest('[data-collapse-target]')
-        if (!header) return
+// simple collapse handler for wiki filters
+document.addEventListener('click', (event) => {
+  const header = event.target.closest('[data-collapse-target]')
+  if (!header) return
 
-        const targetId = header.getAttribute('data-collapse-target')
-        const body = document.getElementById(targetId)
-        if (!body) return
+  const targetId = header.getAttribute('data-collapse-target')
+  const body = document.getElementById(targetId)
+  if (!body) return
 
-        const isOpen = body.classList.toggle('is-open')
-        header.classList.toggle('is-open', isOpen)
-      })
+  const isOpen = body.classList.toggle('is-open')
+  header.classList.toggle('is-open', isOpen)
+})
 
-      // tells JS whether user is logged in (Edge will insert true/false)
-      const accessToken = localStorage.getItem('accessToken')
-      window.IS_LOGGED_IN = !!accessToken
-      document.body.dataset.isLoggedIn = window.IS_LOGGED_IN ? 'true' : 'false';
+// tells JS whether user is logged in (Edge will insert true/false)
+const accessToken = localStorage.getItem('accessToken')
+window.IS_LOGGED_IN = !!accessToken
+document.body.dataset.isLoggedIn = window.IS_LOGGED_IN ? 'true' : 'false';
 
-      // ===== AUTH MODAL JS =====
-      const authOverlay = document.getElementById('authOverlay')
-      const authModal = document.getElementById('authModal')
-      const authLogin = document.getElementById('authLogin')
-      const authSignup = document.getElementById('authSignup')
+// ===== AUTH MODAL JS =====
+const authOverlay = document.getElementById('authOverlay')
+const authModal = document.getElementById('authModal')
+const authLogin = document.getElementById('authLogin')
+const authSignup = document.getElementById('authSignup')
 
-      function openAuthModal (mode) {
-        if (!authModal || !authOverlay) return
+function openAuthModal (mode) {
+  if (!authModal || !authOverlay) return
 
-        authModal.classList.add('is-open')
-        authOverlay.classList.add('is-visible')
+  authModal.classList.add('is-open')
+  authOverlay.classList.add('is-visible')
 
-        if (authLogin && authSignup) {
-          authLogin.style.display = mode === 'signup' ? 'none' : 'block'
-          authSignup.style.display = mode === 'signup' ? 'block' : 'none'
-        }
-      }
+  if (authLogin && authSignup) {
+    authLogin.style.display = mode === 'signup' ? 'none' : 'block'
+    authSignup.style.display = mode === 'signup' ? 'block' : 'none'
+  }
+}
 
-      function closeAuthModal () {
-        if (!authModal || !authOverlay) return
-        authModal.classList.remove('is-open')
-        authOverlay.classList.remove('is-visible')
+function closeAuthModal () {
+  if (!authModal || !authOverlay) return
+  authModal.classList.remove('is-open')
+  authOverlay.classList.remove('is-visible')
 
-        if (authLogin) authLogin.style.display = 'none'
-        if (authSignup) authSignup.style.display = 'none'
-      }
+  if (authLogin) authLogin.style.display = 'none'
+  if (authSignup) authSignup.style.display = 'none'
+}
 
-      // open from any element with .js-open-auth
-      document.querySelectorAll('.js-open-auth').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-          event.preventDefault()
-          const mode = btn.getAttribute('data-auth-mode') || 'login'
-          openAuthModal(mode)
-        })
-      })
+// open from any element with .js-open-auth
+document.querySelectorAll('.js-open-auth').forEach((btn) => {
+  btn.addEventListener('click', (event) => {
+    event.preventDefault()
+    const mode = btn.getAttribute('data-auth-mode') || 'login'
+    openAuthModal(mode)
+  })
+})
 
-      document.querySelectorAll('.auth-modal-close').forEach((btn) => {
-      btn.addEventListener('click', (event) => {
-          event.preventDefault()
-          closeAuthModal()
-        })
-      })
+document.querySelectorAll('.auth-modal-close').forEach((btn) => {
+btn.addEventListener('click', (event) => {
+    event.preventDefault()
+    closeAuthModal()
+  })
+})
 
-      if (authModal) {
+if (authModal) {
   authModal.addEventListener('click', (event) => {
-    // only close if you clicked the backdrop, not inside the card
     if (event.target === authModal) {
       closeAuthModal()
     }
   })
 }
 
-      window.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-          closeAuthModal()
-        }
-      })
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    closeAuthModal()
+  }
+})
 
-      // ===== REQUIRE-AUTH CLICK GUARD =====
-      document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
-        el.addEventListener('click', (event) => {
-          if (!window.IS_LOGGED_IN) {
-            event.preventDefault()
-            const mode = el.getAttribute('data-auth-mode') || 'login'
-            openAuthModal(mode)
-          }
-        })
-      })
+// ===== REQUIRE-AUTH CLICK GUARD =====
+document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
+  el.addEventListener('click', (event) => {
+    if (!window.IS_LOGGED_IN) {
+      event.preventDefault()
+      const mode = el.getAttribute('data-auth-mode') || 'login'
+      openAuthModal(mode)
+    }
+  })
+})
 
 
-  // ===== JOIN / POST BUTTON LOGIC =====
-  function authHeaders () {
+// ===== JOIN / POST BUTTON LOGIC =====
+function authHeaders () {
   const token = localStorage.getItem('accessToken')
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-function titleCaseFromSlug (slug) {
-  return slug
-    .split('-')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
-}
-
-// cache fandomId so we don’t keep requesting it
-async function getFandomIdFromSlug (slug) {
-  const cacheKey = `fandomId:${slug}`
-  const cached = sessionStorage.getItem(cacheKey)
-  if (cached) return Number(cached)
-
-  const fandomName = titleCaseFromSlug(slug)
-
-  // backend expects "fandomName"
-  const res = await fetch(`/api/fandom/name?fandomName=${encodeURIComponent(fandomName)}`)
-  const text = await res.text()
-let data
-try { data = JSON.parse(text) } catch { data = { error: text } }
-
-if (!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`)
-  if (!res.ok) throw new Error(data?.error || 'Failed to resolve fandomId')
-
-  const fandom = Array.isArray(data) ? data[0] : data
-  const fandomId = fandom?.fandomId ?? fandom?.fandom_id ?? fandom?.id
-  if (!fandomId) throw new Error('Fandom not found in DB (name mismatch?)')
-
-  sessionStorage.setItem(cacheKey, String(fandomId))
-  return fandomId
-}
-
-  function getJoinedFandoms () {
-    try {
-      const raw = window.localStorage.getItem('joinedFandoms')
-      if (!raw) return {}
-      return JSON.parse(raw)
-    } catch (err) {
-      console.error('Failed to parse joinedFandoms from localStorage', err)
-      return {}
-    }
-  }
-
-  function saveJoinedFandoms (map) {
-    try {
-      window.localStorage.setItem('joinedFandoms', JSON.stringify(map))
-    } catch (err) {
-      console.error('Failed to save joinedFandoms to localStorage', err)
-    }
-  }
-
-  function escapeHtml (str) {
+function escapeHtml (str) {
   return String(str || '').replace(/[&<>"']/g, (m) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
   }[m]))
@@ -196,11 +144,8 @@ async function loadFeed () {
   if (!feed) return
 
   const body = document.body
-  const slug = body.dataset.fandomSlug || 'default-fandom'
   const activeTab = body.dataset.activeTab || 'fanworks'
-
-  const fandomId = await getFandomIdFromSlug(slug)
-
+  const fandomId = Number(body.dataset.fandomId)
   const res = await fetch(`/api/posts/fandom/${fandomId}`)
   const posts = await res.json()
 
@@ -210,8 +155,17 @@ async function loadFeed () {
   }
 
   // filter by tab (because you are storing tab as postType)
+  const TAB_TO_CONTENT_IDS = {
+    fanworks: new Set([1, 2, 3]), // Fanart/Fanfic/Fanmerch
+    wiki: new Set([4, 5, 6]),     // Announcement/Lore/Worldbuilding
+    forum: new Set([7, 8, 9]),    // Discussion/Polls/QnA
+  }
+
+  const allowed = TAB_TO_CONTENT_IDS[activeTab] || new Set()
+
   const filtered = (Array.isArray(posts) ? posts : []).filter((p) => {
-    return (p.postType ?? p.post_type) === activeTab
+    const cid = p.contentId ?? p.content_id
+    return allowed.has(Number(cid))
   })
 
   if (!filtered.length) {
@@ -220,273 +174,291 @@ async function loadFeed () {
   }
 
   feed.innerHTML = filtered.map(renderPostCard).join('')
+  console.log('posts sample:', posts?.[0])
 }
 
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('accessToken')
-    document.body.dataset.isLoggedIn = token ? 'true' : 'false'
-    const body = document.body
-    const slug = body.dataset.fandomSlug || 'default-fandom'
-    const isLoggedIn = body.dataset.isLoggedIn === 'true'
-    const initialHasJoined = body.dataset.initialHasJoined === 'true'
-
-    const joinBtn = document.querySelector('.js-join-or-post')
-    if (!joinBtn) return
-
-    // read from localStorage
-    const joinedMap = getJoinedFandoms()
-    let hasJoined = initialHasJoined || !!joinedMap[slug]
-
-    function updateJoinButton () {
-      joinBtn.textContent = hasJoined ? 'POST' : 'JOIN'
-    }
-
-    updateJoinButton()
-
-    joinBtn.addEventListener('click', async(event) => {
-      event.preventDefault()
-
-      // if user not logged in → open auth modal
-      if (!isLoggedIn) {
-        if (typeof openAuthModal === 'function') {
-          openAuthModal('login')
-        } else {
-          console.warn('openAuthModal not available')
-        }
-        return
-      }
-
-      // logged in but not joined yet → JOIN
-      if (!hasJoined) {
-        try {
-    const fandomId = await getFandomIdFromSlug(slug)
-
-    const res = await fetch('/api/fandom/join', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...authHeaders(),
-      },
-      body: JSON.stringify({ fandomId }),
-    })
-
-    const data = await res.json()
-    if (!res.ok) throw new Error(data?.error || data?.message || 'Join failed')
-
-    hasJoined = true
-    joinedMap[slug] = true
-    saveJoinedFandoms(joinedMap)
-    updateJoinButton()
-    } catch (err) {
-    alert(err.message)
-  }
-        // later you can also show a toast like "Joined this fandom!"
-        return
-      }
-
-      // logged in + already joined → open create-post modal
-      if (typeof window.openPostModal === 'function') {
-      window.openPostModal()
-      }
-    })
-
-    setupPostModal()
-    loadFeed().catch(console.error)
+async function fetchJoinStatus(fandomId) {
+  const res = await fetch(`/api/fandom/join-status?fandomId=${fandomId}`, {
+    headers: { Accept: 'application/json', ...authHeaders() },
   })
+  if (!res.ok) return false
+  const data = await res.json().catch(() => ({}))
+  return !!data.hasJoined
+}
 
-  const POST_CONTENT_TYPES = {
-    fanworks: ['#Fanfiction', '#Fanart', '#Merch'],
-    wiki: ['Announcement', 'Lore', 'Worldbuilding'],
-    forum: ['#Discussion', '#Poll', '#QnA']
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('accessToken')
+  document.body.dataset.isLoggedIn = token ? 'true' : 'false'
+  const body = document.body
+  const isLoggedIn = body.dataset.isLoggedIn === 'true'
+
+  const joinBtn = document.querySelector('.js-join-or-post')
+  if (!joinBtn) return
+
+  // track join state
+  const fandomId = Number(document.body.dataset.fandomId)
+  let hasJoined = document.body.dataset.initialHasJoined === 'true'
+
+  // If token exists, trust DB (not SSR)
+  if (localStorage.getItem('accessToken') && Number.isFinite(fandomId)) {
+    hasJoined = await fetchJoinStatus(fandomId)
+    document.body.dataset.initialHasJoined = hasJoined ? 'true' : 'false'
   }
 
-  function setupPostModal () {
-    const overlay = document.getElementById('postOverlay')
-    const modal = document.getElementById('postModal')
-    const closeBtn = document.getElementById('postCloseBtn')
-    const tabSelect = document.getElementById('postTabSelect')
-    const typeSelect = document.getElementById('postTypeSelect')
-    const contentInput = document.getElementById('postContent')
-    const tagsInput = document.getElementById('postTags')
-    const submitBtn = document.getElementById('postSubmitBtn')
+  function updateJoinButton () {
+    joinBtn.textContent = hasJoined ? 'POST' : 'JOIN'
+  }
 
-    if (!overlay || !modal || !tabSelect || !typeSelect || !contentInput || !submitBtn) {
+  updateJoinButton()
+
+  joinBtn.addEventListener('click', async(event) => {
+    event.preventDefault()
+
+    // if user not logged in → open auth modal
+    if (!isLoggedIn) {
+      if (typeof openAuthModal === 'function') {
+        openAuthModal('login')
+      } else {
+        console.warn('openAuthModal not available')
+      }
       return
     }
 
-    const body = document.body
-    const slug = body.dataset.fandomSlug || 'default-fandom'
-    const initialTab = body.dataset.activeTab || 'fanworks'
+    // logged in but not joined yet → JOIN
+    if (!hasJoined) {
+      try {
+        const fandomId = Number(document.body.dataset.fandomId)
+        const res = await fetch('/api/fandom/join', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ fandomId }),
+        })
 
-    function fillTypeOptions (tab) {
-      const options = POST_CONTENT_TYPES[tab] || []
-      typeSelect.innerHTML = ''
-      options.forEach((label) => {
-        const opt = document.createElement('option')
-        opt.value = label
-        opt.textContent = label
-        typeSelect.appendChild(opt)
-      })
-    }
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data?.error || data?.message || 'Join failed')
 
-    function openPostModal (tab) {
-      const chosenTab = tab || initialTab || 'fanworks'
-      tabSelect.value = chosenTab
-      fillTypeOptions(chosenTab)
+        hasJoined = true
+        document.body.dataset.initialHasJoined = 'true'
+        updateJoinButton()
 
-      overlay.classList.add('is-visible')
-      contentInput.value = ''
-      tagsInput.value = ''
-      contentInput.focus()
-    }
+      } catch (err) {
+        alert(err.message || String(err))
 
-    function closePostModal () {
-      overlay.classList.remove('is-visible')
-    }
-
-    // expose globally so join/POST button can call it
-    window.openPostModal = openPostModal
-
-    // when user changes "Post to" tab, update content-type options
-    tabSelect.addEventListener('change', () => {
-      fillTypeOptions(tabSelect.value)
-    })
-
-    // close handlers
-    if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        e.preventDefault()
-        closePostModal()
-      })
-    }
-
-    overlay.addEventListener('click', (event) => {
-      if (event.target === overlay) {
-        closePostModal()
       }
-    })
-
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        closePostModal()
-      }
-    })
-
-    submitBtn.addEventListener('click', async (event) => {
-  event.preventDefault()
-
-  const caption = contentInput.value.trim()
-  const tagsRaw = tagsInput.value.trim()
-  const tab = tabSelect.value          // fanworks / wiki / forum
-  const type = typeSelect.value        // your dropdown value
-
-  if (!caption) return
-
-  try {
-    const fandomId = await getFandomIdFromSlug(slug)
-
-    // 1) Create the post
-
-    const res = await fetch('/api/posts', {
-      method: 'POST',
-      redirect: 'manual',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-        ...authHeaders(),
-      },
-      body: JSON.stringify({
-        caption,
-        fandomId,
-        parentId: null,
-        contentId: 1,
-        postType: 'normal',     // Always use 'normal' for regular posts, 'poll' for polls
-      }),
-    })
-    
-    const post = await res.json()
-    if (!res.ok) throw new Error(post?.error || 'Create post failed')
-
-    // 2) Turn “type” into a hashtag too (optional but nice)
-    //    Example: "Fanfiction" or "#Fanfiction" → "Fanfiction"
-    const autoTag = String(type || '').replace(/^#/, '').trim()
-
-    // 3) Parse user tags "#a #b,c" → ["a","b","c"]
-    const tagList = []
-    if (autoTag) tagList.push(autoTag)
-
-    if (tagsRaw) {
-      const cleaned = tagsRaw
-        .split(/[\s,]+/)
-        .map(t => t.replace(/^#/, '').trim())
-        .filter(Boolean)
-      tagList.push(...cleaned)
+      return
     }
 
-    // 4) Find-or-create hashtags, then attach to post
-    for (const tag of tagList) {
-      const hRes = await fetch('/api/hashtags/find-or-create', {
+    // logged in + already joined → open create-post modal
+    if (typeof window.openPostModal === 'function') {
+    window.openPostModal()
+    }
+  })
+  setupPostModal()
+  loadFeed().catch(console.error)
+
+})
+
+const POST_CONTENT_TYPES = {
+  fanworks: ['#Fanfiction', '#Fanart', '#Merch'],
+  wiki: ['Announcement', 'Lore', 'Worldbuilding'],
+  forum: ['#Discussion', '#Poll', '#QnA']
+}
+
+const CONTENT_ID_MAP = {
+  fanworks: { '#Fanart': 1, '#Fanfiction': 2, '#Merch': 3 },
+  wiki: { 'Announcement': 4, 'Lore': 5, 'Worldbuilding': 6 },
+  forum: { '#Discussion': 7, '#Poll': 8, '#QnA': 9 },
+}
+
+function setupPostModal () {
+  const overlay = document.getElementById('postOverlay')
+  const modal = document.getElementById('postModal')
+  const closeBtn = document.getElementById('postCloseBtn')
+  const tabSelect = document.getElementById('postTabSelect')
+  const typeSelect = document.getElementById('postTypeSelect')
+  const contentInput = document.getElementById('postContent')
+  const tagsInput = document.getElementById('postTags')
+  const submitBtn = document.getElementById('postSubmitBtn')
+
+  if (!overlay || !modal || !tabSelect || !typeSelect || !contentInput || !submitBtn) {
+    return
+  }
+
+  const body = document.body
+  const initialTab = body.dataset.activeTab || 'fanworks'
+
+  function fillTypeOptions (tab) {
+    const options = POST_CONTENT_TYPES[tab] || []
+    typeSelect.innerHTML = ''
+    options.forEach((label) => {
+      const opt = document.createElement('option')
+      opt.value = label
+      opt.textContent = label
+      typeSelect.appendChild(opt)
+    })
+  }
+
+  function openPostModal (tab) {
+    const chosenTab = tab || initialTab || 'fanworks'
+    tabSelect.value = chosenTab
+    fillTypeOptions(chosenTab)
+
+    overlay.classList.add('is-visible')
+    contentInput.value = ''
+    tagsInput.value = ''
+    contentInput.focus()
+  }
+
+  function closePostModal () {
+    overlay.classList.remove('is-visible')
+  }
+
+  // expose globally so join/POST button can call it
+  window.openPostModal = openPostModal
+
+  // when user changes "Post to" tab, update content-type options
+  tabSelect.addEventListener('change', () => {
+    fillTypeOptions(tabSelect.value)
+  })
+
+  // close handlers
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault()
+      closePostModal()
+    })
+  }
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      closePostModal()
+    }
+  })
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closePostModal()
+    }
+  })
+
+  submitBtn.addEventListener('click', async (event) => {
+    event.preventDefault()
+
+    const caption = contentInput.value.trim()
+    const tagsRaw = tagsInput.value.trim()
+    const tab = tabSelect.value          // fanworks / wiki / forum
+    const type = typeSelect.value        // your dropdown value
+    const contentId = CONTENT_ID_MAP[tab]?.[type]
+    if (!contentId) {
+      alert('Invalid content type selected')
+      return
+    }
+
+    if (!caption) return
+
+    try {
+      const fandomId = Number(document.body.dataset.fandomId)
+
+      // 1) Create the post
+      const res = await fetch('/api/posts', {
         method: 'POST',
         redirect: 'manual',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
           ...authHeaders(),
         },
-        body: JSON.stringify({ tag }),
+        body: JSON.stringify({
+          caption,
+          fandomId,
+          parentId: null,
+          contentId,
+          postType: 'normal',     // Always use 'normal' for regular posts, 'poll' for polls
+        }),
       })
+      const post = await res.json()
+      if (!res.ok) throw new Error(post?.error || 'Create post failed')
 
-      if (!hRes.ok) {
-        console.warn(`Failed to find/create hashtag "${tag}":`, hRes.status)
-        continue
+      // 2) Turn “type” into a hashtag too (optional but nice)
+      //    Example: "Fanfiction" or "#Fanfiction" → "Fanfiction"
+      const autoTag = String(type || '').replace(/^#/, '').trim()
+
+      // 3) Parse user tags "#a #b,c" → ["a","b","c"]
+      const tagList = []
+      if (autoTag) tagList.push(autoTag)
+
+      if (tagsRaw) {
+        const cleaned = tagsRaw
+          .split(/[\s,]+/)
+          .map(t => t.replace(/^#/, '').trim())
+          .filter(Boolean)
+        tagList.push(...cleaned)
       }
 
-      const hashtag = await hRes.json()
-      await fetch(`/posts/${post.postId || post.id}/hashtags`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...authHeaders(),
-        },
-        body: JSON.stringify({ hashtagId: hashtag.hashtagId || hashtag.id }),
-      })
-    }
+      // 4) Find-or-create hashtags, then attach to post
+      for (const tag of tagList) {
+        const hRes = await fetch('/api/hashtags/find-or-create', {
+          method: 'POST',
+          redirect: 'manual',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ tag }),
+        })
 
-    // 5) Update UI: either prepend, or reload feed
-    // If you already render posts via JS, prepend. If not, reload.
-    if (typeof window.prependPostToFeed === 'function') {
-      window.prependPostToFeed(post)
-    } else {
-      // fallback: reload current feed if you have a load function
-      if (typeof window.loadFandomFeed === 'function') {
-        window.loadFandomFeed(fandomId)
+        if (!hRes.ok) {
+          console.warn(`Failed to find/create hashtag "${tag}":`, hRes.status)
+          continue
+        }
+
+        const hashtag = await hRes.json()
+        await fetch(`/posts/${post.postId || post.id}/hashtags`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ hashtagId: hashtag.hashtagId || hashtag.id }),
+        })
+      }
+
+      // 5) Update UI: either prepend, or reload feed
+      // If you already render posts via JS, prepend. If not, reload.
+      if (typeof window.prependPostToFeed === 'function') {
+        window.prependPostToFeed(post)
       } else {
-        // worst-case fallback
-        location.reload()
+        // fallback: reload current feed if you have a load function
+        if (typeof window.loadFandomFeed === 'function') {
+          window.loadFandomFeed(fandomId)
+        } else {
+          // worst-case fallback
+          location.reload()
+        }
       }
+
+      const feed = document.getElementById('feedSection')
+      if (feed) {
+        const loading = feed.querySelector('.feed-loading')
+        if (loading) loading.remove()
+        feed.insertAdjacentHTML('afterbegin', renderPostCard(post))
+      }
+      
+      closePostModal()
+    } catch (err) {
+      alert(err.message)
     }
-
-    const feed = document.getElementById('feedSection')
-if (feed) {
-  const loading = feed.querySelector('.feed-loading')
-  if (loading) loading.remove()
-  feed.insertAdjacentHTML('afterbegin', renderPostCard(post))
+  })
 }
 
-
-    closePostModal()
-  } catch (err) {
-    alert(err.message)
-  }
-})
-
-}
-
-  // ===== LIKE BUTTON LOGIC =====
+// ===== LIKE BUTTON LOGIC =====
 document.addEventListener('DOMContentLoaded', () => {
   let currentUser = null
   const rawUser = localStorage.getItem('currentUser')

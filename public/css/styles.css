@@ -203,9 +203,6 @@
 }
 
 
-.fandom-card-name {
-  font-size: 0.85rem;
-}
 
 .intro-card-grid {
   display: grid;
@@ -214,12 +211,55 @@
 }
 
 .fandom-card {
+  position: relative;
+  overflow: hidden;       /* CLIPS the ::after */
+  border-radius: 18px;   
+
   background: #edd4d6;
-  border-radius: 18px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
   aspect-ratio: 4 / 3;
   display: flex;
   align-items: flex-end;
   padding: 0.6rem;
+}
+
+.fandom-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+
+  border-radius: inherit;   
+  z-index: 1;
+
+  background: linear-gradient(
+    to top,
+    rgba(106, 65, 65, 0.25),
+    rgba(106, 65, 65, 0.1),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.fandom-card-name {
+  position: relative;
+  z-index: 2;
+
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+
+  background: rgba(216, 133, 133, 0.35);
+  backdrop-filter: blur(2px);  
 }
 
 /* Homepage */

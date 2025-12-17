@@ -29,10 +29,10 @@ export default class extends BaseSeeder {
       { contentName: 'Forum', contentBranch: 'Polls' },
     ])
     await Media.createMany([
-      { fileUrl: '#public/images/media_assets/Honkai-Star-Rail-thumbnail', mediaType: 'image' },
-      { fileUrl: '#public/images/media_assets/reverse1999-thumbnail', mediaType: 'image' },
-      { fileUrl: '#public/images/media_assets/wuthering-waves-thumbnail', mediaType: 'image' },
-      { fileUrl: '#public/images/media_assets/Zenless-Zone-Zero-thumbnail', mediaType: 'image' },
+      { fileUrl: '/images/media_assets/Honkai-Star-Rail-thumbnail.png', mediaType: 'image' },
+      { fileUrl: '/images/media_assets/reverse1999-thumbnail.png', mediaType: 'image' },
+      { fileUrl: '/images/media_assets/wuthering-waves-thumbnail.png', mediaType: 'image' },
+      { fileUrl: '/images/media_assets/Zenless-Zone-Zero-thumbnail.png', mediaType: 'image' },
     ])
     await Fandom.createMany([
       { fandomName: 'Honkai Star Rail', categoryId: 7, thumbnailMediaId: 1 },
