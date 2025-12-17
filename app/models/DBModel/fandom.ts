@@ -15,6 +15,9 @@ export default class Fandom extends BaseModel {
   @column({ columnName: 'fandom_name' })
   declare fandomName: string
 
+  @column({ columnName: 'thumbnail_media_id' })
+  declare thumbnailMediaId: number
+
   @belongsTo(() => Category, { foreignKey: 'categoryId' })
   public category!: BelongsTo<typeof Category>
 

@@ -3,6 +3,7 @@ import Fandom from '#models/DBModel/fandom'
 import Category from '#models/DBModel/category'
 import Content from '#models/DBModel/content'
 import User from '#models/DBModel/User/user'
+import Media from '#models/DBModel/media'
 import db from '@adonisjs/lucid/services/db'
 
 export default class extends BaseSeeder {
@@ -27,11 +28,17 @@ export default class extends BaseSeeder {
       { contentName: 'Forum', contentBranch: 'Discussion' },
       { contentName: 'Forum', contentBranch: 'Polls' },
     ])
+    await Media.createMany([
+      { fileUrl: '#public/images/media_assets/Honkai-Star-Rail-thumbnail', mediaType: 'image' },
+      { fileUrl: '#public/images/media_assets/reverse1999-thumbnail', mediaType: 'image' },
+      { fileUrl: '#public/images/media_assets/wuthering-waves-thumbnail', mediaType: 'image' },
+      { fileUrl: '#public/images/media_assets/Zenless-Zone-Zero-thumbnail', mediaType: 'image' },
+    ])
     await Fandom.createMany([
-      { fandomName: 'Honkai Star Rail', categoryId: 8 },
-      { fandomName: 'Reverse: 1999', categoryId: 8 },
-      { fandomName: 'Wuthering Waves', categoryId: 8 },
-      { fandomName: 'Zenless Zone Zero', categoryId: 8 },
+      { fandomName: 'Honkai Star Rail', categoryId: 7, thumbnailMediaId: 1 },
+      { fandomName: 'Reverse: 1999', categoryId: 7, thumbnailMediaId: 2 },
+      { fandomName: 'Wuthering Waves', categoryId: 7, thumbnailMediaId: 3 },
+      { fandomName: 'Zenless Zone Zero', categoryId: 7, thumbnailMediaId: 4 },
     ])
     await User.create({
       username: 'cyrup',

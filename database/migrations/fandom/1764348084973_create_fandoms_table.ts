@@ -13,6 +13,12 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('categories')
         .onDelete('CASCADE')
+      table
+        .integer('thumbnail_media_id')
+        .unsigned()
+        .references('id')
+        .inTable('media')
+        .onDelete('CASCADE')
     })
   }
 

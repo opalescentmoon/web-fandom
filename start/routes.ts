@@ -39,8 +39,8 @@ router.get('/', async ({ view, auth }) => {
 
   const popularFandoms = [
     { name: 'Honkai Star Rail', slug: 'honkai-star-rail' },
-    { name: 'Reverse 1999', slug: 'reverse-1999' },
-    { name: 'Wuthering Wave', slug: 'wuthering-wave' },
+    { name: 'Reverse: 1999', slug: 'reverse:-1999' },
+    { name: 'Wuthering Waves', slug: 'wuthering-waves' },
     { name: 'Zenless Zone Zero', slug: 'zenless-zone-zero' },
   ]
   return view.render('pages/intro', {
