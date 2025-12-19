@@ -14,6 +14,7 @@ const HashtagController = () => import('#controllers/hashtags_controller')
 const WikisController = () => import('#controllers/wikis_controller')
 const UserController = () => import('#controllers/User/users_controller')
 const PostsController = () => import('#controllers/User/posts_controller')
+const SearchController = () => import('#controllers/search_controller')
 
 /**
  * AUTH ROUTES
@@ -127,24 +128,37 @@ router.get('/forum', async ({ request, view, auth }) => {
   })
 })
 
-router.on('/chats').render('pages/chats')
-router.on('/profile').render('pages/profile')
+//PROFILE PAGE
+router.get('/profile', async ({ view }) => {
+  return view.render('pages/profile')
+})
 
+
+router.on('/chats').render('pages/chats')
+
+
+// SEARCH ROUTES
 router.get('/search', async ({ request, view, auth }) => {
+  const fandomId = Number(request.input('fandomId')) || 0
   const fandomName = request.input('fandom_name') || 'Fandom Name'
   const query = request.input('q')
   const activeTab = request.input('tab') || 'fanworks'
+  const branch = request.input('branch') || '' 
 
   return view.render('pages/search', {
     title: 'Search',
     query,
     activeTab,
+    branch,
+    fandomId,
     fandomName,
     hasJoined: false,
     user: auth.user,
     isSearch: true,
   })
 })
+
+router.get('/api/search', [SearchController, 'index'])
 
 // LIKE ROUTES
 router
@@ -244,8 +258,10 @@ router
 // HASHTAG ROUTES
 router
   .group(() => {
+    router.get('/trending', [HashtagController, 'trending'])  
     router.post('/find-or-create', [HashtagController, 'findOrCreate'])
     router.get('/by-name', [HashtagController, 'getByName'])
+    router.get('/used', [HashtagController, 'usedInBranch'])
     router.get('/all', [HashtagController, 'getAll'])
   })
   .prefix('/api/hashtags')
@@ -253,6 +269,8 @@ router
 // USER ROUTES
 router
   .group(() => {
+    router.get('/me', [UserController, 'me'])
+    router.get('/me/joined-fandoms', [UserController, 'joinedFandoms'])
     router.put('/profile', [UserController, 'editProfile'])
     router.put('/email', [UserController, 'updateEmail'])
     router.put('/password', [UserController, 'changePassword'])
@@ -274,8 +292,8 @@ router
     /**
      * HASHTAGS
      */
-    router.post('/:postId/hashtags', [PostsController, 'addHashtag'])
-    router.delete('/:postId/hashtags/:hashtagId', [PostsController, 'removeHashtag'])
+    router.post('/:postId/hashtags', [PostsController, 'addHashtag']).use(middleware.auth())
+    router.delete('/:postId/hashtags/:hashtagId', [PostsController, 'removeHashtag']).use(middleware.auth())
 
     /**
      * COMMENTS
@@ -285,7 +303,7 @@ router
     /**
      * MEDIA
      */
-    router.post('/:postId/media', [PostsController, 'addMedia'])
+    router.post('/:postId/media', [PostsController, 'addMedia']).use(middleware.auth())
     router.get('/:postId/media', [PostsController, 'media'])
     router.delete('/:postId/media/:mediaId', [PostsController, 'removeMedia'])
 

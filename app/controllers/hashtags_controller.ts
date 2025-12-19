@@ -41,4 +41,38 @@ export default class HashtagsController {
       return response.badRequest({ error: error.message })
     }
   }
+
+  /**
+   * trending hashtags
+   */
+  public async trending({ request, response }: HttpContext) {
+    try {
+      const fandomId = Number(request.input('fandomId'))
+      const limit = Math.min(Number(request.input('limit') || 5), 20)
+
+      if (!Number.isFinite(fandomId)) return response.ok([])
+
+      const result = await this.hashtagService.getTrendingByFandom(fandomId, limit)
+      return response.ok(result)
+    } catch (error) {
+      return response.badRequest({ error: error.message })
+    }
+  }
+
+  /**
+   * Get hashtags used in a specific branch
+   */
+  public async usedInBranch({ request, response }: HttpContext) {
+    try {
+      const fandomId = Number(request.input('fandomId'))
+      const branch = String(request.input('branch') || '').trim()   // Lore / World
+      if (!fandomId || !branch) return response.badRequest({ error: 'fandomId and branch are required' })
+
+      const tags = await this.hashtagService.usedInBranch({ fandomId, branch })
+      return response.ok(tags)
+    } catch (e) {
+      return response.internalServerError({ error: e.message })
+    }
+  }
+
 }

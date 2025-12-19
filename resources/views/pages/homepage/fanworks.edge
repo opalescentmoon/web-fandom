@@ -57,21 +57,18 @@
 
   @slot('filter')
     <div class="filter-section">
-      <h4>Filter by Tags</h4>
+      <h4>Filter by Branch</h4>
       <ul class="filter-list">
-        <li><a href="#">#Fanfiction</a></li>
-        <li><a href="#">#Fanart</a></li>
-        <li><a href="#">#Merch</a></li>
+        <li><a href="#" class="js-branch" data-branch="Fanfiction">#Fanfiction</a></li>
+        <li><a href="#" class="js-branch" data-branch="Fanart">#Fanart</a></li>
+        <li><a href="#" class="js-branch" data-branch="Fanmerch">#Merch</a></li>
       </ul>
     </div>
 
     <div class="filter-section">
       <h4>Trending</h4>
-      <ul class="filter-list">
-        <li><a href="#">#Tags</a></li>
-        <li><a href="#">#Tags</a></li>
-        <li><a href="#">#Tags</a></li>
-        <li><a href="#">#Tags</a></li>
+      <ul class="filter-list" id="trendingList">
+        <li class="feed-loading">Loading...</li>
       </ul>
     </div>
   @endslot

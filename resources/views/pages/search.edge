@@ -13,7 +13,8 @@
     <!-- search bar under the tabs -->
     <form class="fandom-search-bar" method="get" action="/search">
       <input type="hidden" name="tab" value="{{ activeTab }}" />
-      <input type="hidden" name="slug" value="{{ slug }}" /> 
+      <input type="hidden" name="fandomId" value="{{ fandomId }}" />
+      <input type="hidden" name="fandom_name" value="{{ fandomName }}" /> 
       <span class="search-icon">🔍</span>
       <input
         type="text"
@@ -45,8 +46,8 @@
         {{ activeTab === 'fanworks' ? 'Fanworks' : (activeTab === 'wiki' ? 'Wiki' : 'Forum') }}
       </p>
 
-      <section class="feed-section">
-        <!-- just reuse your normal post-card style -->
+      <section id="feedSection" class="feed-section">
+        <!-- just reuse your normal post-card style 
         <article class="post-card">
           <header class="post-header">
             <div class="post-user">
@@ -75,7 +76,7 @@
           </footer>
         </article>
 
-        <!-- more result cards here -->
+         more result cards here -->
       </section>
     @endif
   @endslot
@@ -85,42 +86,42 @@
       <!-- BEFORE SEARCH: right side shows Trending tags (match your first mockup) -->
       <div class="filter-section">
         <h4>Trending</h4>
-        <ul class="filter-list">
-          <li><a href="#">#Tags</a></li>
-          <li><a href="#">#Tags</a></li>
-          <li><a href="#">#Tags</a></li>
-          <li><a href="#">#Tags</a></li>
+        <ul class="filter-list" id="trendingList">
+          <li class="feed-loading">Loading...</li>
         </ul>
       </div>
     @else
       <!-- AFTER SEARCH: right side becomes the normal filter for the active tab -->
       @if(activeTab === 'fanworks')
         <div class="filter-section">
-          <h4>Filter by Tags</h4>
+          <h4>Filter by Branch</h4>
           <ul class="filter-list">
-            <li><a href="#">#Fanfiction</a></li>
-            <li><a href="#">#Fanart</a></li>
-            <li><a href="#">#Merch</a></li>
+            <li><a href="#" class="js-branch" data-branch="Fanfiction">#Fanfiction</a></li>
+            <li><a href="#" class="js-branch" data-branch="Fanart">#Fanart</a></li>
+            <li><a href="#" class="js-branch" data-branch="Fanmerch">#Merch</a></li>
           </ul>
         </div>
       @elseif(activeTab === 'wiki')
-        <!-- reuse your wiki filter (Announcement / Lore / World accordion) -->
         <div class="filter-section">
-          <h4>Filter by Tags</h4>
-          <p class="filter-static-link">Announcement</p>
-        </div>
-        <!-- Lore + World collapsibles here if you want -->
-      @elseif(activeTab === 'forum')
-         <div class="filter-section">
-          <h4>Filter by Tags</h4>
+          <h4>Filter by Branch</h4>
           <ul class="filter-list">
-            <li><a href="#">#QnA</a></li>
-            <li><a href="#">#Poll</a></li>
-            <li><a href="#">#Discussion</a></li>
+            <li><a href="#" class="js-branch" data-branch="Announcement">Announcement</a></li>
+            <li><a href="#" class="js-branch" data-branch="Lore">Lore</a></li>
+            <li><a href="#" class="js-branch" data-branch="Worldbuilding">World</a></li>
           </ul>
         </div>
+      @elseif(activeTab === 'forum')
+        <div class="filter-section">
+        <h4>Filter by Branch</h4>
+        <ul class="filter-list">
+          <li><a href="#" class="js-branch" data-branch="QnA">#QnA</a></li>
+          <li><a href="#" class="js-branch" data-branch="Polls">#Polls</a></li>
+          <li><a href="#" class="js-branch" data-branch="Discussion">#Discussion</a></li>
+        </ul>
+      </div>
       @endif
     @endif
+    <script src="/js/script_search.js"></script>
   @endslot
 
 @end

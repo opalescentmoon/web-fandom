@@ -1,8 +1,30 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { UserService } from '#services/user_service'
+import Database from '@adonisjs/lucid/services/db'
 
 export default class UsersController {
   private userService = new UserService()
+
+  public async me({ auth, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    return response.ok(user)
+  }
+
+  public async joinedFandoms({ auth, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    const rows = await Database
+      .from('user_fandom')
+      .join('fandoms', 'fandoms.fandom_id', 'user_fandom.fandom_id')
+      .where('user_fandom.user_id', user.userId)
+      .select(
+        Database.raw('fandoms.fandom_id as "fandomId"'),
+        Database.raw('fandoms.fandom_name as "fandomName"')
+      )
+      .orderBy('fandoms.fandom_name', 'asc')
+
+    return response.ok(rows)
+  }
 
   /**
    * Edit user profile (bio, profile picture)

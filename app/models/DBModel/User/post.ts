@@ -50,8 +50,8 @@ export default class Post extends BaseModel {
   @belongsTo(() => Post, { foreignKey: 'parent_id' })
   public comment!: BelongsTo<typeof Post>
 
-  @hasMany(() => Media)
-  public media!: HasMany<typeof Media>
+  @hasMany(() => Media, { foreignKey: 'postId' })
+  declare media: HasMany<typeof Media>
 
   @hasMany(() => Like, { foreignKey: 'id' })
   public like!: HasMany<typeof Like>
@@ -60,7 +60,12 @@ export default class Post extends BaseModel {
   public parent!: HasMany<typeof Post>
 
   @manyToMany(() => Hashtag, {
-    pivotTable: 'hashtag_post',
+    pivotTable: 'hashtag_posts',
+    pivotForeignKey: 'post_id',
+    pivotRelatedForeignKey: 'hashtag_id',
+
+    localKey: 'postId',               // PK in posts table
+    relatedKey: 'id',                  // PK in hashtags table
   })
   public hashtags!: ManyToMany<typeof Hashtag>
 }

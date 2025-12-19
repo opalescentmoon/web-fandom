@@ -21,9 +21,12 @@ export default class LikesController {
     return { removed: await this.service.removeLike(userId, postId) }
   }
 
-  public async toggle({ request, auth }: HttpContext) {
+  public async toggle({ request, auth, response }: HttpContext) {
     const userId = auth.user!.userId
-    const postId = request.input('post_id')
+    const postId = Number(request.input('post_id') ?? request.input('postId'))
+     if (!postId) {
+      return response.badRequest({ message: 'postId is required' })
+    }
 
     return await this.service.toggleLike(userId, postId)
   }

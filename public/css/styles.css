@@ -469,10 +469,16 @@
   text-decoration: underline;
 }
 
-.filter-static-link {
+.filter-static-link a {
+  text-decoration: none;
   color: #7d3a3f;
   margin: 0.25rem 0 0;
   font-size: 0.9rem;
+}
+
+a.js-branch.is-active {
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 /* Header text that you click */
@@ -503,6 +509,7 @@
   margin: 0;
   max-height: 0;
   overflow: hidden;
+  pointer-events: none;  
   opacity: 0;
   transition: max-height 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
 }
@@ -523,7 +530,8 @@
 
 /* Open state */
 .collapse-body.is-open {
-  max-height: 200px;    /* enough height for a few links */
+  max-height: 500px;
+  pointer-events: auto;
   opacity: 1;
   margin-top: 0.2rem;
 }
@@ -1289,4 +1297,39 @@
   white-space: nowrap;
   border: 0;
 }
+
+.post-media {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 520px;   /* tweak */
+  object-fit: contain; /* keep ratio, show whole image */
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+/* videos need a little extra */
+video.post-media {
+  width: 100%;
+  height: auto;
+}
+
+.post-media-preview { margin-top: 10px; }
+.post-media-preview-img, .post-media-preview-video {
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.post-media-preview-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.post-media-remove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 

@@ -1,6 +1,6 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import Post from './User/post.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel,  belongsTo,  column } from '@adonisjs/lucid/orm'
+import Post from '#models/DBModel/User/post'
+import type {  BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class Media extends BaseModel {
   @column({ isPrimary: true })
@@ -16,5 +16,5 @@ export default class Media extends BaseModel {
   declare postId: number
 
   @belongsTo(() => Post, { foreignKey: 'postId' })
-  public post!: BelongsTo<typeof Post>
+  declare post: BelongsTo<typeof Post>
 }

@@ -1,5 +1,8 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { PostService } from '#services/post_service'
+import app from '@adonisjs/core/services/app'
+import { cuid } from '@adonisjs/core/helpers'
+import Media from '#models/DBModel/media'
 
 export default class PostsController {
   private postService = new PostService()
@@ -35,7 +38,9 @@ export default class PostsController {
         })
       }
 
-      return response.created(post)
+      const fullPost = await this.postService.getPostWithContent(post.postId)
+
+      return response.created(fullPost ?? post.serialize())
     } catch (error) {
       return response.badRequest({ error: error.message })
     }
@@ -115,10 +120,14 @@ export default class PostsController {
   /**
    * Get all posts from a user
    */
-  public async getByUser({ params, response }: HttpContext) {
+  public async getByUser({ params, request, response }: HttpContext) {
     try {
       const userId = Number(params.userId)
-      const posts = await this.postService.getPostsByUser(userId)
+      const fandomIdRaw = request.input('fandomId')
+      const branch = request.input('branch') || undefined
+      const fandomId = fandomIdRaw ? Number(fandomIdRaw) : undefined
+
+      const posts = await this.postService.getPostsByUser(userId, fandomId, branch)
       return response.ok(posts)
     } catch (error) {
       return response.badRequest({ error: error.message })
@@ -140,15 +149,26 @@ export default class PostsController {
   /**
    * Get posts by fandom
    */
-  public async getByFandom({ params, response }: HttpContext) {
+  public async getByFandom({ params, request, response, auth }: HttpContext) {
     try {
       const fandomId = Number(params.fandomId)
-      const posts = await this.postService.getPostsByFandom(fandomId)
+      const { tab, branch } = request.qs()
+
+      let userId: number | null = null
+      try {
+        await auth.check() // if Authorization header exists + valid → auth.user filled
+        userId = auth.user?.userId ?? null
+      } catch {
+        userId = null
+      }
+
+      const posts = await this.postService.getPostsByFandom(fandomId, tab, branch, userId)
       return response.ok(posts)
     } catch (error) {
       return response.badRequest({ error: error.message })
     }
   }
+
 
   /**
    * Get posts by type
@@ -195,14 +215,43 @@ export default class PostsController {
   public async addMedia({ params, request, response }: HttpContext) {
     try {
       const postId = Number(params.postId)
-      const { mediaUrl, mediaType } = request.only(['mediaUrl', 'mediaType'])
+      if (!postId) return response.badRequest({ error: 'Invalid postId' })
 
-      const media = await this.postService.addMediaToPost(postId, mediaUrl, mediaType)
+      // make sure post exists
+
+      const file = request.file('media', {
+        size: '15mb',
+        extnames: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov'],
+      })
+
+      if (!file) {
+        return response.badRequest({ error: 'No media file uploaded (field name must be "media")' })
+      }
+
+      const fileName = `${cuid()}.${file.extname}`
+      const uploadDir = app.makePath('public/uploads/posts')
+
+      await file.move(uploadDir, { name: fileName })
+
+      if (!file.isValid) {
+        return response.badRequest({ error: file.errors })
+      }
+
+      // Determine type
+      const mediaType = file.type === 'video' ? 'video' : 'image'
+
+      // Public URL path stored in DB
+      const fileUrl = `/uploads/posts/${fileName}`
+
+      // 1) create media row
+      const media = await Media.create({ postId, fileUrl, mediaType })
+
       return response.ok(media)
     } catch (error) {
-      return response.badRequest({ error: error.message })
+      return response.internalServerError({ error: error.message })
     }
   }
+
 
   /**
    * Get media for a post

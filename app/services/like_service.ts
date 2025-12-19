@@ -24,14 +24,34 @@ export class LikeService {
 
   /** Toggle like: add if missing, remove if exists. Returns { action: 'added' | 'removed', like?: Like } */
   public async toggleLike(userId: number, postId: number) {
-    const like = await Like.query().where('user_id', userId).andWhere('post_id', postId).first()
-    if (like) {
-      await like.delete()
-      return { action: 'removed' as const }
+    const existing = await Like.query()
+      .where('user_id', userId)
+      .andWhere('post_id', postId)
+      .first()
+
+    let liked: boolean
+
+    if (existing) {
+      await existing.delete()
+      liked = false
+    } else {
+      await Like.create({ userId, postId })
+      liked = true
     }
 
-    const newLike = await Like.create({ userId, postId })
-    return { action: 'added' as const, like: newLike }
+    // count likes for the post
+    const countRow = await Like.query()
+      .where('post_id', postId)
+      .count('* as total')
+      .first()
+
+    const likeCount = Number(countRow?.$extras?.total ?? 0)
+
+    return {
+      action: liked ? ('added' as const) : ('removed' as const),
+      liked,
+      likeCount,
+    }
   }
 
   /** Return number of likes for a post. */

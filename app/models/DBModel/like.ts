@@ -14,8 +14,8 @@ export default class Like extends BaseModel {
   @column({ columnName: 'post_id' })
   declare postId: number
 
-  @column.dateTime({ autoCreate: true })
-  declare timestamp: DateTime
+  @column.dateTime({ autoCreate: true, columnName: 'time' })
+  declare time: DateTime
 
   @belongsTo(() => User, { foreignKey: 'userId' })
   public user!: BelongsTo<typeof User>

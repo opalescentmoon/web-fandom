@@ -10,7 +10,7 @@
 })
   @slot('main')
     <!-- forum-style cards -->
-    <article class="post-card" id="feedSection">
+    <section class="feed-section" id="feedSection">
      <div class="feed-loading">Loading posts...</div>
       {{-- <header class="post-header">
         <div class="post-user">
@@ -47,26 +47,23 @@
             <button>↻</button>
           </div>
       </footer>--}}
-    </article>
+    </section>
   @endslot
 
   @slot('filter')
     <div class="filter-section">
-      <h4>Filter by Tags</h4>
+      <h4>Filter by Branch</h4>
       <ul class="filter-list">
-        <li><a href="#">#QnA</a></li>
-        <li><a href="#">#Poll</a></li>
-        <li><a href="#">#Discussion</a></li>
+        <li><a href="#" class="js-branch" data-branch="QnA">#QnA</a></li>
+        <li><a href="#" class="js-branch" data-branch="Polls">#Polls</a></li>
+        <li><a href="#" class="js-branch" data-branch="Discussion">#Discussion</a></li>
       </ul>
     </div>
 
     <div class="filter-section">
       <h4>Trending</h4>
-      <ul class="filter-list">
-        <li><a href="#">#Tags</a></li>
-        <li><a href="#">#Tags</a></li>
-        <li><a href="#">#Tags</a></li>
-        <li><a href="#">#Tags</a></li>
+      <ul class="filter-list" id="trendingList">
+        <li class="feed-loading">Loading...</li>
       </ul>
     </div>
   @endslot

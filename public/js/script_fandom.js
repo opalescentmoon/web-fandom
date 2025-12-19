@@ -1,20 +1,37 @@
-// simple collapse handler for wiki filters
-document.addEventListener('click', (event) => {
-  const header = event.target.closest('[data-collapse-target]')
-  if (!header) return
-
-  const targetId = header.getAttribute('data-collapse-target')
-  const body = document.getElementById(targetId)
-  if (!body) return
-
-  const isOpen = body.classList.toggle('is-open')
-  header.classList.toggle('is-open', isOpen)
-})
-
 // tells JS whether user is logged in (Edge will insert true/false)
 const accessToken = localStorage.getItem('accessToken')
 window.IS_LOGGED_IN = !!accessToken
 document.body.dataset.isLoggedIn = window.IS_LOGGED_IN ? 'true' : 'false';
+
+// ===== CONTENT BRANCH FILTERING =====
+function setupBranchFilterToggle() {
+  const aside = document.querySelector('.fandom-filter')
+  if (!aside) return
+
+  aside.addEventListener('click', (e) => {
+    const a = e.target.closest('a.js-branch')
+    if (!a) return
+
+    e.preventDefault()
+
+    const clicked = (a.dataset.branch || '').trim()
+    if (!clicked) return
+
+    const body = document.body
+    const current = body.dataset.activeBranch || ''
+
+    // toggle
+    body.dataset.activeBranch = (current === clicked) ? '' : clicked
+
+    // highlight active
+    aside.querySelectorAll('a.js-branch').forEach((el) => {
+      el.classList.toggle('is-active', el.dataset.branch === body.dataset.activeBranch)
+    })
+
+    loadFeed().catch(console.error)
+  })
+}
+
 
 // ===== AUTH MODAL JS =====
 const authOverlay = document.getElementById('authOverlay')
@@ -98,11 +115,36 @@ function escapeHtml (str) {
 }
 
 function renderPostCard (p) {
-  const postId = p.postId ?? p.id
+  const postId = p.postId ?? p.post_id ?? p.id
   const caption = p.caption ?? ''
-  const postType = p.postType ?? p.post_type ?? ''
-  const liked = false
-  const likeCount = 0
+  const contentBranch = p.contentBranch ?? p.content_branch ?? ''
+  const username =
+    p.user?.displayName ??
+    p.user?.display_name ??
+    p.user?.userName ??
+    p.user?.user_name ??
+    'Username'
+  const hashtags = Array.isArray(p.hashtags) ? p.hashtags : []
+  const hashtagHtml = hashtags
+    .map((h) => {
+      const name = h.hashtagName ?? h.hashtag_name ?? h.name ?? ''
+      if (!name) return ''
+      return `<a href="#" class="post-hashtag js-hashtag" data-tag="${escapeHtml(name)}">#${escapeHtml(name)}</a>`
+    })
+    .filter(Boolean)
+    .join(' ')
+  const liked = !!(p.likedByMe ?? p.liked_by_me)
+  const likeCount = Number(p.likeCount ?? p.like_count ?? 0)
+  const media = p.media || []
+  const mediaHtml = media.map(m => {
+    const url = m.fileUrl ?? m.file_url
+    const type = m.mediaType ?? m.media_type
+    if (!url) return ''
+    if (type === 'video') {
+      return `<video class="post-media" controls src="${url}"></video>`
+    }
+    return `<img class="post-media" src="${url}" alt="Post media" />`
+  }).join('')
 
   return `
     <article class="post-card" data-post-id="${postId}">
@@ -110,25 +152,29 @@ function renderPostCard (p) {
         <div class="post-user-mini">
           <div class="avatar-circle"></div>
           <div class="post-user-text">
-            <div class="post-username">Username</div>
+            <div class="post-username">${escapeHtml(username)}</div>
           </div>
         </div>
-        <div class="post-tag">${escapeHtml(postType)}</div>
+        <div class="post-branch">${escapeHtml(contentBranch || '')}</div>
       </header>
 
       <main class="post-body">
         <p>${escapeHtml(caption)}</p>
+        ${mediaHtml}
       </main>
 
       <footer class="post-footer">
+        <div class="post-hashtags">
+          ${hashtagHtml || ''}
+        </div>
         <div class="post-actions">
           <button
             class="post-like-btn"
-            data-like-url="/likes/toggle"
-            data-post-id="${postId}"
-            data-liked="${liked ? 'true' : 'false'}"
             data-requires-auth="true"
             data-auth-mode="login"
+            data-like-url="/api/likes/toggle"
+            data-post-id="${postId}"
+            data-liked="${liked ? 'true' : 'false'}"
           >
             <span class="post-like-icon">${liked ? '♥' : '♡'}</span>
             <span class="post-like-count">${likeCount}</span>
@@ -145,9 +191,23 @@ async function loadFeed () {
 
   const body = document.body
   const activeTab = body.dataset.activeTab || 'fanworks'
+  const activeBranch = document.body.dataset.activeBranch || '' 
   const fandomId = Number(body.dataset.fandomId)
-  const res = await fetch(`/api/posts/fandom/${fandomId}`)
+
+  const params = new URLSearchParams()
+  params.set('tab', activeTab)
+  if (activeBranch) params.set('branch', activeBranch)
+
+  const accessToken = localStorage.getItem('accessToken')
+
+  const res = await fetch(`/api/posts/fandom/${fandomId}?${params}`, {
+    headers: accessToken
+      ? { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
+      : { 'Accept': 'application/json' },
+  })
+
   const posts = await res.json()
+
 
   if (!res.ok) {
     feed.innerHTML = `<div class="feed-loading">Failed to load posts</div>`
@@ -155,27 +215,78 @@ async function loadFeed () {
   }
 
   // filter by tab (because you are storing tab as postType)
-  const TAB_TO_CONTENT_IDS = {
-    fanworks: new Set([1, 2, 3]), // Fanart/Fanfic/Fanmerch
-    wiki: new Set([4, 5, 6]),     // Announcement/Lore/Worldbuilding
-    forum: new Set([7, 8, 9]),    // Discussion/Polls/QnA
-  }
-
-  const allowed = TAB_TO_CONTENT_IDS[activeTab] || new Set()
-
-  const filtered = (Array.isArray(posts) ? posts : []).filter((p) => {
-    const cid = p.contentId ?? p.content_id
-    return allowed.has(Number(cid))
-  })
-
-  if (!filtered.length) {
+  if (!Array.isArray(posts) || !posts.length) {
     feed.innerHTML = `<div class="feed-loading">No posts yet</div>`
     return
   }
 
-  feed.innerHTML = filtered.map(renderPostCard).join('')
-  console.log('posts sample:', posts?.[0])
+  feed.innerHTML = posts.map((p) => renderPostCard({ ...p, __src: 'loadFeed' })).join('')
 }
+
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('.js-hashtag')
+  if (!a) return
+  e.preventDefault()
+
+  const tag = String(a.dataset.tag || '').trim().replace(/^#/, '')
+  if (!tag) return
+
+  const fandomId = document.body.dataset.fandomId
+  const fandomName = document.body.dataset.fandomName || ''
+  const tab = document.body.dataset.activeTab || 'fanworks'
+
+  const url = new URL('/search', location.origin)
+  if (fandomId) url.searchParams.set('fandomId', fandomId)
+  if (fandomName) url.searchParams.set('fandom_name', fandomName)
+  url.searchParams.set('tab', tab)
+  url.searchParams.set('q', tag)
+  url.searchParams.delete('branch') // new search resets branch
+
+  location.href = url.toString()
+})
+
+async function loadTrendingHashtags() {
+  const list = document.getElementById('trendingList')
+  if (!list) return
+
+  const fandomId = document.body.dataset.fandomId
+  if (!fandomId) {
+    list.innerHTML = ''
+    return
+  }
+
+  try {
+    const url = new URL('/api/hashtags/trending', location.origin)
+    url.searchParams.set('fandomId', fandomId)
+    url.searchParams.set('limit', '5')
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+
+    const data = await res.json().catch(() => [])
+    if (!res.ok) throw new Error(data?.error || 'Trending failed')
+
+    const tags = Array.isArray(data) ? data : []
+    if (!tags.length) {
+      list.innerHTML = `<li class="feed-loading">No trending tags yet</li>`
+      return
+    }
+
+    list.innerHTML = tags.map((t) => `
+      <li>
+        <a href="#" class="js-hashtag" data-tag="${escapeHtml(t.name)}">#${escapeHtml(t.name)}</a>
+      </li>
+    `).join('')
+  } catch (err) {
+    console.error(err)
+    list.innerHTML = `<li class="feed-loading">Failed to load</li>`
+  }
+}
+
 
 async function fetchJoinStatus(fandomId) {
   const res = await fetch(`/api/fandom/join-status?fandomId=${fandomId}`, {
@@ -187,6 +298,9 @@ async function fetchJoinStatus(fandomId) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  setupBranchFilterToggle()
+
+  // determine login state
   const token = localStorage.getItem('accessToken')
   document.body.dataset.isLoggedIn = token ? 'true' : 'false'
   const body = document.body
@@ -258,8 +372,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   })
   setupPostModal()
-  loadFeed().catch(console.error)
-
+  const isSearch = document.body.dataset.isSearch === 'true'
+  if (!isSearch) {
+    loadFeed().catch(console.error)
+  }
+  loadTrendingHashtags().catch(console.error)
 })
 
 const POST_CONTENT_TYPES = {
@@ -284,7 +401,11 @@ function setupPostModal () {
   const tagsInput = document.getElementById('postTags')
   const submitBtn = document.getElementById('postSubmitBtn')
 
-  if (!overlay || !modal || !tabSelect || !typeSelect || !contentInput || !submitBtn) {
+  const mediaInput = document.getElementById('postMediaInput')
+  const imageBtn = document.getElementById('postImageBtn')
+  const previewEl = document.getElementById('postMediaPreview')
+
+  if (!overlay || !modal || !tabSelect || !typeSelect || !contentInput || !tagsInput || !submitBtn) {
     return
   }
 
@@ -302,30 +423,42 @@ function setupPostModal () {
     })
   }
 
+  let selectedMediaFile = null
+
+  function resetMediaUI () {
+    selectedMediaFile = null
+    if (mediaInput) mediaInput.value = ''
+    if (previewEl) {
+      previewEl.style.display = 'none'
+      previewEl.innerHTML = ''
+    }
+  }
+
   function openPostModal (tab) {
     const chosenTab = tab || initialTab || 'fanworks'
     tabSelect.value = chosenTab
     fillTypeOptions(chosenTab)
 
     overlay.classList.add('is-visible')
+
     contentInput.value = ''
     tagsInput.value = ''
+    resetMediaUI()
+
     contentInput.focus()
   }
 
   function closePostModal () {
     overlay.classList.remove('is-visible')
+    resetMediaUI()
   }
 
-  // expose globally so join/POST button can call it
   window.openPostModal = openPostModal
 
-  // when user changes "Post to" tab, update content-type options
   tabSelect.addEventListener('change', () => {
     fillTypeOptions(tabSelect.value)
   })
 
-  // close handlers
   if (closeBtn) {
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault()
@@ -334,25 +467,75 @@ function setupPostModal () {
   }
 
   overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) {
-      closePostModal()
-    }
+    if (event.target === overlay) closePostModal()
   })
 
   window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      closePostModal()
-    }
+    if (event.key === 'Escape') closePostModal()
   })
+
+  // ✅ Camera click → open file picker
+  if (imageBtn && mediaInput) {
+    imageBtn.addEventListener('click', () => mediaInput.click())
+  }
+
+  // ✅ THIS is the preview logic and MUST be outside submit
+  if (mediaInput) {
+    mediaInput.addEventListener('change', () => {
+      selectedMediaFile = mediaInput.files?.[0] || null
+
+      if (!previewEl) return
+
+      previewEl.innerHTML = ''
+      previewEl.style.display = 'none'
+
+      if (!selectedMediaFile) return
+
+      const isVideo = selectedMediaFile.type.startsWith('video/')
+      const url = URL.createObjectURL(selectedMediaFile)
+
+      previewEl.style.display = 'block'
+      const previewMaxH = 100
+      previewEl.innerHTML = `
+        <div class="post-media-preview-meta" style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="post-media-filename" style="max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          ${selectedMediaFile.name}
+          </span>
+          <button type="button" class="post-media-remove" id="postMediaRemoveBtn">Remove</button>
+        </div>
+
+        <div style="
+          margin-top:8px;
+          width:100%;
+          max-height:${previewMaxH}px;
+          overflow:hidden;
+          border-radius:12px;
+          background: rgba(0,0,0,0.04);
+        ">
+        ${
+          isVideo
+            ? `<video style="width:100%; height:${previewMaxH}px; object-fit:cover; display:block;" muted controls src="${url}"></video>`
+            : `<img style="width:100%; height:${previewMaxH}px; object-fit:cover; display:block;" src="${url}" alt="Selected media" />`
+        }
+      </div>
+    `
+
+      document.getElementById('postMediaRemoveBtn')?.addEventListener('click', () => {
+        resetMediaUI()
+      })
+    })
+  }
 
   submitBtn.addEventListener('click', async (event) => {
     event.preventDefault()
+    event.stopPropagation()
 
     const caption = contentInput.value.trim()
     const tagsRaw = tagsInput.value.trim()
-    const tab = tabSelect.value          // fanworks / wiki / forum
-    const type = typeSelect.value        // your dropdown value
+    const tab = tabSelect.value
+    const type = typeSelect.value
     const contentId = CONTENT_ID_MAP[tab]?.[type]
+
     if (!contentId) {
       alert('Invalid content type selected')
       return
@@ -370,7 +553,6 @@ function setupPostModal () {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
           ...authHeaders(),
         },
         body: JSON.stringify({
@@ -378,170 +560,178 @@ function setupPostModal () {
           fandomId,
           parentId: null,
           contentId,
-          postType: 'normal',     // Always use 'normal' for regular posts, 'poll' for polls
+          postType: 'normal',
         }),
       })
+
       const post = await res.json()
       if (!res.ok) throw new Error(post?.error || 'Create post failed')
 
-      // 2) Turn “type” into a hashtag too (optional but nice)
-      //    Example: "Fanfiction" or "#Fanfiction" → "Fanfiction"
-      const autoTag = String(type || '').replace(/^#/, '').trim()
+      const createdPostId = post.postId ?? post.post_id ?? post.id
 
-      // 3) Parse user tags "#a #b,c" → ["a","b","c"]
-      const tagList = []
-      if (autoTag) tagList.push(autoTag)
+      // 2) Hashtags attach (your existing logic)
+      const tagSet = new Set()
+      const branchName = String(type || '').replace(/^#/, '').trim().toLowerCase()
 
       if (tagsRaw) {
-        const cleaned = tagsRaw
+        tagsRaw
           .split(/[\s,]+/)
           .map(t => t.replace(/^#/, '').trim())
+          .filter(t => t && t.toLowerCase() !== branchName)
           .filter(Boolean)
-        tagList.push(...cleaned)
+          .forEach(t => tagSet.add(t))
       }
 
-      // 4) Find-or-create hashtags, then attach to post
+      const tagList = [...tagSet]
+
       for (const tag of tagList) {
         const hRes = await fetch('/api/hashtags/find-or-create', {
           method: 'POST',
-          redirect: 'manual',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             ...authHeaders(),
           },
           body: JSON.stringify({ tag }),
         })
 
-        if (!hRes.ok) {
-          console.warn(`Failed to find/create hashtag "${tag}":`, hRes.status)
-          continue
-        }
+        const hashtag = await hRes.json().catch(() => ({}))
+        if (!hRes.ok) continue
 
-        const hashtag = await hRes.json()
-        await fetch(`/posts/${post.postId || post.id}/hashtags`, {
+        const hashtagId = hashtag.hashtagId ?? hashtag.id ?? hashtag.hashtag?.id
+        if (!hashtagId) continue
+
+        await fetch(`/api/posts/${createdPostId}/hashtags`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             ...authHeaders(),
           },
-          body: JSON.stringify({ hashtagId: hashtag.hashtagId || hashtag.id }),
+          body: JSON.stringify({ hashtagId }),
         })
       }
 
-      // 5) Update UI: either prepend, or reload feed
-      // If you already render posts via JS, prepend. If not, reload.
-      if (typeof window.prependPostToFeed === 'function') {
-        window.prependPostToFeed(post)
-      } else {
-        // fallback: reload current feed if you have a load function
-        if (typeof window.loadFandomFeed === 'function') {
-          window.loadFandomFeed(fandomId)
-        } else {
-          // worst-case fallback
-          location.reload()
-        }
+      // 3) ✅ Upload media if selected
+      if (selectedMediaFile) {
+        const fd = new FormData()
+        fd.append('media', selectedMediaFile)
+
+        const mRes = await fetch(`/api/posts/${createdPostId}/media`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            ...authHeaders(),
+          },
+          body: fd,
+        })
+
+        const mJson = await mRes.json().catch(() => ({}))
+        if (!mRes.ok) throw new Error(mJson?.error || 'Upload media failed')
       }
 
-      const feed = document.getElementById('feedSection')
-      if (feed) {
-        const loading = feed.querySelector('.feed-loading')
-        if (loading) loading.remove()
-        feed.insertAdjacentHTML('afterbegin', renderPostCard(post))
-      }
-      
+      await loadFeed().catch(console.error)
       closePostModal()
     } catch (err) {
       alert(err.message)
     }
   })
+
+  // Optional: block unexpected form submit
+  document.addEventListener('submit', (e) => {
+    if (e.target.closest('#postModal')) {
+      console.warn('🚫 blocked unexpected form submit from post modal')
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  })
 }
 
-// ===== LIKE BUTTON LOGIC =====
-document.addEventListener('DOMContentLoaded', () => {
-  let currentUser = null
-  const rawUser = localStorage.getItem('currentUser')
-  if (rawUser) {
-    try {
-      currentUser = JSON.parse(rawUser)
-    } catch (e) {
-      console.warn('Failed to parse currentUser', e)
-    }
+
+// ===== LIKE BUTTON LOGIC (token-based + delegated) =====
+document.addEventListener('click', async (event) => {
+  const btn = event.target.closest('.post-like-btn')
+  if (!btn) return
+
+  event.preventDefault()
+
+  // token-based login check
+  const accessToken = localStorage.getItem('accessToken')
+  window.IS_LOGGED_IN = !!accessToken
+
+  if (!accessToken) {
+    // you can optionally trigger your login modal here based on:
+    // btn.dataset.requiresAuth / btn.dataset.authMode
+    return
   }
 
-  const likeButtons = document.querySelectorAll('.post-like-btn')
-  if (!likeButtons.length) return
+  const url = btn.dataset.likeUrl
+  const postIdRaw = btn.dataset.postId
+  const postId = Number(postIdRaw)
 
-  likeButtons.forEach((btn) => {
-    btn.addEventListener('click', async (event) => {
-      event.preventDefault()
+  if (!url || !postIdRaw || Number.isNaN(postId)) {
+    console.warn('Missing/invalid data-like-url or data-post-id on like button')
+    return
+  }
 
-      if (!window.IS_LOGGED_IN || !currentUser) {
-        return
-      }
+  const iconEl = btn.querySelector('.post-like-icon')
+  const countEl = btn.querySelector('.post-like-count')
 
-      const url = btn.dataset.likeUrl
-      const postId = btn.dataset.postId
-      if (!url || !postId) {
-        console.warn('Missing data-like-url or data-post-id on like button')
-        return
-      }
+  const wasLiked = btn.dataset.liked === 'true'
+  const currentCount = Number.parseInt(countEl?.textContent || '0', 10) || 0
 
-      const userId = currentUser.userId ?? currentUser.user_id
-      if (!userId) {
-        console.warn('No userId found in currentUser')
-        return
-      }
+  // optimistic UI
+  if (iconEl) iconEl.textContent = wasLiked ? '♡' : '♥'
+  btn.dataset.liked = wasLiked ? 'false' : 'true'
+  if (countEl) {
+    countEl.textContent = String(wasLiked ? Math.max(0, currentCount - 1) : currentCount + 1)
+  }
 
-      const iconEl = btn.querySelector('.post-like-icon')
-      const countEl = btn.querySelector('.post-like-count')
-
-      const wasLiked = btn.dataset.liked === 'true'
-      let currentCount = 0
-      if (countEl) {
-        const parsed = parseInt(countEl.textContent || '0', 10)
-        currentCount = Number.isNaN(parsed) ? 0 : parsed
-      }
-
-      // optimistic UI
-      if (iconEl) iconEl.textContent = wasLiked ? '♡' : '♥'
-      btn.dataset.liked = wasLiked ? 'false' : 'true'
-      if (countEl) {
-        const newCount = wasLiked ? Math.max(0, currentCount - 1) : currentCount + 1
-        countEl.textContent = String(newCount)
-      }
-
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'text/html,application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            userId: userId,
-            postId: Number(postId),
-          }),
-        })
-
-        if (!res.ok) {
-          console.warn('Like failed with status', res.status)
-          // revert optimistic UI
-          btn.dataset.liked = wasLiked ? 'true' : 'false'
-          if (iconEl) iconEl.textContent = wasLiked ? '♥' : '♡'
-          if (countEl) countEl.textContent = String(currentCount)
-          return
-        }
-
-        // res.ok → keep optimistic UI, no need to read body
-      } catch (err) {
-        console.error('Like request failed:', err)
-        btn.dataset.liked = wasLiked ? 'true' : 'false'
-        if (iconEl) iconEl.textContent = wasLiked ? '♥' : '♡'
-        if (countEl) countEl.textContent = String(currentCount)
-      }
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ post_id: Number(postId) }),
     })
-  })
+
+    if (!res.ok) {
+      console.warn('Like failed with status', res.status)
+
+      // If token expired / invalid
+      if (res.status === 401) {
+        // optional: clear token so UI updates properly next time
+        // localStorage.removeItem('accessToken')
+        // window.IS_LOGGED_IN = false
+      }
+
+      // revert optimistic UI
+      btn.dataset.liked = wasLiked ? 'true' : 'false'
+      if (iconEl) iconEl.textContent = wasLiked ? '♥' : '♡'
+      if (countEl) countEl.textContent = String(currentCount)
+      return
+    }
+
+    // If your backend returns JSON like { liked: true/false, likeCount: number }
+    const data = await res.json().catch(() => null)
+    if (data && typeof data.liked === 'boolean') {
+      btn.dataset.liked = data.liked ? 'true' : 'false'
+      if (iconEl) iconEl.textContent = data.liked ? '♥' : '♡'
+    }
+    if (data && typeof data.likeCount === 'number' && countEl) {
+      countEl.textContent = String(data.likeCount)
+    }
+  } catch (err) {
+    console.error('Like request failed:', err)
+
+    // revert optimistic UI
+    btn.dataset.liked = wasLiked ? 'true' : 'false'
+    if (iconEl) iconEl.textContent = wasLiked ? '♥' : '♡'
+    if (countEl) countEl.textContent = String(currentCount)
+  }
 })

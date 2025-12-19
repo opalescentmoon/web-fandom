@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
 
-  <body class="profile-page-body">
+  <body class="profile-page-body" data-user-id="">
     <!-- Top red header -->
     <header class="profile-header">
       <button class="icon-button" id="profileBackButton">
@@ -37,16 +37,64 @@
               <span>XX Following</span>
             </div>
 
-            <p class="profile-bio">
-              Bio Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-              do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
+            <p class="profile-bio" data-bio>Bio ...</p>
           </div>
         </section>
 
         <!-- Posts list -->
-        <section class="profile-posts">
-          <!-- Post 1: Announcement style -->
+        <section id="profileFeed" class="feed-section">
+          <div class="feed-loading">Loading posts...</div>
+        </section>
+      </section>
+
+      <!-- Right sidebar: fandoms + tags -->
+      <aside class="profile-sidebar">
+        <section class="profile-sidebar-section">
+          <h3>Fandoms</h3>
+          <ul id="joinedFandomsList">
+            <li class="muted">Loading...</li>
+          </ul>
+        </section>
+
+      <section class="profile-sidebar-section">
+          <div class="filter-section">
+          <h4>Filter by Branch</h4>
+          <ul class="filter-list">
+            <li><a href="#" class="js-branch" data-branch="Fanfiction">#Fanfiction</a></li>
+            <li><a href="#" class="js-branch" data-branch="Fanart">#Fanart</a></li>
+            <li><a href="#" class="js-branch" data-branch="Fanmerch">#Merch</a></li>
+            <li><a href="#" class="js-branch" data-branch="QnA">#QnA</a></li>
+            <li><a href="#" class="js-branch" data-branch="Polls">#Polls</a></li>
+            <li><a href="#" class="js-branch" data-branch="Discussion">#Discussion</a></li>
+            <li><a href="#" class="js-branch" data-branch="Announcement">Announcement</a></li>
+            <li><a href="#" class="js-branch" data-branch="Lore">Lore</a></li>
+            <li><a href="#" class="js-branch" data-branch="World">World</a></li>
+          </ul>
+        </div>
+      </section>
+      </aside>
+    </div>
+
+<script >
+// Back button: behave like chat page
+const profileBackBtn = document.getElementById('profileBackButton')
+if (profileBackBtn) {
+  profileBackBtn.addEventListener('click', () => {
+    if (window.history.length > 1) {
+      window.history.back()
+    } else {
+      window.location.href = '/'
+    }
+  })
+} 
+</script> 
+<script src="/js/script_fandom.js"></script>
+<script src="/js/script_profile.js"></script>
+    
+</body>
+</html>
+
+ <!-- Post 1: Announcement style 
           <article class="post-card">
             <header class="post-header">
               <div class="post-user">
@@ -72,7 +120,7 @@
             </footer>
           </article>
 
-          <!-- Post 2: Wiki-style -->
+          Post 2: Wiki-style 
           <article class="post-card">
             <header class="post-header">
               <div class="post-user">
@@ -99,89 +147,4 @@
                 <button>↻</button>
               </div>
             </footer>
-          </article>
-        </section>
-      </section>
-
-      <!-- Right sidebar: fandoms + tags -->
-      <aside class="profile-sidebar">
-        <section class="profile-sidebar-section">
-          <h3>Fandoms</h3>
-          <ul>
-            <li><a href="#">Fandom name</a></li>
-            <li><a href="#">Fandom name</a></li>
-            <li><a href="#">Fandom name</a></li>
-          </ul>
-        </section>
-
-        <section class="profile-sidebar-section">
-          <h3>Tags</h3>
-          <ul>
-            <li><a href="#">#Fanfic</a></li>
-            <li><a href="#">#Discussion</a></li>
-            <li><a href="#">#Poll</a></li>
-          </ul>
-        </section>
-      </aside>
-    </div>
-
-    <script>
-
-
-      // Back button: behave like chat page
-      const profileBackBtn = document.getElementById('profileBackButton')
-      if (profileBackBtn) {
-        profileBackBtn.addEventListener('click', () => {
-          if (window.history.length > 1) {
-            window.history.back()
-          } else {
-            window.location.href = '/'
-          }
-        })
-      }
-
- const token = localStorage.getItem('accessToken')
-      window.IS_LOGGED_IN = !!token
-
-      
-;(function () {
-  const token = localStorage.getItem('accessToken')
-  window.IS_LOGGED_IN = !!token
-
-  const displayNameEl = document.querySelector('[data-display-name]')
-  const usernameEl = document.querySelector('[data-username]')
-
-  let currentUser = null
-  const rawUser = localStorage.getItem('currentUser')
-  if (rawUser) {
-    try {
-      currentUser = JSON.parse(rawUser)
-    } catch (e) {
-      console.warn('Failed to parse currentUser from localStorage', e)
-    }
-  }
-
-  if (!window.IS_LOGGED_IN || !currentUser) {
-    // optional: redirect guests away from profile
-    // window.location.href = '/'
-    return
-  }
-
-  const displayName =
-    currentUser.display_name ||
-    currentUser.displayName ||
-    currentUser.user_name ||
-    currentUser.username ||
-    'User'
-
-  const username =
-    currentUser.user_name ||
-    currentUser.username ||
-    ''
-
-  if (displayNameEl) displayNameEl.textContent = displayName
-  if (usernameEl) usernameEl.textContent = username ? '@' + username : ''
-})()
-    </script>
-  </body>
-</html>
+          </article>-->

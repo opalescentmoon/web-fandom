@@ -36,45 +36,46 @@
 
   @slot('filter')
   <div class="filter-section">
-    <h4>Filter by Tags</h4>
-    <p class="filter-static-link">Announcement</p>
+    <h4>Filter by Branch</h4>
+    <p class="filter-static-link">
+      <a href="#" class="js-branch" data-branch="Announcement">Announcement</a>
+    </p>
   </div>
 
   <!-- Lore collapsible -->
   <div class="filter-section">
-    <button
-      class="collapse-header"
+    <a
+      class="collapse-header js-branch"
       type="button"
+      data-branch="Lore"
       data-collapse-target="lore-list"
     >
       <span>Lore</span>
       <span class="collapse-chevron">▾</span>
-    </button>
+    </a>
 
     <ul id="lore-list" class="collapse-body">
-      <li><a href="#">Characters</a></li>
-      <li><a href="#">Stories</a></li>
-      <li><a href="#">Lore detail</a></li>
+      <li class="muted">Loading...</li>
     </ul>
   </div>
 
   <!-- World collapsible -->
   <div class="filter-section">
-    <button
-      class="collapse-header"
+    <a
+      class="collapse-header js-branch"
       type="button"
+      data-branch="Worldbuilding"
       data-collapse-target="world-list"
     >
       <span>World</span>
       <span class="collapse-chevron">▾</span>
-    </button>
+    </a>
 
     <ul id="world-list" class="collapse-body">
-      <li><a href="#">World map</a></li>
-      <li><a href="#">Locations</a></li>
-      <li><a href="#">World building</a></li>
+      <li class="muted">Loading...</li>
     </ul>
   </div>
+<script src="/js/script_wiki.js"></script>
 @endslot
 
 @end

@@ -17,6 +17,7 @@
     data-is-logged-in="{{ user ? 'true' : 'false' }}"
     data-initial-has-joined="{{ hasJoined ? 'true' : 'false' }}"
     data-active-tab="{{ activeTab ?? 'fanworks' }}"
+    data-is-search="{{ $props.isSearch ? 'true' : 'false' }}"
     >
     <!-- Top red header -->
     <header class="fandom-header">
@@ -45,7 +46,7 @@
             </a>
         </button>
         <button class="sidebar-icon">
-            <a href="/search?tab={{ $props.activeTab || 'fanworks' }}&fandom_name={{ encodeURIComponent($props.fandomName) }}">
+            <a href="/search?tab={{ $props.activeTab || 'fanworks' }}&fandomId={{ $props.fandomId }}&fandom_name={{ encodeURIComponent($props.fandomName) }}">
             <img src="/images/loupe.png" alt="Search" width="24" height="24" />
             </a>
         </button>
@@ -70,7 +71,7 @@
         <nav class="fandom-tabs">
           <a
             href="{{ isSearch 
-            ? '/search?tab=fanworks&slug=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '') 
+            ? '/search?tab=fanworks&fandomId=' + $props.fandomId + '&fandom_name=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '')
             : '/fanworks?fandom_name=' + encodeURIComponent($props.fandomName) }}"
             class="fandom-tab {{ $props.activeTab === 'fanworks' ? 'is-active' : '' }}"
           >
@@ -78,7 +79,7 @@
           </a>
           <a
             href="{{ isSearch 
-            ? '/search?tab=wiki&slug=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '') 
+            ? '/search?tab=wiki&fandomId=' + $props.fandomId + '&fandom_name=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '')
             : '/wiki?fandom_name=' + encodeURIComponent($props.fandomName)}}"
             class="fandom-tab {{ $props.activeTab === 'wiki' ? 'is-active' : '' }}"
           >
@@ -86,7 +87,7 @@
           </a>
           <a
             href="{{ isSearch 
-            ? '/search?tab=forum&slug=' + slug + '&q=' + encodeURIComponent(currentQuery || '') 
+            ? '/search?tab=forum&fandomId=' + $props.fandomId + '&fandom_name=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '')
             : '/forum?fandom_name=' + encodeURIComponent($props.fandomName) }}"
             class="fandom-tab {{ $props.activeTab === 'forum' ? 'is-active' : '' }}"
           >
@@ -139,6 +140,8 @@
           class="post-content-input"
           placeholder="Share with the fandom..."
         ></textarea>
+        <div id="postMediaPreview" class="post-media-preview" style="display:none"></div>
+
 
         <div class="post-tags-input">
           <label for="postTags">Tags:</label>
@@ -152,9 +155,16 @@
 
       <footer class="post-modal-footer">
         <div class="post-actions-left">
+          
           <button type="button" class="icon-button post-icon-btn" id="postImageBtn" title="Add image">
             📷
           </button>
+          <input
+            type="file"
+            id="postMediaInput"
+            accept="image/*,video/*"
+            style="display:none"
+          />
           <button type="button" class="icon-button post-icon-btn" id="postPollBtn" title="Create poll">
             📊
           </button>

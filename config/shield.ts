@@ -21,9 +21,19 @@ const shieldConfig = defineConfig({
       // '/auth/login',
       // '/auth/register',
       // '/auth/logout',
+      '/api/*',
+
+
+
+      '/api/likes/toggle',
+
+      '/api/hashtags/find-or-create',
+      '/api/posts/:postId/hashtags',
 
       '/api/posts',
       '/api/posts/*',
+
+      '/api/posts/:postId/media',
 
       '/api/fandom/join',
       '/api/fandom/create',
