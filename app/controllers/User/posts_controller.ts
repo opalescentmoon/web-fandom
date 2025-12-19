@@ -155,12 +155,8 @@ export default class PostsController {
       const { tab, branch } = request.qs()
 
       let userId: number | null = null
-      try {
-        await auth.check() // if Authorization header exists + valid → auth.user filled
-        userId = auth.user?.userId ?? null
-      } catch {
-        userId = null
-      }
+      const ok = await auth.check()
+      if (ok && auth.user) userId = auth.user.userId
 
       const posts = await this.postService.getPostsByFandom(fandomId, tab, branch, userId)
       return response.ok(posts)

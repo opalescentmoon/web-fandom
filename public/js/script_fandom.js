@@ -145,6 +145,25 @@ function renderPostCard (p) {
     }
     return `<img class="post-media" src="${url}" alt="Post media" />`
   }).join('')
+  const poll = p.poll
+  const myVoted = poll?.myVotedOptionId
+  const pollHtml = poll?.options?.length
+    ? `
+      <div class="poll-box" data-poll-id="${poll.id}" data-voted="${myVoted ? 'true' : 'false'}">
+        ${poll.options.map((o) => `
+          <button type="button"
+            class="poll-option-btn ${Number(myVoted) === Number(o.id) ? 'is-selected' : ''}"
+            data-option-id="${o.id}"
+            ${myVoted ? 'disabled' : ''}
+          >
+            <span class="poll-option-text">${o.optionText}</span>
+            <span class="poll-option-votes">${o.votes}</span>
+          </button>
+        `).join('')}
+      </div>
+    `
+    : ''
+
 
   return `
     <article class="post-card" data-post-id="${postId}">
@@ -160,6 +179,7 @@ function renderPostCard (p) {
 
       <main class="post-body">
         <p>${escapeHtml(caption)}</p>
+        ${pollHtml}
         ${mediaHtml}
       </main>
 
@@ -201,9 +221,10 @@ async function loadFeed () {
   const accessToken = localStorage.getItem('accessToken')
 
   const res = await fetch(`/api/posts/fandom/${fandomId}?${params}`, {
-    headers: accessToken
-      ? { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
-      : { 'Accept': 'application/json' },
+    headers: {
+      'Accept': 'application/json',
+      ...(window.IS_LOGGED_IN ? authHeaders() : {}),
+    },
   })
 
   const posts = await res.json()
@@ -287,7 +308,6 @@ async function loadTrendingHashtags() {
   }
 }
 
-
 async function fetchJoinStatus(fandomId) {
   const res = await fetch(`/api/fandom/join-status?fandomId=${fandomId}`, {
     headers: { Accept: 'application/json', ...authHeaders() },
@@ -296,6 +316,108 @@ async function fetchJoinStatus(fandomId) {
   const data = await res.json().catch(() => ({}))
   return !!data.hasJoined
 }
+
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.poll-option-btn')
+  if (!btn) return
+  if (!window.IS_LOGGED_IN) return
+
+  const box = btn.closest('.poll-box')
+  if (!box) return
+
+  // prevent double click / spam while waiting
+  if (box.dataset.voting === 'true' || box.dataset.voted === 'true') return
+
+  const pollId = Number(box.dataset.pollId)
+  const pollOptionId = Number(btn.dataset.optionId)
+  if (!pollId || !pollOptionId) return
+
+  // Snapshot current UI (so we can revert if API fails)
+  const buttons = Array.from(box.querySelectorAll('.poll-option-btn'))
+  const prevTexts = buttons.map((b) => ({
+    id: Number(b.dataset.optionId),
+    text: b.querySelector('.poll-option-votes')?.textContent ?? '',
+  }))
+
+  // lock UI while voting (prevents “freeze” flicker)
+  box.dataset.voting = 'true'
+  buttons.forEach((b) => {
+    b.disabled = true
+    b.style.opacity = '0.85'
+    b.style.cursor = 'default'
+  })
+
+  try {
+    const res = await fetch('/api/poll/vote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ pollId, pollOptionId }),
+    })
+
+    const json = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      // restore UI if vote failed (eg already voted)
+      buttons.forEach((b) => {
+        const id = Number(b.dataset.optionId)
+        const prev = prevTexts.find((x) => x.id === id)
+        const voteEl = b.querySelector('.poll-option-votes')
+        if (voteEl && prev) voteEl.textContent = prev.text
+      })
+      box.dataset.voting = 'false'
+      // keep disabled if user already voted (twitter style)
+      if (String(json?.error || '').toLowerCase().includes('already voted')) {
+        box.dataset.voted = 'true'
+        return
+      }
+      // otherwise allow retry
+      buttons.forEach((b) => (b.disabled = false))
+      return
+    }
+
+    // ✅ success: update counts from server response
+    const countsArr = Array.isArray(json.counts) ? json.counts : []
+    const countsMap = new Map(countsArr.map((c) => [Number(c.optionId), Number(c.total)]))
+    const totalVotes =
+      Number(json.totalVotes) ||
+      Array.from(countsMap.values()).reduce((a, b) => a + b, 0)
+
+    buttons.forEach((b) => {
+      const id = Number(b.dataset.optionId)
+      const votes = countsMap.get(id) || 0
+
+      // if you want percentage:
+      const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0
+
+      const voteEl = b.querySelector('.poll-option-votes')
+      //if (voteEl) voteEl.textContent = `${votes} • ${pct}%`
+      // if you DON’T want percentage, replace line above with:
+      if (voteEl) voteEl.textContent = String(votes)
+    })
+    buttons.forEach((b) => b.classList.remove('is-selected'))
+    btn.classList.add('is-selected')
+    box.dataset.voted = 'true'
+    box.dataset.voting = 'false'
+    // keep disabled permanently after successful vote (twitter feel)
+  } catch (err) {
+    console.error(err)
+    // revert UI and re-enable
+    buttons.forEach((b) => {
+      const id = Number(b.dataset.optionId)
+      const prev = prevTexts.find((x) => x.id === id)
+      const voteEl = b.querySelector('.poll-option-votes')
+      if (voteEl && prev) voteEl.textContent = prev.text
+      b.disabled = false
+      b.style.opacity = ''
+      b.style.cursor = ''
+    })
+    box.dataset.voting = 'false'
+  }
+})
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupBranchFilterToggle()
@@ -405,6 +527,13 @@ function setupPostModal () {
   const imageBtn = document.getElementById('postImageBtn')
   const previewEl = document.getElementById('postMediaPreview')
 
+  const pollBtn = document.getElementById('postPollBtn')
+  const pollBuilder = document.getElementById('pollBuilder')
+  const pollOptionsWrap = document.getElementById('pollOptionsWrap')
+  const pollAddOptionBtn = document.getElementById('pollAddOptionBtn')
+  const pollRemoveOptionBtn = document.getElementById('pollRemoveOptionBtn')
+
+
   if (!overlay || !modal || !tabSelect || !typeSelect || !contentInput || !tagsInput || !submitBtn) {
     return
   }
@@ -434,10 +563,54 @@ function setupPostModal () {
     }
   }
 
+  const POLLS_CONTENT_ID = 8
+  const POLL_MIN = 2
+  const POLL_MAX = 4
+
+  function getSelectedContentId () {
+    const tab = tabSelect.value
+    const type = typeSelect.value
+    return Number(CONTENT_ID_MAP[tab]?.[type])
+  }
+
+  function isPollBranchSelected () {
+    return tabSelect.value === 'forum' && getSelectedContentId() === POLLS_CONTENT_ID
+  }
+
+  function setPollUIVisible (show) {
+    if (!pollBuilder) return
+    pollBuilder.style.display = show ? 'block' : 'none'
+  }
+
+  function resetPollInputs () {
+    if (!pollOptionsWrap) return
+    pollOptionsWrap.innerHTML = `
+      <input class="poll-option-input" type="text" placeholder="Option 1" />
+      <input class="poll-option-input" type="text" placeholder="Option 2" />
+    `
+  }
+
+  function updatePollAvailability () {
+    if (!pollBtn) return
+
+    const ok = isPollBranchSelected()
+    pollBtn.disabled = !ok
+    pollBtn.style.opacity = ok ? '1' : '0.35'
+    pollBtn.style.cursor = ok ? 'pointer' : 'not-allowed'
+
+    if (!ok) {
+      setPollUIVisible(false)
+    }
+  }
+
   function openPostModal (tab) {
     const chosenTab = tab || initialTab || 'fanworks'
     tabSelect.value = chosenTab
     fillTypeOptions(chosenTab)
+
+    updatePollAvailability()
+    resetPollInputs()
+    setPollUIVisible(false)
 
     overlay.classList.add('is-visible')
 
@@ -457,7 +630,15 @@ function setupPostModal () {
 
   tabSelect.addEventListener('change', () => {
     fillTypeOptions(tabSelect.value)
+    updatePollAvailability()
   })
+
+  typeSelect.addEventListener('change', () => {
+    updatePollAvailability()
+  })
+
+  updatePollAvailability()
+  resetPollInputs()
 
   if (closeBtn) {
     closeBtn.addEventListener('click', (e) => {
@@ -526,6 +707,47 @@ function setupPostModal () {
     })
   }
 
+  if (pollBtn) {
+    pollBtn.addEventListener('click', () => {
+      if (!isPollBranchSelected()) return
+      const isOpen = pollBuilder?.style.display === 'block'
+      if (isOpen) {
+        setPollUIVisible(false)
+      } else {
+        resetPollInputs()
+        setPollUIVisible(true)
+      }
+    })
+  }
+
+  function getPollOptions () {
+    if (!pollOptionsWrap) return []
+    return Array.from(pollOptionsWrap.querySelectorAll('.poll-option-input'))
+      .map((i) => i.value.trim())
+      .filter(Boolean)
+  }
+
+  pollAddOptionBtn?.addEventListener('click', () => {
+    if (!pollOptionsWrap) return
+    const inputs = pollOptionsWrap.querySelectorAll('.poll-option-input')
+    if (inputs.length >= POLL_MAX) return
+
+    const nextIndex = inputs.length + 1
+    const inp = document.createElement('input')
+    inp.className = 'poll-option-input'
+    inp.type = 'text'
+    inp.placeholder = `Option ${nextIndex}`
+    pollOptionsWrap.appendChild(inp)
+  })
+
+  pollRemoveOptionBtn?.addEventListener('click', () => {
+    if (!pollOptionsWrap) return
+    const inputs = pollOptionsWrap.querySelectorAll('.poll-option-input')
+    if (inputs.length <= POLL_MIN) return
+    pollOptionsWrap.removeChild(inputs[inputs.length - 1])
+  })
+
+
   submitBtn.addEventListener('click', async (event) => {
     event.preventDefault()
     event.stopPropagation()
@@ -568,6 +790,56 @@ function setupPostModal () {
       if (!res.ok) throw new Error(post?.error || 'Create post failed')
 
       const createdPostId = post.postId ?? post.post_id ?? post.id
+
+      // ✅ If poll, create poll options
+      const isPoll = isPollBranchSelected()
+
+      if (isPoll) {
+        const options = getPollOptions()
+        if (options.length < POLL_MIN) {
+          alert('Poll needs at least 2 options')
+          return
+        }
+        if (options.length > POLL_MAX) {
+          alert('Max 4 options')
+          return
+        }
+
+        // 1) create poll (question copies caption)
+        const pRes = await fetch('/api/poll/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            postId: Number(createdPostId),
+            question: caption,
+          }),
+        })
+
+        const poll = await pRes.json().catch(() => ({}))
+        if (!pRes.ok) throw new Error(poll?.error || 'Create poll failed')
+
+        // 2) add options
+        const oRes = await fetch('/api/poll/options/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            pollId: poll.id,
+            options, // controller expects { pollId, options }
+          }),
+        })
+
+        const oJson = await oRes.json().catch(() => ({}))
+        if (!oRes.ok) throw new Error(oJson?.error || 'Add poll options failed')
+      }
+
 
       // 2) Hashtags attach (your existing logic)
       const tagSet = new Set()
@@ -634,6 +906,8 @@ function setupPostModal () {
 
       await loadFeed().catch(console.error)
       closePostModal()
+      setPollUIVisible(false) 
+      resetPollInputs()
     } catch (err) {
       alert(err.message)
     }

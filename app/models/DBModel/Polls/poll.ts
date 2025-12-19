@@ -10,9 +10,12 @@ export default class Poll extends BaseModel {
   @column({ columnName: 'post_id' })
   declare postId: number
 
-  @belongsTo(() => Post, { foreignKey: 'id' })
+  @column()
+  declare question: string
+
+  @belongsTo(() => Post, { foreignKey: 'postId' })
   public post!: BelongsTo<typeof Post>
 
-  @hasMany(() => PollOption)
-  public pollOption!: HasMany<typeof PollOption>
+  @hasMany(() => PollOption, { foreignKey: 'pollId' })
+  public options!: HasMany<typeof PollOption>
 }

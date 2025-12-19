@@ -16,6 +16,6 @@ export default class PollOption extends BaseModel {
   @column({ columnName: 'option_text' })
   declare optionText: string
 
-  @hasMany(() => PollVote)
-  public pollVote!: HasMany<typeof PollVote>
+  @hasMany(() => PollVote, { foreignKey: 'pollOptionId' })
+  public votes!: HasMany<typeof PollVote>
 }

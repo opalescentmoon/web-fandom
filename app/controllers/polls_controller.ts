@@ -9,8 +9,8 @@ export default class PollsController {
    */
   public async create({ request, response }: HttpContext) {
     try {
-      const { postId } = request.only(['postId'])
-      const poll = await this.pollService.createPoll(postId)
+      const { postId, question } = request.only(['postId', 'question'])
+      const poll = await this.pollService.createPoll(postId, question || '')
       return response.ok(poll)
     } catch (error) {
       return response.badRequest({ error: error.message })
@@ -53,9 +53,9 @@ export default class PollsController {
 
       const { pollId, pollOptionId } = request.only(['pollId', 'pollOptionId'])
 
-      const vote = await this.pollService.votePoll(pollId, user.userId, pollOptionId)
+      const result = await this.pollService.votePoll(pollId, user.userId, pollOptionId)
 
-      return response.ok(vote)
+      return response.ok(result)
     } catch (error) {
       return response.badRequest({ error: error.message })
     }

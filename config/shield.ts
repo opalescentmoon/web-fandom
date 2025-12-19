@@ -19,11 +19,19 @@ const shieldConfig = defineConfig({
     enabled: true,
     exceptRoutes: [
       // '/auth/login',
-      // '/auth/register',
+      '/auth/register',
       // '/auth/logout',
       '/api/*',
 
+      '/api/poll/create',
 
+      '/api/poll/options/add',
+
+      '/api/poll/options/remove',
+
+      '/api/poll/vote',
+
+      '/api/poll/delete',
 
       '/api/likes/toggle',
 

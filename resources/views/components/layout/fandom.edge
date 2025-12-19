@@ -142,6 +142,23 @@
         ></textarea>
         <div id="postMediaPreview" class="post-media-preview" style="display:none"></div>
 
+        <div id="pollBuilder" class="poll-builder" style="display:none;">
+          <div class="poll-builder-head">
+            <div class="poll-builder-title">Poll Options</div>
+            <div class="poll-builder-hint">Min 2, Max 4</div>
+          </div>
+
+          <div id="pollOptionsWrap" class="poll-options-wrap">
+            <input class="poll-option-input" type="text" placeholder="Option 1" />
+            <input class="poll-option-input" type="text" placeholder="Option 2" />
+          </div>
+
+          <div class="poll-builder-actions">
+            <button type="button" id="pollAddOptionBtn" class="poll-add-btn">+ Add option</button>
+            <button type="button" id="pollRemoveOptionBtn" class="poll-remove-btn">Remove last</button>
+          </div>
+        </div>
+
 
         <div class="post-tags-input">
           <label for="postTags">Tags:</label>
