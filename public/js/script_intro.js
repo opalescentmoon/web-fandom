@@ -1,0 +1,337 @@
+
+const sidebar = document.getElementById('introSidebar')
+const toggle = document.getElementById('sidebarToggle')
+const overlay = document.getElementById('introOverlay')
+
+function setSidebarOpen (isOpen) {
+if (!sidebar || !overlay) return
+if (isOpen) {
+sidebar.classList.add('is-open')
+overlay.classList.add('is-visible')
+} else {
+sidebar.classList.remove('is-open')
+overlay.classList.remove('is-visible')
+}
+}
+
+if (toggle) {
+toggle.addEventListener('click', () => {
+const isOpen = sidebar.classList.contains('is-open')
+setSidebarOpen(!isOpen)
+})
+}
+
+if (overlay) {
+overlay.addEventListener('click', () => setSidebarOpen(false))
+}
+
+window.addEventListener('keydown', (event) => {
+if (event.key === 'Escape') {
+setSidebarOpen(false)
+}
+})
+
+// tells JS whether user is logged in (Edge will insert true/false)
+const token = localStorage.getItem('accessToken')
+window.IS_LOGGED_IN = !!token
+
+// ===== SIDEBAR USER DISPLAY & LOGOUT =====
+;(function () {
+const loggedInBox = document.getElementById('sidebarLoggedIn')
+const guestBox = document.getElementById('sidebarGuest')
+const displayNameEl = document.querySelector('[data-display-name]')
+const usernameEl = document.querySelector('[data-username]')
+const logoutLink = document.getElementById('sidebarLogoutLink')
+
+let currentUser = null
+const rawUser = localStorage.getItem('currentUser')
+if (rawUser) {
+try {
+currentUser = JSON.parse(rawUser)
+} catch (e) {
+console.warn('Failed to parse currentUser from localStorage', e)
+}
+}
+
+if (window.IS_LOGGED_IN && currentUser && loggedInBox && guestBox) {
+// Pick display name / username from either snake_case or camelCase
+const displayName =
+currentUser.display_name ||
+currentUser.displayName ||
+currentUser.user_name ||
+currentUser.username ||
+'User'
+
+const username =
+currentUser.user_name ||
+currentUser.username ||
+''
+
+if (displayNameEl) displayNameEl.textContent = displayName
+if (usernameEl) usernameEl.textContent = username ? '@' + username : ''
+
+loggedInBox.style.display = 'block'
+guestBox.style.display = 'none'
+} else {
+// show guest view
+if (loggedInBox) loggedInBox.style.display = 'none'
+if (guestBox) guestBox.style.display = 'block'
+}
+
+// Logout handler: clear token + local user, optionally call backend
+if (logoutLink) {
+logoutLink.addEventListener('click', async (event) => {
+event.preventDefault()
+
+const token = localStorage.getItem('accessToken')
+try {
+if (token) {
+await fetch('/auth/logout', {
+method: 'POST',
+headers: {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/json',
+},
+})
+}
+} catch (err) {
+console.warn('Logout request failed (will still clear local data)', err)
+}
+
+localStorage.removeItem('accessToken')
+localStorage.removeItem('currentUser')
+window.IS_LOGGED_IN = false
+location.reload()
+})
+}
+})()
+
+// ===== AUTH MODAL JS =====
+const authOverlay = document.getElementById('authOverlay')
+const authModal = document.getElementById('authModal')
+const authLogin = document.getElementById('authLogin')
+const authSignup = document.getElementById('authSignup')
+
+function openAuthModal (mode) {
+if (!authModal || !authOverlay) return
+
+authModal.classList.add('is-open')
+authOverlay.classList.add('is-visible')
+
+if (authLogin && authSignup) {
+authLogin.style.display = mode === 'signup' ? 'none' : 'block'
+authSignup.style.display = mode === 'signup' ? 'block' : 'none'
+}
+}
+
+function closeAuthModal () {
+if (!authModal || !authOverlay) return
+authModal.classList.remove('is-open')
+authOverlay.classList.remove('is-visible')
+
+if (authLogin) authLogin.style.display = 'none'
+if (authSignup) authSignup.style.display = 'none'
+}
+
+// open from any element with .js-open-auth
+document.querySelectorAll('.js-open-auth').forEach((btn) => {
+btn.addEventListener('click', (event) => {
+event.preventDefault()
+const mode = btn.getAttribute('data-auth-mode') || 'login'
+openAuthModal(mode)
+})
+})
+
+document.querySelectorAll('.auth-modal-close').forEach((btn) => {
+btn.addEventListener('click', (event) => {
+event.preventDefault()
+closeAuthModal()
+})
+})
+
+if (authModal) {
+authModal.addEventListener('click', (event) => {
+// only close if you clicked the backdrop, not inside the card
+if (event.target === authModal) {
+closeAuthModal()
+}
+})
+}
+
+window.addEventListener('keydown', (event) => {
+if (event.key === 'Escape') {
+closeAuthModal()
+}
+})
+
+// ===== REQUIRE-AUTH CLICK GUARD =====
+document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
+el.addEventListener('click', (event) => {
+if (!window.IS_LOGGED_IN) {
+event.preventDefault()
+const mode = el.getAttribute('data-auth-mode') || 'login'
+openAuthModal(mode)
+}
+})
+})
+
+// filtering fandoms card
+let selectedCategoryId = null
+let currentQuery = ''
+let initialGridHtml = ''
+
+function escapeHtml(str) {
+return String(str || '').replace(/[&<>"']/g, (m) => ({
+'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+}[m]))
+}
+
+function setActive(el, on) {
+if (!el) return
+el.classList.toggle('is-active', !!on)
+}
+
+// Important: prevent 302 redirect issues (same trick you used before)
+async function fetchJson(url) {
+const res = await fetch(url, {
+headers: {
+Accept: 'application/json',
+'X-Requested-With': 'XMLHttpRequest',
+},
+})
+const json = await res.json().catch(() => ({}))
+if (!res.ok) throw new Error(json?.error || `Request failed (${res.status})`)
+return json
+}
+
+function normalizeFandom(item) {
+// supports different shapes from controller
+const fandom = item?.fandom ?? item
+return {
+fandomId: fandom?.fandomId ?? fandom?.fandom_id,
+fandomName: fandom?.fandomName ?? fandom?.fandom_name ?? '',
+categoryId: fandom?.categoryId ?? fandom?.category_id,
+// thumbnail might be preloaded object or direct url
+thumbnailUrl:
+fandom?.thumbnailMedia?.fileUrl ??
+fandom?.thumbnailMedia?.file_url ??
+fandom?.thumbnail_url ??
+null,
+}
+}
+
+function renderFandomCard(f) {
+const name = f.fandomName || 'Fandom'
+const href =
+`/fanworks?fandomId=${encodeURIComponent(f.fandomId || '')}` +
+`&fandom_name=${encodeURIComponent(name)}`
+
+const bg = f.thumbnailUrl
+? `background-image: linear-gradient(to top, rgba(0,0,0,0.35), rgba(0,0,0,0)), url('${escapeHtml(f.thumbnailUrl)}');`
+: `background: #edd4d6;`
+
+return `
+<a href="${href}" class="intro-fandom-card-link">
+<div class="fandom-card" style="${bg}">
+<span class="fandom-card-name">${escapeHtml(name)}</span>
+</div>
+</a>
+`
+}
+
+function renderGrid(items) {
+const grid = document.getElementById('introFandomGrid')
+if (!grid) return
+
+if (!Array.isArray(items) || items.length === 0) {
+grid.innerHTML = `<div class="muted">No fandoms found.</div>`
+return
+}
+
+const fandoms = items.map(normalizeFandom).filter(f => f.fandomName)
+grid.innerHTML = fandoms.map(renderFandomCard).join('')
+}
+
+async function loadFandoms() {
+const q = currentQuery.trim()
+const categoryId = selectedCategoryId
+
+const hasQ = q.length > 0
+const hasCat = categoryId !== null && Number.isFinite(categoryId)
+
+// no filters -> keep SSR list
+if (!hasQ && !hasCat) {
+const grid = document.getElementById('introFandomGrid')
+if (grid) grid.innerHTML = initialGridHtml
+return
+}
+
+let data = []
+
+// 1) If user typed something, search by name first
+if (hasQ) {
+const url = new URL('/api/fandom/name', location.origin)
+url.searchParams.set('q', q)
+data = await fetchJson(url.toString())
+
+} else if (hasCat) {
+const url = new URL('/api/fandom/category', location.origin)
+url.searchParams.set('categoryId', String(categoryId))
+data = await fetchJson(url.toString())
+}
+
+// AND logic if both set
+if (hasQ && hasCat) {
+const normalized = (Array.isArray(data) ? data : []).map(normalizeFandom)
+data = normalized.filter(f => Number(f.categoryId) === Number(categoryId))
+}
+
+renderGrid(data);
+}
+
+function updateCategoryActiveUI() {
+document.querySelectorAll('.js-category[data-category-id]').forEach((a) => {
+const id = Number(a.dataset.categoryId)
+setActive(a, Number.isFinite(selectedCategoryId) && id === selectedCategoryId)
+})
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+const input = document.getElementById('introSearchInput')
+const form = document.getElementById('introSearchForm')
+const grid = document.getElementById('introFandomGrid')
+if (grid) initialGridHtml = grid.innerHTML
+
+// Search typing (debounced)
+let t = null
+if (input) {
+input.addEventListener('input', () => {
+currentQuery = input.value || ''
+clearTimeout(t)
+t = setTimeout(() => {
+loadFandoms().catch(console.error)
+}, 250)
+})
+}
+
+// Prevent submit reload (still allow enter)
+if (form) {
+form.addEventListener('submit', (e) => {
+e.preventDefault()
+currentQuery = input?.value || ''
+loadFandoms().catch(console.error)
+})
+}
+
+// Category toggle
+document.addEventListener('click', (e) => {
+const a = e.target.closest('.js-category[data-category-id]')
+if (!a) return
+e.preventDefault()
+
+const id = Number(a.dataset.categoryId)
+selectedCategoryId = (selectedCategoryId === id) ? null : id
+updateCategoryActiveUI()
+loadFandoms().catch(console.error)
+})
+})
