@@ -1,6 +1,7 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { FandomService } from '#services/fandom_service'
 import { ModService } from '#services/mod_service'
+import Fandom from '#models/DBModel/fandom'
 
 export default class FandomsController {
   private fandomService = new FandomService()
@@ -48,26 +49,30 @@ export default class FandomsController {
    * Get fandoms by category
    */
   public async getByCategory({ request, response }: HttpContext) {
-    try {
-      const { categoryId } = request.only(['categoryId'])
-      const fandoms = await this.fandomService.getFandomByCategory(categoryId)
-      return response.ok(fandoms)
-    } catch (error) {
-      return response.badRequest({ error: error.message })
+    const categoryId = Number(request.input('categoryId'))
+    if (!Number.isFinite(categoryId)) {
+      return response.badRequest({ error: 'Invalid categoryId' })
     }
+
+    const fandoms = await Fandom.query()
+      .where('category_id', categoryId)
+      .preload('thumbnailMedia')
+
+    return response.ok(fandoms)
   }
 
   /**
    * Get fandoms by name
    */
   public async getByName({ request, response }: HttpContext) {
-    try {
-      const { fandomName } = request.only(['fandomName'])
-      const fandoms = await this.fandomService.getFandomByName(fandomName)
-      return response.ok(fandoms)
-    } catch (error) {
-      return response.badRequest({ error: error.message })
-    }
+    const q = String(request.input('q') || '').trim()
+    if (!q) return response.ok([])
+
+    const fandoms = await Fandom.query()
+      .whereILike('fandom_name', `%${q}%`)
+      .preload('thumbnailMedia')
+
+    return response.ok(fandoms)
   }
 
   /**

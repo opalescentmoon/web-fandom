@@ -8,21 +8,27 @@
     </div>
 
     <div class="intro-search-media">
-      <form class="intro-search-bar" method="GET" action="/search">
-        <input type="text" placeholder="Search Fandoms..." />
+      <form id="introSearchForm" class="intro-search-bar">
+        <input
+          id="introSearchInput"
+          type="text"
+          name="q"
+          placeholder="Search Fandoms..."
+          autocomplete="off"
+        />
       </form>
 
       <div class="intro-media-links">
         <h3>Search by Media</h3>
-        <div class="media-links-grid">
-          <a href="#">Anime &amp; Manga</a>
-          <a href="#">Cartoon &amp; Comics</a>
-          <a href="#">Musics</a>
-          <a href="#">Video Games</a>
-          <a href="#">Books &amp; Literature</a>
-          <a href="#">Movies</a>
-          <a href="#">TV Shows</a>
-          <a href="#">Other Media</a>
+        <div class="media-links-grid" id="introMediaGrid">
+          <a href="#" class="js-category" data-category-id="1">Anime &amp; Manga</a>
+          <a href="#" class="js-category" data-category-id="3">Cartoon &amp; Comics</a>
+          <a href="#" class="js-category" data-category-id="5">Musics</a>
+          <a href="#" class="js-category" data-category-id="7">Video Games</a>
+          <a href="#" class="js-category" data-category-id="2">Books &amp; Literature</a>
+          <a href="#" class="js-category" data-category-id="4">Movies</a>
+          <a href="#" class="js-category" data-category-id="6">TV Shows</a>
+          <a href="#" class="js-category" data-category-id="8">Other Media</a>
         </div>
       </div>
     </div>
@@ -30,7 +36,7 @@
 
     <section class="intro-section">
       <h2>EXPLORE</h2>
-      <div class="intro-card-grid">
+      <div class="intro-card-grid" id="introFandomGrid">
         @each(fandom in fandoms)
           <a href="/fanworks?fandom_name={{ encodeURIComponent(fandom.fandomName) }}"
            class="intro-fandom-card-link"
