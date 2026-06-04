@@ -64,8 +64,8 @@ export default class Post extends BaseModel {
     pivotForeignKey: 'post_id',
     pivotRelatedForeignKey: 'hashtag_id',
 
-    localKey: 'postId',               // PK in posts table
-    relatedKey: 'id',                  // PK in hashtags table
+    localKey: 'postId', // PK in posts table
+    relatedKey: 'id', // PK in hashtags table
   })
   public hashtags!: ManyToMany<typeof Hashtag>
 }

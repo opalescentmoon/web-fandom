@@ -12,7 +12,7 @@ export default class Hashtag extends BaseModel {
   @manyToMany(() => Post, {
     pivotTable: 'hashtag_posts',
     pivotForeignKey: 'hashtag_id',
-  pivotRelatedForeignKey: 'post_id',
+    pivotRelatedForeignKey: 'post_id',
 
     localKey: 'id',
     relatedKey: 'postId',

@@ -3,7 +3,10 @@ import hash from '@adonisjs/core/services/hash'
 
 export class UserService {
   // Edit user profile (bio and profile picture)
-  public async editProfile(userId: number, data: { bio?: string; profilePicture?: string }) {
+  public async editProfile(
+    userId: number,
+    data: { displayName?: string; bio?: string; profilePicture?: string }
+  ) {
     const user = await User.findOrFail(userId)
     if (typeof data.bio !== 'undefined') user.bio = data.bio
     if (typeof data.profilePicture !== 'undefined') user.profilePicture = data.profilePicture as any

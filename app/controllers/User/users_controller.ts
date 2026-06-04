@@ -33,7 +33,7 @@ export default class UsersController {
       const user = auth.user
       if (!user) return response.unauthorized({ error: 'Not logged in' })
 
-      const data = request.only(['bio', 'profilePicture'])
+      const data = request.only(['displayName', 'bio', 'profilePicture'])
 
       const updated = await this.userService.editProfile(user.userId, data)
       return response.ok(updated)
