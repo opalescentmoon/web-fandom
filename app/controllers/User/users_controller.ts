@@ -13,8 +13,7 @@ export default class UsersController {
   public async joinedFandoms({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
-    const rows = await Database
-      .from('user_fandom')
+    const rows = await Database.from('user_fandom')
       .join('fandoms', 'fandoms.fandom_id', 'user_fandom.fandom_id')
       .where('user_fandom.user_id', user.userId)
       .select(
@@ -38,7 +37,21 @@ export default class UsersController {
 
       const updated = await this.userService.editProfile(user.userId, data)
       return response.ok(updated)
-    } catch (error) {
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
+    }
+  }
+
+  public async updateUsername({ request, auth, response }: HttpContext) {
+    try {
+      const user = auth.user
+      if (!user) return response.unauthorized({ error: 'Not logged in' })
+
+      const { username } = request.only(['username'])
+
+      const updated = await this.userService.updateUsername(user.userId, username)
+      return response.ok(updated)
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -55,7 +68,7 @@ export default class UsersController {
 
       const updated = await this.userService.updateEmail(user.userId, email)
       return response.ok(updated)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -72,7 +85,7 @@ export default class UsersController {
 
       await this.userService.changePassword(user.userId, newPassword)
       return response.ok({ message: 'Password updated successfully' })
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -87,7 +100,7 @@ export default class UsersController {
 
       const deleted = await this.userService.deleteUser(user.userId)
       return response.ok({ message: 'User deleted', deleted })
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }

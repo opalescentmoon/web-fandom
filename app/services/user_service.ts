@@ -11,6 +11,13 @@ export class UserService {
     return user
   }
 
+  public async updateUsername(userId: number, username: string) {
+    const user = await User.findOrFail(userId)
+    user.username = username
+    await user.save()
+    return user
+  }
+
   public async updateEmail(userId: number, email: string) {
     const user = await User.findOrFail(userId)
     user.email = email
