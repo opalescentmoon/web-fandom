@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Profile</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
 
@@ -26,11 +25,18 @@
       <section class="profile-main">
         <!-- Profile banner -->
         <section class="profile-banner">
-          <div class="profile-avatar"></div>
+          <div class="profile-avatar-wrapper">
+            <div class="profile-avatar" id="profileAvatar">
+              <img id="profileAvatarImg" src="" alt="Profile picture" style="display:none; width:100%; height:100%; border-radius:999px; object-fit:cover;" />
+            </div>
+          </div>
 
           <div class="profile-info-text" id="sidebarLoggedIn">
-            <h1 class="profile-name" data-display-name>Display name</h1>
-            <div class="profile-username" data-username>@Username</div>
+            <div class="profile-name-row">
+              <h1 class="profile-name" data-display-name>Display name</h1>
+              <button class="edit-profile-btn" id="editProfileBtn">Edit Profile</button>
+            </div>
+            <p class="profile-username" data-username>@username</p>
 
             <div class="profile-stats">
               <span>XX Follower</span>
@@ -75,23 +81,61 @@
       </aside>
     </div>
 
-<script >
-// Back button: behave like chat page
-const profileBackBtn = document.getElementById('profileBackButton')
-if (profileBackBtn) {
-  profileBackBtn.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back()
-    } else {
-      window.location.href = '/'
-    }
-  })
-} 
-</script> 
-<script src="/js/script_fandom.js"></script>
-<script src="/js/script_profile.js"></script>
+    <!-- ── Edit Profile Modal ── -->
+    <div class="modal-overlay" id="editProfileModal" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">Edit Profile</h2>
+          <button class="modal-close-btn" id="editProfileClose">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Avatar preview + upload -->
+          <div class="modal-avatar-section">
+            <div class="modal-avatar-preview" id="modalAvatarPreview"></div>
+            <label class="avatar-upload-label" for="avatarFileInput">Change Photo</label>
+            <input type="file" id="avatarFileInput" accept="image/jpg,image/jpeg,image/png,image/gif,image/webp" style="display:none;" />
+          </div>
+
+          <!-- Display name -->
+          <div class="modal-field">
+            <label class="modal-label" for="editDisplayName">Display Name</label>
+            <input class="modal-input" type="text" id="editDisplayName" placeholder="Display name" maxlength="50" />
+          </div>
+
+          <!-- Bio -->
+          <div class="modal-field">
+            <label class="modal-label" for="editBio">Bio</label>
+            <textarea class="modal-input modal-textarea" id="editBio" placeholder="Tell everyone about yourself..." maxlength="200" rows="3"></textarea>
+          </div>
+
+          <div class="modal-error" id="editProfileError" style="display:none;"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="editProfileCancel">Cancel</button>
+          <button class="modal-save-btn" id="editProfileSave">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script >
+    // Back button: behave like chat page
+      const profileBackBtn = document.getElementById('profileBackButton')
+      if (profileBackBtn) {
+        profileBackBtn.addEventListener('click', () => {
+          if (window.history.length > 1) {
+            window.history.back()
+          } else {
+            window.location.href = '/'
+          }
+        })
+      } 
+    </script> 
+    <script src="/js/script_fandom.js"></script>
+    <script src="/js/script_profile.js"></script>
     
-</body>
+  </body>
 </html>
 
  <!-- Post 1: Announcement style 

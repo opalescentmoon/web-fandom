@@ -1,5 +1,7 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { UserService } from '#services/user_service'
+import app from '@adonisjs/core/services/app'
+import { cuid } from '@adonisjs/core/helpers'
 import Database from '@adonisjs/lucid/services/db'
 
 export default class UsersController {
@@ -41,6 +43,26 @@ export default class UsersController {
       return response.badRequest({ error: error.message })
     }
   }
+
+  public async updateProfilePicture({ request, auth, response }: HttpContext) {
+    const user = auth.user
+    if (!user) return response.unauthorized({ error: 'Not logged in' })
+
+    const file = request.file('avatar', {
+      size: '5mb',
+      extnames: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    })
+
+    if (!file) return response.badRequest({ error: 'No file uploaded' })
+
+    const fileName = `${cuid()}.${file.extname}`
+    await file.move(app.makePath('public/uploads/avatars'), { name: fileName })
+
+    const profilePicture = `/uploads/avatars/${fileName}`
+
+    const updated = await this.userService.editProfile(user.userId, { profilePicture })
+    return response.ok(updated)
+}
 
   public async updateUsername({ request, auth, response }: HttpContext) {
     try {

@@ -269,6 +269,7 @@ router
     router.get('/me', [UserController, 'me'])
     router.get('/me/joined-fandoms', [UserController, 'joinedFandoms'])
     router.put('/profile', [UserController, 'editProfile'])
+    router.post('/profile/avatar', [UserController, 'updateProfilePicture'])
     router.put('/username', [UserController, 'updateUsername'])
     router.put('/email', [UserController, 'updateEmail'])
     router.put('/password', [UserController, 'changePassword'])

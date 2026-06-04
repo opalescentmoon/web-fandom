@@ -46,6 +46,9 @@ const shieldConfig = defineConfig({
       '/api/fandom/join',
       '/api/fandom/create',
 
+      '/api/user/profile',
+      '/api/user/profile/avatar',
+
       '/api/likes/*',
       '/api/poll/*',
       '/api/hashtags/*',

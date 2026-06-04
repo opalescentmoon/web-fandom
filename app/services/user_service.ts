@@ -9,6 +9,7 @@ export class UserService {
   ) {
     const user = await User.findOrFail(userId)
     if (typeof data.bio !== 'undefined') user.bio = data.bio
+    if (typeof data.displayName !== 'undefined') user.displayName = data.displayName
     if (typeof data.profilePicture !== 'undefined') user.profilePicture = data.profilePicture as any
     await user.save()
     return user

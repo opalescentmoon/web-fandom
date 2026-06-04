@@ -103,9 +103,13 @@ document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
 
 
 // ===== JOIN / POST BUTTON LOGIC =====
-function authHeaders () {
+function authHeaders() {
   const token = localStorage.getItem('accessToken')
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    'X-CSRF-TOKEN': csrf,
+  }
 }
 
 function escapeHtml (str) {
