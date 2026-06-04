@@ -27,53 +27,53 @@
       <!-- Sidebar -->
       <aside class="intro-sidebar" id="introSidebar">
         
-      <!-- logged in ver -->
-      <div id="sidebarLoggedIn" class="sidebar-logged-in" style="display: none;">
-        <a href="/profile" class="sidebar-profile">
-          <div class="avatar-circle"></div>
-          <div class="profile-text">
-            <div  class="display-name"data-display-name>Display name</div>
-        <div class="username" data-username>@username</div>
-          </div>
-        </a>
+        <!-- logged in ver -->
+        <div id="sidebarLoggedIn" class="sidebar-logged-in" style="display: none;">
+          <a href="/profile" class="sidebar-profile">
+            <div class="avatar-circle"></div>
+            <div class="profile-text">
+              <div  class="display-name"data-display-name>Display name</div>
+          <div class="username" data-username>@username</div>
+            </div>
+          </a>
 
-        <nav class="sidebar-menu">
-          <a href="/profile" class="sidebar-link" data-requires-auth="true">Profile</a>
-          <a href="/chats" class="sidebar-link" data-requires-auth="true">Chats</a>
-          <a href="#" class="sidebar-link">Follower Request</a>
-          <a href="#" class="sidebar-link">Settings</a>
-          <a href="#" class="sidebar-link sidebar-link-danger" id="sidebarLogoutLink">Log Out</a>
-        </nav>
+          <nav class="sidebar-menu">
+            <a href="/profile" class="sidebar-link" data-requires-auth="true">Profile</a>
+            <a href="/chats" class="sidebar-link" data-requires-auth="true">Chats</a>
+            <a href="#" class="sidebar-link">Follower Request</a>
+            <a href="#" class="sidebar-link">Settings</a>
+            <a href="#" class="sidebar-link sidebar-link-danger" id="sidebarLogoutLink">Log Out</a>
+          </nav>
+        </div>
+        
+        <!-- guest ver -->
+        <div id="sidebarGuest" class="sidebar-guest">
+        <p class="sidebar-hello">Hi there! ヾ(｡･▽･｡)</p>
+        <p>Welcome to Space.</p>
+
+        <p class="sidebar-guest-text">
+          <a class="sidebar-link-accent js-open-auth" data-auth-mode="login">Log in</a>
+          to interact with your fandom!
+        </p>
+
+        <p class="sidebar-guest-text">
+          No account yet?<br />
+          <a class="auth-inline-link js-open-auth sidebar-link-accent"
+          data-auth-mode="signup">Create one now.</a>
+        </p>
       </div>
-      
-      <!-- guest ver -->
-      <div id="sidebarGuest" class="sidebar-guest">
-      <p class="sidebar-hello">Hi there! ヾ(｡･▽･｡)</p>
-      <p>Welcome to Space.</p>
-
-      <p class="sidebar-guest-text">
-        <a class="sidebar-link-accent js-open-auth" data-auth-mode="login">Log in</a>
-        to interact with your fandom!
-      </p>
-
-      <p class="sidebar-guest-text">
-        No account yet?<br />
-        <a class="auth-inline-link js-open-auth sidebar-link-accent"
-         data-auth-mode="signup">Create one now.</a>
-      </p>
-    </div>
       
     </aside>
       
 
-      <!-- Dark overlay behind sidebar -->
-      <div class="intro-overlay" id="introOverlay"></div>
+    <!-- Dark overlay behind sidebar -->
+    <div class="intro-overlay" id="introOverlay"></div>
 
-      <!-- Main content -->
-      <main class="intro-main">
-        {{{ await $slots.main() }}}
-      </main>
-    </div>
+    <!-- Main content -->
+    <main class="intro-main">
+      {{{ await $slots.main() }}}
+    </main>
+  </div>
 
     @include('components/auth_modal')
 
