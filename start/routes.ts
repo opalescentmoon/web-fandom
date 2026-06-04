@@ -32,17 +32,14 @@ router.get('/auth/profile', [AuthController, 'getProfile']).use(middleware.auth(
 router.get('/', async ({ view, auth }) => {
   const user = auth.user // null if not logged in
 
-  const fandoms = await Fandom
-    .query()
-    .preload('thumbnailMedia')
-  
+  const fandoms = await Fandom.query().preload('thumbnailMedia')
+
   return view.render('pages/intro', {
     title: 'Introduction',
     user,
     fandoms,
   })
 })
-
 
 // FANWORKS
 router.get('/fanworks', async ({ request, view, auth }) => {
@@ -133,9 +130,7 @@ router.get('/profile', async ({ view }) => {
   return view.render('pages/profile')
 })
 
-
 router.on('/chats').render('pages/chats')
-
 
 // SEARCH ROUTES
 router.get('/search', async ({ request, view, auth }) => {
@@ -143,7 +138,7 @@ router.get('/search', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
   const query = request.input('q')
   const activeTab = request.input('tab') || 'fanworks'
-  const branch = request.input('branch') || '' 
+  const branch = request.input('branch') || ''
 
   return view.render('pages/search', {
     title: 'Search',
@@ -227,20 +222,22 @@ router
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
-    router.get('/join-status', async ({ request, auth }) => {
-      const fandomId = Number(request.input('fandomId'))
-      if (!Number.isFinite(fandomId)) return { hasJoined: false }
+    router
+      .get('/join-status', async ({ request, auth }) => {
+        const fandomId = Number(request.input('fandomId'))
+        if (!Number.isFinite(fandomId)) return { hasJoined: false }
 
-      const user = auth.user! 
+        const user = auth.user!
 
-      const row = await db
-        .from('user_fandom')
-        .where('user_id', user.userId)
-        .where('fandom_id', fandomId)
-        .first()
+        const row = await db
+          .from('user_fandom')
+          .where('user_id', user.userId)
+          .where('fandom_id', fandomId)
+          .first()
 
-      return { hasJoined: !!row }
-    }).use(middleware.auth())
+        return { hasJoined: !!row }
+      })
+      .use(middleware.auth())
   })
   .prefix('/api/fandom')
 
@@ -258,7 +255,7 @@ router
 // HASHTAG ROUTES
 router
   .group(() => {
-    router.get('/trending', [HashtagController, 'trending'])  
+    router.get('/trending', [HashtagController, 'trending'])
     router.post('/find-or-create', [HashtagController, 'findOrCreate'])
     router.get('/by-name', [HashtagController, 'getByName'])
     router.get('/used', [HashtagController, 'usedInBranch'])
@@ -272,6 +269,7 @@ router
     router.get('/me', [UserController, 'me'])
     router.get('/me/joined-fandoms', [UserController, 'joinedFandoms'])
     router.put('/profile', [UserController, 'editProfile'])
+    router.put('/username', [UserController, 'updateUsername'])
     router.put('/email', [UserController, 'updateEmail'])
     router.put('/password', [UserController, 'changePassword'])
     router.delete('/delete', [UserController, 'deleteUser'])
@@ -293,7 +291,9 @@ router
      * HASHTAGS
      */
     router.post('/:postId/hashtags', [PostsController, 'addHashtag']).use(middleware.auth())
-    router.delete('/:postId/hashtags/:hashtagId', [PostsController, 'removeHashtag']).use(middleware.auth())
+    router
+      .delete('/:postId/hashtags/:hashtagId', [PostsController, 'removeHashtag'])
+      .use(middleware.auth())
 
     /**
      * COMMENTS
