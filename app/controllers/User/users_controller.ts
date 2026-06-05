@@ -62,7 +62,7 @@ export default class UsersController {
 
     const updated = await this.userService.editProfile(user.userId, { profilePicture })
     return response.ok(updated)
-}
+  }
 
   public async updateUsername({ request, auth, response }: HttpContext) {
     try {
