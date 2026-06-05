@@ -27,6 +27,7 @@ export default class extends BaseSeeder {
       { contentName: 'Official', contentBranch: 'Worldbuilding' },
       { contentName: 'Forum', contentBranch: 'Discussion' },
       { contentName: 'Forum', contentBranch: 'Polls' },
+      { contentName: 'Forum', contentBranch: 'QnA' },
     ])
     await Media.createMany([
       { fileUrl: '/images/media_assets/Honkai-Star-Rail-thumbnail.png', mediaType: 'image' },

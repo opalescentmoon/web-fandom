@@ -7,16 +7,14 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table
-        .integer('hashtag_id')
-        .unsigned()
-        // .references('id')
-        // .inTable('hashtags')
-        // .onDelete('CASCADE')
+      table.integer('hashtag_id').unsigned()
+      // .references('id')
+      // .inTable('hashtags')
+      // .onDelete('CASCADE')
 
-      table.integer('user_id').unsigned() // .references('user_id').inTable('users').onDelete('CASCADE')
+      table.integer('post_id').unsigned() // .references('post_id').inTable('posts').onDelete('CASCADE')
 
-      table.unique(['user_id', 'hashtag_id'])
+      table.unique(['post_id', 'hashtag_id'])
     })
   }
 
