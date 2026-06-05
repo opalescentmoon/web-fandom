@@ -26,7 +26,7 @@
         <!-- logged in ver -->
         <div id="sidebarLoggedIn" class="sidebar-logged-in" style="display: none;">
           <a href="/profile" class="sidebar-profile">
-            <div class="avatar-circle"></div>
+            <div class="avatar-circle" style="${avatarUrl ? `background-image:url('${avatarUrl}'); background-size:cover; background-position:center;` : ''}"></div>
             <div class="profile-text">
               <div  class="display-name"data-display-name>Display name</div>
           <div class="username" data-username>@username</div>
@@ -74,5 +74,8 @@
     @include('components/auth_modal')
 
     <script src="/js/script_intro.js"></script>
+    <script>
+      const avatarUrl = p.user?.profilePicture ?? p.user?.profile_picture ?? null
+    </script>
   </body>
 </html>

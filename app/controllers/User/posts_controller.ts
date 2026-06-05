@@ -216,7 +216,7 @@ export default class PostsController {
       // make sure post exists
 
       const file = request.file('media', {
-        size: '15mb',
+        size: '500mb',
         extnames: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov'],
       })
 

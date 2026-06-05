@@ -318,6 +318,7 @@ async function saveProfile() {
     editSaveBtn.disabled = false
     editSaveBtn.textContent = 'Save'
   }
+  loadProfileFeed()
 }
 
 if (editOpenBtn) editOpenBtn.addEventListener('click', openEditModal)
@@ -366,11 +367,51 @@ document.addEventListener('click', async (e) => {
 
 // ── Init ─────────────────────────────────────────────────────────────
 
+async function loadProfileUser() {
+  const pathParts = window.location.pathname.split('/')
+  const urlUserId = pathParts[pathParts.length - 1]
+  const isNumberId = !isNaN(Number(urlUserId)) && urlUserId !== ''
+
+  const editBtn = document.getElementById('editProfileBtn')
+  const followBtn = document.getElementById('followProfileBtn')
+
+  // always fetch logged in user first
+  const loggedInUser = await fetchJson('/api/user/me')
+
+  if (!isNumberId) {
+    // /profile with no id → own profile
+    me = loggedInUser
+  } else {
+    // /profile/:userId → compare with logged in user
+    me = await fetchJson(`/api/user/${urlUserId}`)
+  }
+
+  const isOwnProfile = String(me.userId) === String(loggedInUser.userId)
+
+  if (editBtn) editBtn.style.display = isOwnProfile ? 'inline-block' : 'none'
+  if (followBtn) followBtn.style.display = isOwnProfile ? 'none' : 'inline-block'
+
+  document.body.dataset.userId = me.userId ?? ''
+
+  const displayNameEl = document.querySelector('[data-display-name]')
+  const usernameEl = document.querySelector('[data-username]')
+  const bioEl = document.querySelector('[data-bio]')
+
+  const displayName = me.displayName ?? me.display_name ?? 'User'
+  const username = me.userName ?? me.user_name ?? me.username ?? ''
+
+  if (displayNameEl) displayNameEl.textContent = displayName
+  if (usernameEl) usernameEl.textContent = username ? '@' + username : ''
+  if (bioEl) bioEl.textContent = me.bio ?? ''
+
+  updateAvatarDisplay(me.profilePicture ?? me.profile_picture ?? null)
+}
+
 async function initProfile() {
   const token = localStorage.getItem('accessToken')
   if (!token) return
 
-  await loadMe()
+  await loadProfileUser()
   await loadJoinedFandoms()
   await loadProfileFeed()
 }

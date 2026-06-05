@@ -3,6 +3,7 @@ import { UserService } from '#services/user_service'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
 import Database from '@adonisjs/lucid/services/db'
+import User from '#models/DBModel/User/user'
 
 export default class UsersController {
   private userService = new UserService()
@@ -11,6 +12,21 @@ export default class UsersController {
     const user = auth.getUserOrFail()
     return response.ok(user)
   }
+
+  public async getById({ params, response }: HttpContext) {
+  try {
+    const user = await User.findOrFail(Number(params.userId))
+    return response.ok({
+      userId: user.userId,
+      username: user.username,
+      displayName: user.displayName,
+      bio: user.bio,
+      profilePicture: user.profilePicture,
+    })
+  } catch (error: any) {
+    return response.notFound({ error: 'User not found' })
+  }
+}
 
   public async joinedFandoms({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()

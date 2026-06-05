@@ -463,6 +463,14 @@ body.fandom-body {
   font-size: 0.9rem;
 }
 
+.post-user-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+}
+
 /* Right filter column */
 .fandom-filter {
   background: #ffffff;
@@ -823,7 +831,9 @@ a.js-branch.is-active {
   cursor: pointer;
 }
 
-/*profile page*/
+/*
+ ======PROFILE PAGE========
+*/
 .profile-page-body {
   margin: 0;
   font-family: system-ui, sans-serif;
@@ -838,6 +848,11 @@ a.js-branch.is-active {
   background: #c76369;
   color: #fff;
   padding: 0.5rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
 .profile-header-title {
@@ -849,6 +864,7 @@ a.js-branch.is-active {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) 320px;
   gap: 0;
+  margin-top: 46px;
   min-height: calc(100vh - 48px);
 }
 
@@ -995,6 +1011,10 @@ a.js-branch.is-active {
   background: #ffffff;
   border-left: 1px solid #f0d8da;
   padding: 1.2rem 1.5rem;
+  position: sticky;
+  top: 48px; /* height of the header */
+  height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 .profile-sidebar-section + .profile-sidebar-section {

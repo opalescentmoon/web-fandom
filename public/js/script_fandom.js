@@ -174,10 +174,12 @@ function renderPostCard (p) {
     <article class="post-card" data-post-id="${postId}">
       <header class="post-header">
         <div class="post-user-mini">
-          <div class="avatar-circle" style="${avatarUrl ? `background-image:url('${avatarUrl}'); background-size:cover; background-position:center;` : ''}"></div>
-          <div class="post-user-text">
-            <div class="post-username">${escapeHtml(username)}</div>
-          </div>
+          <a href="/profile/${p.user?.userId ?? p.user?.user_id}" class="post-user-link">
+            <div class="avatar-circle" style="${avatarUrl ? `background-image:url('${avatarUrl}'); background-size:cover; background-position:center;` : ''}"></div>
+            <div class="post-user-text">
+              <div class="post-username">${escapeHtml(username)}</div>
+            </div>
+          </a>
         </div>
         <div class="post-branch">${escapeHtml(contentBranch || '')}</div>
       </header>

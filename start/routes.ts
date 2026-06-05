@@ -129,7 +129,11 @@ router.get('/forum', async ({ request, view, auth }) => {
 router.get('/profile', async ({ view }) => {
   return view.render('pages/profile')
 })
+router.get('/profile/:userId', async ({ view, params }) => {
+  return view.render('pages/profile', { profileUserId: params.userId })
+})
 
+//CHAT PAGE
 router.on('/chats').render('pages/chats')
 
 // SEARCH ROUTES
@@ -274,6 +278,7 @@ router
     router.put('/email', [UserController, 'updateEmail'])
     router.put('/password', [UserController, 'changePassword'])
     router.delete('/delete', [UserController, 'deleteUser'])
+    router.get('/:userId', [UserController, 'getById'])
   })
   .prefix('/api/user')
   .use(middleware.auth())
