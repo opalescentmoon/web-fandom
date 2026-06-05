@@ -41,7 +41,7 @@ export default class PostsController {
       const fullPost = await this.postService.getPostWithContent(post.postId)
 
       return response.created(fullPost ?? post.serialize())
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -56,7 +56,7 @@ export default class PostsController {
 
       const post = await this.postService.addHashtagToPost(postId, hashtagId)
       return response.ok(post)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -71,7 +71,7 @@ export default class PostsController {
 
       const post = await this.postService.removeHashtagToPost(postId, hashtagId)
       return response.ok(post)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -86,7 +86,7 @@ export default class PostsController {
 
       const post = await this.postService.editPost(postId, caption)
       return response.ok(post)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -99,7 +99,7 @@ export default class PostsController {
       const postId = Number(params.postId)
       const deleted = await this.postService.deletePost(postId)
       return response.ok(deleted)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -112,7 +112,7 @@ export default class PostsController {
       const postId = Number(params.postId)
       const post = await this.postService.getPost(postId)
       return response.ok(post)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -129,7 +129,7 @@ export default class PostsController {
 
       const posts = await this.postService.getPostsByUser(userId, fandomId, branch)
       return response.ok(posts)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -141,7 +141,7 @@ export default class PostsController {
     try {
       const posts = await this.postService.getAllPosts()
       return response.ok(posts)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -160,11 +160,10 @@ export default class PostsController {
 
       const posts = await this.postService.getPostsByFandom(fandomId, tab, branch, userId)
       return response.ok(posts)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
-
 
   /**
    * Get posts by type
@@ -174,7 +173,7 @@ export default class PostsController {
       const { postType } = params
       const posts = await this.postService.getPostsByType(postType)
       return response.ok(posts)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -187,7 +186,7 @@ export default class PostsController {
       const postId = Number(params.postId)
       const comments = await this.postService.getCommentsForPost(postId)
       return response.ok(comments)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -200,7 +199,7 @@ export default class PostsController {
       const hashtagId = Number(params.hashtagId)
       const posts = await this.postService.getPostsWithHashtag(hashtagId)
       return response.ok(posts)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -243,11 +242,10 @@ export default class PostsController {
       const media = await Media.create({ postId, fileUrl, mediaType })
 
       return response.ok(media)
-    } catch (error) {
+    } catch (error: any) {
       return response.internalServerError({ error: error.message })
     }
   }
-
 
   /**
    * Get media for a post
@@ -257,7 +255,7 @@ export default class PostsController {
       const postId = Number(params.postId)
       const media = await this.postService.getMediaForPost(postId)
       return response.ok(media)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -272,7 +270,7 @@ export default class PostsController {
 
       const removed = await this.postService.removeMediaFromPost(postId, mediaId)
       return response.ok(removed)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -285,7 +283,7 @@ export default class PostsController {
       const userId = Number(params.userId)
       const comments = await this.postService.getCommentsByUser(userId)
       return response.ok(comments)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -297,7 +295,7 @@ export default class PostsController {
     try {
       const comments = await this.postService.getAllComments()
       return response.ok(comments)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
