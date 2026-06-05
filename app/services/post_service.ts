@@ -77,16 +77,156 @@ export class PostService {
       .select(
         'posts.*',
         'contents.content_name as "contentName"',
-        'contents.content_branch as "contentBranch"'
+        'contents.content_branch as contentBranch'
       )
-      .preload('user')
+      .preload('user', (u) => {
+        u.select(['user_id', 'user_name', 'display_name', 'profile_picture'])
+      })
       .preload('hashtags')
+      .preload('media')
       .orderBy('posts.created_at', 'desc')
 
     if (fandomId) query.where('posts.fandom_id', fandomId)
     if (branch) query.where('contents.content_branch', branch)
 
-    return query
+    const posts = await query
+
+    const rows = posts.map((p) => ({
+      ...p.serialize(),
+      ...p.$extras,
+    }))
+    console.log('rows sample:', rows[0])
+
+    const postIds = rows
+      .map((p: any) => Number(p.postId ?? p.post_id ?? p.id))
+      .filter((n: number) => Number.isFinite(n))
+
+    if (!postIds.length) return rows
+
+    /**
+     * =========================
+     * LIKE INFO
+     * =========================
+     */
+    const likeCountRows = await Like.query()
+      .whereIn('post_id', postIds)
+      .select('post_id')
+      .count('* as total')
+      .groupBy('post_id')
+
+    const likeCountMap = new Map<number, number>()
+    for (const r of likeCountRows as any[]) {
+      const pid = Number(r.$extras?.post_id ?? r.post_id ?? r.postId)
+      const total = Number(r.$extras?.total ?? r.total ?? 0)
+      likeCountMap.set(pid, total)
+    }
+
+    let likedSet = new Set<number>()
+    if (typeof userId === 'number') {
+      const likedRows = await Like.query()
+        .where('user_id', userId)
+        .whereIn('post_id', postIds)
+        .select('post_id')
+
+      likedSet = new Set(
+        likedRows.map((r: any) => Number(r.$extras?.post_id ?? r.post_id ?? r.postId))
+      )
+    }
+
+    /**
+     * =========================
+     * POLL INFO
+     * =========================
+     */
+    const pollPostIds = rows
+      .filter((p: any) => String(p.contentBranch || '').toLowerCase() === 'polls')
+      .map((p: any) => Number(p.postId ?? p.post_id ?? p.id))
+      .filter((n: number) => Number.isFinite(n))
+
+    const pollByPostId = new Map<number, any>()
+    const countsByPost = new Map<number, Map<number, number>>()
+
+    if (pollPostIds.length) {
+      const polls = await Poll.query()
+        .whereIn('post_id', pollPostIds)
+        .preload('options')
+
+      polls.forEach((poll) => pollByPostId.set(poll.postId, poll))
+
+      const voteCountRows = await PollVote.query()
+        .join('poll_options', 'poll_options.id', 'poll_votes.poll_option_id')
+        .join('polls', 'polls.id', 'poll_options.poll_id')
+        .whereIn('polls.post_id', pollPostIds)
+        .select('polls.post_id as post_id', 'poll_votes.poll_option_id as poll_option_id')
+        .count('* as total')
+        .groupBy('polls.post_id', 'poll_votes.poll_option_id')
+
+      for (const r of voteCountRows as any[]) {
+        const postId = Number(r.$extras?.post_id ?? r.post_id ?? r.postId)
+        const optionId = Number(
+          r.$extras?.poll_option_id ?? r.poll_option_id ?? r.pollOptionId
+        )
+        const total = Number(r.$extras?.total ?? r.total ?? 0)
+
+        if (!countsByPost.has(postId)) countsByPost.set(postId, new Map())
+        countsByPost.get(postId)!.set(optionId, total)
+      }
+    }
+
+    let myVoteByPostId = new Map<number, number>()
+
+    if (typeof userId === 'number' && pollPostIds.length) {
+      const myVoteRows = await PollVote.query()
+        .join('poll_options', 'poll_options.id', 'poll_votes.poll_option_id')
+        .join('polls', 'polls.id', 'poll_options.poll_id')
+        .where('poll_votes.user_id', userId)
+        .whereIn('polls.post_id', pollPostIds)
+        .select('polls.post_id as post_id', 'poll_votes.poll_option_id as poll_option_id')
+
+      for (const r of myVoteRows as any[]) {
+        const postId = Number(r.$extras?.post_id)
+        const optId = Number(
+          r.pollOptionId ?? r.$extras?.poll_option_id ?? r.$extras?.pollOptionId
+        )
+        if (Number.isFinite(postId) && Number.isFinite(optId)) {
+          myVoteByPostId.set(postId, optId)
+        }
+      }
+    }
+
+    /**
+     * =========================
+     * FINAL ATTACH
+     * =========================
+     */
+    return rows.map((p: any) => {
+      const pid = Number(p.postId ?? p.post_id ?? p.id)
+
+      const out: any = {
+        ...p,
+        like_count: likeCountMap.get(pid) ?? 0,
+        liked_by_me: likedSet.has(pid),
+      }
+
+      const poll = pollByPostId.get(pid)
+      if (poll) {
+        const pollJson = poll.serialize()
+        const optionCounts = countsByPost.get(pid) || new Map<number, number>()
+
+        out.poll = {
+          id: pollJson.id,
+          question: pollJson.question,
+          myVotedOptionId: myVoteByPostId.get(pid) ?? null,
+          options: (pollJson.options || []).map((o: any) => ({
+            id: o.id,
+            optionText: o.optionText ?? o.option_text,
+            votes: optionCounts.get(o.id) ?? 0,
+          })),
+        }
+      }
+
+      return out
+    })
   }
 
   public async getAllPosts() {

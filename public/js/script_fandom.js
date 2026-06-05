@@ -128,6 +128,7 @@ function renderPostCard (p) {
     p.user?.userName ??
     p.user?.user_name ??
     'Username'
+  const avatarUrl = p.user?.profilePicture ?? p.user?.profile_picture ?? null
   const hashtags = Array.isArray(p.hashtags) ? p.hashtags : []
   const hashtagHtml = hashtags
     .map((h) => {
@@ -173,7 +174,7 @@ function renderPostCard (p) {
     <article class="post-card" data-post-id="${postId}">
       <header class="post-header">
         <div class="post-user-mini">
-          <div class="avatar-circle"></div>
+          <div class="avatar-circle" style="${avatarUrl ? `background-image:url('${avatarUrl}'); background-size:cover; background-position:center;` : ''}"></div>
           <div class="post-user-text">
             <div class="post-username">${escapeHtml(username)}</div>
           </div>
