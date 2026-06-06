@@ -311,6 +311,12 @@ async function saveProfile() {
     if (bioEl) bioEl.textContent = me.bio
     updateAvatarDisplay(profilePictureUrl)
 
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+    currentUser.profilePicture = profilePictureUrl
+    currentUser.displayName = me.displayName
+    currentUser.bio = me.bio
+    localStorage.setItem('currentUser', JSON.stringify(currentUser))
+
     closeEditModal()
   } catch (err) {
     showEditError(err.message || 'Something went wrong. Please try again.')

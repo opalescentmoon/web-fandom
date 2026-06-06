@@ -110,6 +110,7 @@ export default class AuthController {
             displayName: user.displayName,
             email: user.email,
             bio: user.bio,
+            profilePicture: user.profilePicture,
           },
           token: {
             type: 'bearer',

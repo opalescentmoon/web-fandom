@@ -69,6 +69,13 @@ currentUser.username ||
 
 if (displayNameEl) displayNameEl.textContent = displayName
 if (usernameEl) usernameEl.textContent = username ? '@' + username : ''
+const avatarUrl = currentUser.profilePicture ?? currentUser.profile_picture ?? null
+const sidebarAvatar = loggedInBox.querySelector('.avatar-circle')
+if (sidebarAvatar && avatarUrl) {
+  sidebarAvatar.style.backgroundImage = `url('${avatarUrl}')`
+  sidebarAvatar.style.backgroundSize = 'cover'
+  sidebarAvatar.style.backgroundPosition = 'center'
+}
 
 loggedInBox.style.display = 'block'
 guestBox.style.display = 'none'
