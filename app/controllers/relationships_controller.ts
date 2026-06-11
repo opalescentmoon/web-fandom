@@ -22,7 +22,7 @@ export default class RelationshipsController {
       )
 
       return response.ok(relationship)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -40,7 +40,7 @@ export default class RelationshipsController {
       const removed = await this.relationshipService.removeRelationship(userFollowed, user.userId)
 
       return response.ok({ success: removed })
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -58,7 +58,7 @@ export default class RelationshipsController {
       const result = await this.relationshipService.toggleRelationship(userFollowed, user.userId)
 
       return response.ok(result)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -71,7 +71,7 @@ export default class RelationshipsController {
       const { userId } = request.only(['userId'])
       const total = await this.relationshipService.countFollowers(userId)
       return response.ok({ total })
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -84,7 +84,7 @@ export default class RelationshipsController {
       const { userId } = request.only(['userId'])
       const total = await this.relationshipService.countFollowing(userId)
       return response.ok({ total })
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }

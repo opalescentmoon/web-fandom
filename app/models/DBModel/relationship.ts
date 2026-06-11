@@ -7,10 +7,10 @@ export default class Relationship extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column({ columnName: 'user_follow' })
+  @column({ columnName: 'follow_id' })
   declare userFollow: number
 
-  @column({ columnName: 'user_followed' })
+  @column({ columnName: 'followed_id' })
   declare userFollowed: number
 
   @column.dateTime({ autoCreate: true })
