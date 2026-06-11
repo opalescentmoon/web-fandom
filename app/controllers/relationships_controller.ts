@@ -88,4 +88,17 @@ export default class RelationshipsController {
       return response.badRequest({ error: error.message })
     }
   }
+
+  public async checkFollow({ request, auth, response }: HttpContext) {
+    try {
+      const user = auth.user
+      if (!user) return response.unauthorized({ error: 'Not logged in' })
+
+      const { userFollowed } = request.only(['userFollowed'])
+      const isFollowing = await this.relationshipService.isFollowing(userFollowed, user.userId)
+      return response.ok({ isFollowing })
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
+    }
+  }
 }

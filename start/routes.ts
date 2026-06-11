@@ -253,6 +253,7 @@ router
     router.post('/toggle', [RelationshipController, 'toggle']).use(middleware.auth())
     router.get('/followers', [RelationshipController, 'followers'])
     router.get('/following', [RelationshipController, 'following'])
+    router.get('/check', [RelationshipController, 'checkFollow']).use(middleware.auth())
   })
   .prefix('/api/relationship')
 
