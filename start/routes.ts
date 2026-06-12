@@ -125,6 +125,11 @@ router.get('/forum', async ({ request, view, auth }) => {
   })
 })
 
+// POST PAGE
+router.get('/posts/:postId', async ({ view, params }) => {
+  return view.render('pages/post', { postId: params.postId })
+})
+
 //PROFILE PAGE
 router.get('/profile', async ({ view }) => {
   return view.render('pages/profile')

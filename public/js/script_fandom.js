@@ -171,7 +171,7 @@ function renderPostCard (p) {
 
 
   return `
-    <article class="post-card" data-post-id="${postId}">
+    <article class="post-card" data-post-id="${postId}" onclick="if(!event.target.closest('.post-like-btn')) window.location.href='/posts/${postId}'" style="cursor:pointer">
       <header class="post-header">
         <div class="post-user-mini">
           <a href="/profile/${p.user?.userId ?? p.user?.user_id}" class="post-user-link">
@@ -206,6 +206,10 @@ function renderPostCard (p) {
             <span class="post-like-icon">${liked ? '♥' : '♡'}</span>
             <span class="post-like-count">${likeCount}</span>
           </button>
+          <a href="/posts/${postId}" class="post-comment-btn" onclick="event.stopPropagation()">
+            <span>💬</span>
+            <span class="post-comment-count">${Number(p.commentCount ?? p.comment_count ?? 0)}</span>
+          </a>
         </div>
       </footer>
     </article>
