@@ -331,6 +331,29 @@ if (editOpenBtn) editOpenBtn.addEventListener('click', openEditModal)
 if (editCloseBtn) editCloseBtn.addEventListener('click', closeEditModal)
 if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditModal)
 if (editSaveBtn) editSaveBtn.addEventListener('click', saveProfile)
+const followBtn = document.getElementById('followProfileBtn')
+if (followBtn) {
+  followBtn.addEventListener('click', async () => {
+    if (!me?.userId) return
+
+    try {
+      const res = await fetch('/api/relationship/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...authHeaders() },
+        body: JSON.stringify({ userFollowed: me.userId }),
+      })
+      const result = await res.json()
+
+      const isNowFollowing = result.action === 'added'
+      followBtn.textContent = isNowFollowing ? 'Unfollow' : 'Follow'
+      followBtn.dataset.following = isNowFollowing ? 'true' : 'false'
+
+      await loadFollowCounts()
+    } catch (err) {
+      console.error('Follow toggle failed:', err)
+    }
+  })
+}
 
 // close on overlay click
 if (editModal) {
@@ -373,6 +396,23 @@ document.addEventListener('click', async (e) => {
 
 // ── Init ─────────────────────────────────────────────────────────────
 
+async function loadFollowCounts() {
+  if (!me?.userId) return
+
+  const followersEl = document.querySelector('.profile-stats [data-followers]')
+  const followingEl = document.querySelector('.profile-stats [data-following]')
+
+  if (!followersEl && !followingEl) return
+
+  const [followersData, followingData] = await Promise.all([
+    fetchJson(`/api/relationship/followers?userId=${me.userId}`),
+    fetchJson(`/api/relationship/following?userId=${me.userId}`),
+  ])
+
+  if (followersEl) followersEl.textContent = `${followersData.total ?? 0} Followers`
+  if (followingEl) followingEl.textContent = `${followingData.total ?? 0} Following`
+}
+
 async function loadProfileUser() {
   const pathParts = window.location.pathname.split('/')
   const urlUserId = pathParts[pathParts.length - 1]
@@ -397,6 +437,12 @@ async function loadProfileUser() {
   if (editBtn) editBtn.style.display = isOwnProfile ? 'inline-block' : 'none'
   if (followBtn) followBtn.style.display = isOwnProfile ? 'none' : 'inline-block'
 
+  if (!isOwnProfile && followBtn) {
+    const { isFollowing } = await fetchJson(`/api/relationship/check?userFollowed=${me.userId}`)
+    followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow'
+    followBtn.dataset.following = isFollowing ? 'true' : 'false'
+  }
+
   document.body.dataset.userId = me.userId ?? ''
 
   const displayNameEl = document.querySelector('[data-display-name]')
@@ -411,6 +457,7 @@ async function loadProfileUser() {
   if (bioEl) bioEl.textContent = me.bio ?? ''
 
   updateAvatarDisplay(me.profilePicture ?? me.profile_picture ?? null)
+  await loadFollowCounts()
 }
 
 async function initProfile() {

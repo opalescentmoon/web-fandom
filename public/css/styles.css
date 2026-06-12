@@ -456,10 +456,30 @@ body.fandom-body {
   margin-right: 0.25rem;
 }
 
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .post-actions button {
   border: none;
   background: transparent;
   cursor: pointer;
+  font-size: 0.9rem;
+  
+}
+
+.post-comment-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #333;
+  text-decoration: none;
+}
+
+.post-comment-count {
   font-size: 0.9rem;
 }
 
@@ -576,6 +596,54 @@ a.js-branch.is-active {
 
 .collapse-header.is-open .collapse-chevron {
   transform: rotate(180deg);
+}
+
+/* ── Comment Input Box ────────────────────────────────── */
+.comment-input-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #e6afb2;
+  border-radius: 18px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.comment-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.comment-input::placeholder {
+  color: #747474;
+}
+
+/* ── Comment Card ─────────────────────────────────────── */
+.comment-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #f2e1e2;
+  border-radius: 18px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.comment-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.comment-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
 }
 
 /* Search page*/

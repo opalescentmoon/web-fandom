@@ -11,7 +11,7 @@
 
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
-    <body class="fandom-body"
+  <body class="fandom-body"
     data-fandom-id="{{ fandomId ?? '' }}"
     data-fandom-name="{{ fandomName ?? '' }}"
     data-is-logged-in="{{ user ? 'true' : 'false' }}"
@@ -109,102 +109,101 @@
     @include('components/auth_modal')
 
     {{-- CREATE POST MODAL --}}
-<div class="post-overlay" id="postOverlay">
-  <div class="post-modal" id="postModal">
-    <div class="post-modal-inner">
-      <button class="post-close" id="postCloseBtn" aria-label="Close">
-        ×
-      </button>
+    <div class="post-overlay" id="postOverlay">
+      <div class="post-modal" id="postModal">
+        <div class="post-modal-inner">
+          <button class="post-close" id="postCloseBtn" aria-label="Close">
+            ×
+          </button>
 
-      <header class="post-modal-header">
-        <div class="post-user-mini">
-          <div class="avatar-circle"></div>
-          <div class="post-user-text">
-            <div class="post-username">
-              {{ $props.user ? $props.user.displayName || $props.user.username : 'Username' }}
+          <header class="post-modal-header">
+            <div class="post-user-mini">
+              <div class="avatar-circle"></div>
+              <div class="post-user-text">
+                <div class="post-username">
+                  {{ $props.user ? $props.user.displayName || $props.user.username : 'Username' }}
+                </div>
+              </div>
             </div>
-          </div>
+
+            <div class="post-type-wrapper">
+              <label class="sr-only" for="postTypeSelect">Content type</label>
+              <select id="postTypeSelect" class="post-type-select">
+                <!-- JS will fill options based on tab -->
+              </select>
+            </div>
+          </header>
+
+          <main class="post-modal-body">
+            <textarea
+              id="postContent"
+              class="post-content-input"
+              placeholder="Share with the fandom..."
+            ></textarea>
+            <div id="postMediaPreview" class="post-media-preview" style="display:none"></div>
+
+            <div id="pollBuilder" class="poll-builder" style="display:none;">
+              <div class="poll-builder-head">
+                <div class="poll-builder-title">Poll Options</div>
+                <div class="poll-builder-hint">Min 2, Max 4</div>
+              </div>
+
+              <div id="pollOptionsWrap" class="poll-options-wrap">
+                <input class="poll-option-input" type="text" placeholder="Option 1" />
+                <input class="poll-option-input" type="text" placeholder="Option 2" />
+              </div>
+
+              <div class="poll-builder-actions">
+                <button type="button" id="pollAddOptionBtn" class="poll-add-btn">+ Add option</button>
+                <button type="button" id="pollRemoveOptionBtn" class="poll-remove-btn">Remove last</button>
+              </div>
+            </div>
+            
+            <div class="post-tags-input">
+              <label for="postTags">Tags:</label>
+              <input
+                type="text"
+                id="postTags"
+                placeholder="#add tags"
+              />
+            </div>
+          </main>
+
+          <footer class="post-modal-footer">
+            <div class="post-actions-left">
+              
+              <button type="button" class="icon-button post-icon-btn" id="postImageBtn" title="Add image">
+                📷
+              </button>
+              <input
+                type="file"
+                id="postMediaInput"
+                accept="image/*,video/*"
+                style="display:none"
+              />
+              <button type="button" class="icon-button post-icon-btn" id="postPollBtn" title="Create poll">
+                📊
+              </button>
+            </div>
+
+            <div class="post-actions-right">
+              <label class="sr-only" for="postTabSelect">Post to</label>
+              <select id="postTabSelect" class="post-tab-select">
+                <option value="fanworks">Fanworks</option>
+                <option value="wiki">Wiki</option>
+                <option value="forum">Forum</option>
+              </select>
+
+              <button type="button" class="post-submit-btn" id="postSubmitBtn">
+                Post
+              </button>
+            </div>
+          </footer>
         </div>
-
-        <div class="post-type-wrapper">
-          <label class="sr-only" for="postTypeSelect">Content type</label>
-          <select id="postTypeSelect" class="post-type-select">
-            <!-- JS will fill options based on tab -->
-          </select>
-        </div>
-      </header>
-
-      <main class="post-modal-body">
-        <textarea
-          id="postContent"
-          class="post-content-input"
-          placeholder="Share with the fandom..."
-        ></textarea>
-        <div id="postMediaPreview" class="post-media-preview" style="display:none"></div>
-
-        <div id="pollBuilder" class="poll-builder" style="display:none;">
-          <div class="poll-builder-head">
-            <div class="poll-builder-title">Poll Options</div>
-            <div class="poll-builder-hint">Min 2, Max 4</div>
-          </div>
-
-          <div id="pollOptionsWrap" class="poll-options-wrap">
-            <input class="poll-option-input" type="text" placeholder="Option 1" />
-            <input class="poll-option-input" type="text" placeholder="Option 2" />
-          </div>
-
-          <div class="poll-builder-actions">
-            <button type="button" id="pollAddOptionBtn" class="poll-add-btn">+ Add option</button>
-            <button type="button" id="pollRemoveOptionBtn" class="poll-remove-btn">Remove last</button>
-          </div>
-        </div>
-        
-        <div class="post-tags-input">
-          <label for="postTags">Tags:</label>
-          <input
-            type="text"
-            id="postTags"
-            placeholder="#add tags"
-          />
-        </div>
-      </main>
-
-      <footer class="post-modal-footer">
-        <div class="post-actions-left">
-          
-          <button type="button" class="icon-button post-icon-btn" id="postImageBtn" title="Add image">
-            📷
-          </button>
-          <input
-            type="file"
-            id="postMediaInput"
-            accept="image/*,video/*"
-            style="display:none"
-          />
-          <button type="button" class="icon-button post-icon-btn" id="postPollBtn" title="Create poll">
-            📊
-          </button>
-        </div>
-
-        <div class="post-actions-right">
-          <label class="sr-only" for="postTabSelect">Post to</label>
-          <select id="postTabSelect" class="post-tab-select">
-            <option value="fanworks">Fanworks</option>
-            <option value="wiki">Wiki</option>
-            <option value="forum">Forum</option>
-          </select>
-
-          <button type="button" class="post-submit-btn" id="postSubmitBtn">
-            Post
-          </button>
-        </div>
-      </footer>
+      </div>
     </div>
-  </div>
-</div>
 
 
-<script src="/js/script_fandom.js"></script>
-
-</body>
+    <script src="/js/script_fandom.js"></script>
+  </body>
 </html>

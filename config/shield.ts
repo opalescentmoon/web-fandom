@@ -48,6 +48,7 @@ const shieldConfig = defineConfig({
 
       '/api/user/profile',
       '/api/user/profile/avatar',
+      '/api/relationship/toggle',
 
       '/api/likes/*',
       '/api/poll/*',

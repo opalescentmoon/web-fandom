@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Post</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="fandom-body" data-post-id="{{ postId }}">
+
+    <!-- Top red header -->
+    <header class="fandom-header">
+      <button class="icon-button" onclick="history.back()">
+        <img src="/images/left.png" alt="Back" width="24" height="24" />
+      </button>
+      <div class="fandom-header-center">
+        <span class="fandom-name" id="postFandomName">Loading...</span>
+      </div>
+      <button class="icon-button">
+        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+      </button>
+    </header>
+
+    <!-- 3-column layout -->
+    <div class="fandom-layout">
+
+      <!-- Left sidebar -->
+      <aside class="fandom-sidebar">
+        <button class="sidebar-icon">
+          <a href="/">
+            <img src="/images/home.png" alt="Home" width="24" height="24" />
+          </a>
+        </button>
+        <button class="sidebar-icon">
+          <a href="/search">
+            <img src="/images/loupe.png" alt="Search" width="24" height="24" />
+          </a>
+        </button>
+        <button class="sidebar-icon">
+          <a href="/chats">
+            <img src="/images/chat.png" alt="Chat" width="24" height="24" />
+          </a>
+        </button>
+        <button class="sidebar-icon">
+          <a href="/profile">
+            <img src="/images/user.png" alt="Profile" width="24" height="24" />
+          </a>
+        </button>
+      </aside>
+
+      <!-- Middle column: post + comments -->
+      <section class="fandom-middle">
+        <main class="fandom-main">
+
+          <!-- The post itself -->
+          <div id="postSection">
+            <div class="feed-loading">Loading post...</div>
+          </div>
+
+          <!-- Comment input -->
+          <div class="comment-input-box" id="commentInputBox" style="display:none">
+            <div class="post-user-mini">
+              <div class="avatar-circle" id="commentAvatar"></div>
+            </div>
+            <input
+              type="text"
+              id="commentInput"
+              class="comment-input"
+              placeholder="Write a comment..."
+            />
+            <button class="post-submit-btn" id="commentSubmitBtn">Post</button>
+          </div>
+          
+          <!-- Comments list -->
+          <div id="commentsSection">
+            <div class="feed-loading">Loading comments...</div>
+          </div>
+
+        </main>
+      </section>
+
+      <!-- Right column: trending -->
+      <aside class="fandom-filter">
+        <div class="filter-section">
+          <h4>Trending</h4>
+          <ul class="filter-list" id="trendingList">
+            <li class="feed-loading">Loading...</li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
+
+    <script src="/js/script_post.js"></script>
+  </body>
+</html>

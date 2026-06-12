@@ -40,13 +40,21 @@ export class RelationshipService {
 
   public async countFollowers(userId: number) {
     const rows = await Relationship.query().where('followed_id', userId).count('* as total')
-    const total = rows && rows[0] ? (rows[0] as any).total : 0
+    const total = rows && rows[0] ? (rows[0] as any).$extras?.total : 0
     return Number(total)
   }
 
   public async countFollowing(userId: number) {
     const rows = await Relationship.query().where('follow_id', userId).count('* as total')
-    const total = rows && rows[0] ? (rows[0] as any).total : 0
+    const total = rows && rows[0] ? (rows[0] as any).$extras?.total : 0
     return Number(total)
+  }
+
+  public async isFollowing(userFollowed: number, userFollow: number) {
+    const relationship = await Relationship.query()
+      .where('followed_id', userFollowed)
+      .andWhere('follow_id', userFollow)
+      .first()
+    return !!relationship
   }
 }

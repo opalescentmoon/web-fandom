@@ -126,6 +126,11 @@ router.get('/forum', async ({ request, view, auth }) => {
   })
 })
 
+// POST PAGE
+router.get('/posts/:postId', async ({ view, params }) => {
+  return view.render('pages/post', { postId: params.postId })
+})
+
 //PROFILE PAGE
 router.get('/profile', async ({ view }) => {
   return view.render('pages/profile')
@@ -261,6 +266,7 @@ router
     router.post('/toggle', [RelationshipController, 'toggle']).use(middleware.auth())
     router.get('/followers', [RelationshipController, 'followers'])
     router.get('/following', [RelationshipController, 'following'])
+    router.get('/check', [RelationshipController, 'checkFollow']).use(middleware.auth())
   })
   .prefix('/api/relationship')
 

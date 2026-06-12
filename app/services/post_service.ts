@@ -15,16 +15,17 @@ export class PostService {
     postType: string,
     contentId: number
   ) {
-    const user = await User.findOrFail(userId)
+    if (!parentId){
+      const user = await User.findOrFail(userId)
+      const isMember = await user
+        .related('fandoms')
+        .query()
+        .where('user_fandom.fandom_id', fandomId)
+        .first()
 
-    const isMember = await user
-      .related('fandoms')
-      .query()
-      .where('user_fandom.fandom_id', fandomId)
-      .first()
-
-    if (!isMember) {
-      throw new Error('You must join this fandom to post')
+      if (!isMember) {
+        throw new Error('You must join this fandom to post')
+      }
     }
 
     return await Post.create({
@@ -66,8 +67,35 @@ export class PostService {
 
   // query posts
   public async getPost(postId: number) {
-    const post = await Post.findOrFail(postId)
-    return post
+    const post = await Post.query()
+      .where('posts.post_id', postId)
+      .join('contents', 'contents.content_id', 'posts.content_id')
+      .select(
+        'posts.*',
+        'contents.content_name as contentName',
+        'contents.content_branch as contentBranch'
+      )
+      .preload('hashtags')
+      .preload('media')
+      .preload('user', (u) => {
+        u.select(['user_id', 'user_name', 'display_name', 'profile_picture'])
+      })
+      .preload('fandom', (f) => {
+        f.select(['fandom_id', 'fandom_name'])
+      })
+      .firstOrFail()
+
+    const commentCount = await Post.query()
+    .where('parent_id', postId)
+    .count('* as total')
+
+    const total = Number((commentCount[0] as any).$extras?.total ?? 0)
+
+
+    return {
+      ...post.serialize(),
+      comment_count: total,
+    }
   }
 
   public async getPostsByUser(userId: number, fandomId?: number, branch?: string) {
@@ -313,6 +341,24 @@ export class PostService {
 
     /**
      * =========================
+     * COMMENT COUNT
+     * =========================
+     */
+    const commentCountRows = await Post.query()
+      .whereIn('parent_id', postIds)
+      .select('parent_id')
+      .count('* as total')
+      .groupBy('parent_id')
+
+    const commentCountMap = new Map<number, number>()
+    for (const r of commentCountRows as any[]) {
+      const pid = Number(r.$extras?.parent_id ?? r.parent_id ?? r.parentId)
+      const total = Number(r.$extras?.total ?? r.total ?? 0)
+      commentCountMap.set(pid, total)
+    }
+
+    /**
+     * =========================
      * POLL INFO
      * =========================
      */
@@ -384,8 +430,7 @@ export class PostService {
         }
       }
     }
-
-
+    
     /**
      * =========================
      * FINAL ATTACH
@@ -398,6 +443,7 @@ export class PostService {
         ...p,
         like_count: likeCountMap.get(pid) ?? 0,
         liked_by_me: typeof userId === 'number' ? likedSet.has(pid) : false,
+        comment_count: commentCountMap.get(pid) ?? 0,
       }
 
       const poll = pollByPostId.get(pid)
@@ -427,8 +473,15 @@ export class PostService {
   }
 
   public async getCommentsForPost(postId: number) {
-    const comments = await Post.query().where('parent_id', postId)
-    return comments
+    const comments = await Post.query()
+      .where('parent_id', postId)
+      .preload('user', (u) => {
+        u.select(['user_id', 'user_name', 'display_name', 'profile_picture'])
+      })
+      .preload('media')
+      .orderBy('created_at', 'asc')
+
+    return comments.map((c) => c.serialize())
   }
 
   public async getPostsWithHashtag(hashtagId: number) {
