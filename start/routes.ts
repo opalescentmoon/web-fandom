@@ -1,4 +1,5 @@
 import router from '@adonisjs/core/services/router'
+import transmit from '@adonisjs/transmit/services/main'
 import { middleware } from './kernel.js'
 import Fandom from '#models/DBModel/fandom'
 import db from '@adonisjs/lucid/services/db'
@@ -182,6 +183,13 @@ router
   .use(middleware.auth())
 
 // CHAT & MESSAGES ROUTES
+
+transmit.registerRoutes((route) => {
+  if (route.getPattern() === '__transmit/events') {
+    route.use(middleware.transmitAuth())
+  }
+})
+
 router
   .group(() => {
     router.post('/', [ChatController, 'create'])

@@ -50,4 +50,11 @@ export class ChatService {
     const members = await chat.related('members').query().where('user_id', userId)
     return members.length > 0
   }
+
+  public async returnAllChats() {
+    const chats = await Chat.query().preload('messages', (messageQuery) => {
+      messageQuery.orderBy('createdAt', 'desc').limit(1)
+    })
+    return chats
+  }
 }
