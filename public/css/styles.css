@@ -704,7 +704,9 @@ a.js-branch.is-active {
   margin: 0.6rem 0 0.8rem;
 }
 
-/* Chat page */
+/* 
+=========CHAT PAGE========= 
+*/
 .chat-page-body {
   margin: 0;
   font-family: system-ui, sans-serif;
@@ -897,6 +899,154 @@ a.js-branch.is-active {
   background: #c76369;
   color: #fff;
   cursor: pointer;
+}
+
+.chat-empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c76369;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.new-chat-btn {
+  width: 100%;
+  padding: 0.4rem;
+  margin-bottom: 0.5rem;
+  background: #c76369;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem;
+  width: 360px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1rem;
+  color: #c76369;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #999;
+}
+
+.modal-search-input {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #f0d7d9;
+  border-radius: 20px;
+  outline: none;
+  font-size: 0.88rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-search-results {
+  overflow-y: auto;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.modal-user-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+}
+
+.modal-user-item:hover {
+  background: #fdf0f1;
+}
+
+.modal-user-item img, .modal-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: #f2d7d9;
+}
+
+.modal-user-name {
+  font-size: 0.88rem;
+}
+
+.modal-selected-label {
+  font-size: 0.8rem;
+  color: #c76369;
+  margin: 0;
+}
+
+.modal-selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.modal-chip {
+  background: #f2d7d9;
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.modal-chip-remove {
+  cursor: pointer;
+  color: #c76369;
+  font-weight: bold;
+}
+
+.modal-start-btn {
+  padding: 0.5rem;
+  background: #c76369;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
 }
 
 /*

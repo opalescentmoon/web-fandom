@@ -6,7 +6,7 @@ import User from '../User/user.js'
 import Chat from './chat.js'
 
 export default class Message extends BaseModel {
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'message_id' })
   declare id: number
 
   @column({ columnName: 'chat_id' })
@@ -34,7 +34,7 @@ export default class Message extends BaseModel {
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare editedAt: DateTime
+  declare updatedAt: DateTime
 
   @column.dateTime({ serializeAs: null })
   declare deletedAt: DateTime | null

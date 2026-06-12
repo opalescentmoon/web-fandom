@@ -2,6 +2,7 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { MessageService } from '#services/message_service'
 import { ChatService } from '#services/chat_service'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class MessagesController {
   private messageService = new MessageService()
@@ -25,6 +26,7 @@ export default class MessagesController {
     }
 
     const message = await this.messageService.sendMessage(senderId, chatId, messageText)
+    transmit.broadcast(`chats/${chatId}`, { message: message.serialize() })
     return response.created({ message: 'Message sent', data: message })
   }
 
@@ -99,5 +101,18 @@ export default class MessagesController {
 
     const updated = await this.messageService.updateMessageStatus(messageId, userId, status)
     return response.ok({ message: 'Message status updated', data: updated })
+  }
+
+  public async markChatAsRead({ params, auth, response }: HttpContext) {
+    const chatId = Number(params.chatId)
+    const userId = auth.user!.userId
+
+    const allowed = await this.chatService.isParticipant(chatId, userId)
+    if (!allowed) {
+      return response.forbidden({ message: 'You are not a participant of this chat' })
+    }
+
+    await this.messageService.markChatAsRead(chatId, userId)
+    return response.ok({ message: 'Messages marked as read' })
   }
 }

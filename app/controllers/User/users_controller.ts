@@ -142,4 +142,20 @@ export default class UsersController {
       return response.badRequest({ error: error.message })
     }
   }
+
+  public async search({ request, response }: HttpContext) {
+    const query = request.qs().q
+
+    if (!query) {
+      return response.badRequest({ message: 'Search query is required' })
+    }
+
+    const users = await User.query()
+      .where('user_name', 'ilike', `%${query}%`)
+      .orWhere('display_name', 'ilike', `%${query}%`)
+      .select(['user_id', 'user_name', 'display_name', 'profile_picture'])
+      .limit(10)
+
+    return response.ok({ data: users })
+  }
 }

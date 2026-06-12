@@ -1,6 +1,7 @@
 // app/Controllers/Http/ChatController.ts
 import { HttpContext } from '@adonisjs/core/http'
 import { ChatService } from '#services/chat_service'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class ChatsController {
   private chatService = new ChatService()
@@ -26,6 +27,9 @@ export default class ChatsController {
     }
 
     const chat = await this.chatService.createChat(participantIds, chatType)
+    for (const participantId of participantIds) {
+      transmit.broadcast(`users/${participantId}/chats`, { chat: chat.serialize() })
+    }
     return response.created({ message: 'Chat created', data: chat })
   }
 
@@ -77,6 +81,15 @@ export default class ChatsController {
 
     const chat = await this.chatService.removeParticipant(chatId, userId)
     return response.ok({ message: 'Participant removed', data: chat })
+  }
+
+  /**
+   * get all chat for current user
+   */
+  public async index({ auth, response }: HttpContext) {
+    const userId = auth.user!.userId
+    const chats = await this.chatService.returnAllChats(userId)
+    return response.ok({ data: chats })
   }
 
   /**

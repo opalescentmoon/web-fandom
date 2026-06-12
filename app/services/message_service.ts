@@ -55,4 +55,14 @@ export class MessageService {
     await messageStatus.save()
     return messageStatus
   }
+
+  public async markChatAsRead(chatId: number, userId: number) {
+    const messages = await Message.query().where('chat_id', chatId)
+    
+    for (const message of messages) {
+      if (message.senderId !== userId) {  // don't mark your own messages as read
+        await this.updateMessageStatus(message.id, userId, 'read')
+      }
+    }
+  }
 }

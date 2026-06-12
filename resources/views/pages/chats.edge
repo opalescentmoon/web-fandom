@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <title>Chats</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <script type="module">
+      import { Transmit } from 'https://cdn.jsdelivr.net/npm/@adonisjs/transmit-client@1.1.0/build/index.js'
+      window.Transmit = Transmit
+    </script>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
 
@@ -27,11 +30,11 @@
       <!-- Left: list of conversations -->
       <aside class="chat-list">
         <h2 class="chat-list-title">Chats</h2>
-
         <div class="chat-search-bar">
           <span class="search-icon">🔍</span>
           <input type="text" placeholder="Search..." />
         </div>
+        <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
 
         <div class="chat-list-items">
           <!-- dummy chats -->
@@ -57,107 +60,54 @@
 
       <!-- Right: conversation -->
       <section class="chat-main">
-        <!-- Top bar inside chat -->
-        <header class="chat-main-header">
-          <div class="chat-main-user">
-            <div class="chat-avatar-circle"></div>
-            <span class="chat-main-name">Display name</span>
-          </div>
-
-          <div class="chat-main-status">
-            <!-- you can put "Online" or nothing here -->
-          </div>
-        </header>
-
-        <!-- Message area -->
-        <div class="chat-messages">
-          <!-- incoming (left) -->
-          <div class="chat-message-row incoming">
-            <div class="chat-bubble">
-              Lorem ipsum incoming message…
-            </div>
-          </div>
-
-          <div class="chat-message-row incoming">
-            <div class="chat-bubble">
-              Another incoming message…
-            </div>
-          </div>
-
-          <!-- outgoing (right) -->
-          <div class="chat-message-row outgoing">
-            <div class="chat-bubble">
-              Outgoing message on the right…
-            </div>
-          </div>
-
-          <div class="chat-message-row outgoing">
-            <div class="chat-bubble">
-              Short reply!
-            </div>
-          </div>
-
-          <!-- more dummies if you want -->
+        <!-- empty state (shown before any chat is selected) -->
+        <div class="chat-empty-state" id="chatEmptyState">
+          <p>Select a conversation to start chatting</p>
         </div>
 
-        <!-- Input bar -->
-        <form class="chat-input-bar">
-          <input
-            type="text"
-            placeholder="Type a message..."
-            autocomplete="off"
-          />
-          <button type="submit" class="chat-send-button">
-            <img src="/images/send.png" alt="Send" width="24" height="24" />
-          </button>
-        </form>
+        <!-- chat view (hidden until a chat is selected) -->
+        <div id="chatView" style="display:none; flex-direction:column; height:100%;">
+          <header class="chat-main-header">
+            <div class="chat-main-user">
+              <div class="chat-avatar-circle" id="chatHeaderAvatar"></div>
+              <span class="chat-main-name" id="chatHeaderName"></span>
+            </div>
+            <div class="chat-main-status"></div>
+          </header>
+
+          <div class="chat-messages" id="chatMessages"></div>
+
+          <form class="chat-input-bar" id="chatForm">
+            <input type="text" placeholder="Type a message..." autocomplete="off" />
+            <button type="submit" class="chat-send-button">
+              <img src="/images/send.png" alt="Send" width="24" height="24" />
+            </button>
+          </form>
+        </div>
       </section>
     </div>
 
-    <script>
-        const chatForm = document.querySelector('.chat-input-bar')
-const chatInput = chatForm.querySelector('input')
-const chatArea = document.querySelector('.chat-messages')
+    <!-- New Chat Modal -->
+    <div class="modal-overlay" id="newChatOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">New Chat</h3>
+          <button class="modal-close" id="newChatClose">&times;</button>
+        </div>
 
-// This function simulates sending a message now,
-// and later you can replace JUST the inside of this function
-async function sendMessage(text) {
-  // --- for now: fake message output ---
-  const bubble = document.createElement('div')
-  bubble.className = 'chat-message-row outgoing'
-  bubble.innerHTML = `<div class="chat-bubble">${text}</div>`
-  chatArea.appendChild(bubble)
+        <input type="text" class="modal-search-input" id="userSearchInput" placeholder="Search users..." autocomplete="off" />
 
-  chatArea.scrollTop = chatArea.scrollHeight
+        <div class="modal-search-results" id="userSearchResults"></div>
 
-  // --- later: replace this with real backend call ---
-  // await fetch('/messages', { method: 'POST', body: JSON.stringify({ text }) })
-  // or WebSocket logic
-}
+        <div class="modal-selected" id="selectedUsers" style="display:none;">
+          <p class="modal-selected-label" id="chatTypeLabel"></p>
+          <div class="modal-selected-chips" id="selectedChips"></div>
+        </div>
 
-// Form submission (press Enter or press Send)
-chatForm.addEventListener('submit', (e) => {
-  e.preventDefault()
+        <button class="modal-start-btn" id="startChatBtn" style="display:none;">Start Chat</button>
+      </div>
+    </div>
 
-  const text = chatInput.value.trim()
-  if (!text) return
-
-  sendMessage(text)     // 🧡 now it shows as a bubble
-  chatInput.value = ''   // clear field
-})
-
-      // Back button: go back to the page user came from
-      const backBtn = document.getElementById('chatBackButton')
-      if (backBtn) {
-        backBtn.addEventListener('click', () => {
-          if (window.history.length > 1) {
-            window.history.back()
-          } else {
-            // fallback if no history: go home or intro
-            window.location.href = '/'
-          }
-        })
-      }
-    </script>
+    <script src="/js/script_chats.js"></script>
   </body>
 </html>

@@ -7,8 +7,8 @@ export class ChatService {
 
       const existingChat = await Chat.query()
         .where('chat_type', 'dm')
-        .whereHas('members', (q) => q.where('user_id', userA))
-        .whereHas('members', (q) => q.where('user_id', userB))
+        .whereHas('members', (q) => q.where('chat_members.user_id', userA))
+        .whereHas('members', (q) => q.where('chat_members.user_id', userB))
         .first()
 
       if (existingChat) {
@@ -47,14 +47,21 @@ export class ChatService {
 
   public async isParticipant(chatId: number, userId: number) {
     const chat = await Chat.findOrFail(chatId)
-    const members = await chat.related('members').query().where('user_id', userId)
+    const members = await chat.related('members').query().where('chat_members.user_id', userId)
     return members.length > 0
   }
 
-  public async returnAllChats() {
-    const chats = await Chat.query().preload('messages', (messageQuery) => {
-      messageQuery.orderBy('createdAt', 'desc').limit(1)
-    })
+  public async returnAllChats(userId: number) {
+    const chats = await Chat.query()
+      .whereHas('members', (q) => {
+        q.where('chat_members.user_id', userId)
+      })
+      .preload('members', (q) => {
+        q.select(['user_id', 'display_name', 'profile_picture'])
+      })
+      .preload('messages', (q) => {
+        q.orderBy('created_at', 'desc').limit(1)
+      })
     return chats
   }
 }

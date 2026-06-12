@@ -5,7 +5,7 @@ import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Message from './message.js'
 
 export default class Chat extends BaseModel {
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'chat_id' })
   declare id: number
 
   @column({ columnName: 'chat_type' })
@@ -19,6 +19,10 @@ export default class Chat extends BaseModel {
 
   @manyToMany(() => User, {
     pivotTable: 'chat_members',
+    localKey: 'id',
+    relatedKey: 'userId',
+    pivotForeignKey: 'chat_id',
+    pivotRelatedForeignKey: 'user_id',
   })
   public members!: ManyToMany<typeof User>
 

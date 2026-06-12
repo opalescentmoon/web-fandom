@@ -198,6 +198,7 @@ transmit.registerRoutes((route) => {
 router
   .group(() => {
     router.post('/', [ChatController, 'create'])
+    router.get('/', [ChatController, 'index'])
     router.get('/:chatId/messages', [ChatController, 'messages'])
     router.post('/:chatId/add', [ChatController, 'addParticipant'])
     router.post('/:chatId/remove', [ChatController, 'removeParticipant'])
@@ -213,6 +214,7 @@ router
     router.delete('/:messageId', [MessageController, 'delete'])
     router.get('/:messageId/status', [MessageController, 'status'])
     router.post('/status/update', [MessageController, 'updateStatus'])
+    router.post('/chat/:chatId/read', [MessageController, 'markChatAsRead'])
   })
   .prefix('/api/messages')
   .use(middleware.auth())
@@ -296,9 +298,11 @@ router
   })
   .prefix('/api/user')
   .use(middleware.auth())
+  
+//search user
+router.get('/api/users/search', [UserController, 'search']).use(middleware.auth())
 
 // POST ROUTES
-
 router
   .group(() => {
     router.post('/', [PostsController, 'create']).use(middleware.auth())
