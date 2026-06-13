@@ -1,4 +1,5 @@
 import Chat from '#models/DBModel/Chats/chat'
+import transmit from '@adonisjs/transmit/services/main'
 
 export class ChatService {
   public async createChat(participantIds: number[], chatType: string) {
@@ -26,6 +27,8 @@ export class ChatService {
   public async getChatMessages(chatId: number) {
     const chat = await Chat.findOrFail(chatId)
     const messages = await chat.related('messages').query()
+      .preload('statuses')
+      .orderBy('created_at', 'asc')
     return messages
   }
 
@@ -63,5 +66,18 @@ export class ChatService {
         q.orderBy('created_at', 'desc').limit(1)
       })
     return chats
+  }
+
+  public async broadcastReadReceipts(chatId: number, readerUserId: number) {
+    const chat = await Chat.query()
+      .where('chat_id', chatId)
+      .preload('members')
+      .firstOrFail()
+
+    for (const member of chat.members) {
+      if (member.userId !== readerUserId) {
+        transmit.broadcast(`users/${member.userId}/read`, { chatId })
+      }
+    }
   }
 }

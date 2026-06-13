@@ -23,13 +23,13 @@ export default class MessageStatus extends BaseModel {
   @column.dateTime({ autoCreate: true, columnName: 'sent_at' })
   declare sentAt: DateTime
 
-  @column.dateTime({ autoCreate: true, columnName: 'delivered_at' })
+  @column.dateTime({ columnName: 'delivered_at' })
   declare deliveredAt: DateTime
 
-  @column.dateTime({ autoCreate: true, columnName: 'read_at' })
+  @column.dateTime({ columnName: 'read_at' })
   declare readAt: DateTime
 
-  @column.dateTime({ autoCreate: true, columnName: 'failed_at' })
+  @column.dateTime({ columnName: 'failed_at' })
   declare failedAt: DateTime
 
   @column({ columnName: 'retry_count' })

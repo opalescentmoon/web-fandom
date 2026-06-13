@@ -111,6 +111,33 @@ function subscribeToUserChannel() {
   })
 }
 
+function subscribeToReadReceipts() {
+  const transmit = new Transmit({
+    baseUrl: window.location.origin,
+    eventSourceFactory: (url) => {
+      const urlWithToken = new URL(url)
+      urlWithToken.searchParams.set('token', token)
+      return new EventSource(urlWithToken.toString())
+    }
+  })
+
+  const subscription = transmit.subscription(`users/${currentUser.userId}/read`)
+  subscription.create().then(() => {
+    console.log('subscribed to read receipts')
+  })
+
+  subscription.onMessage((data) => {
+    console.log('read receipt received:', data)
+    // only update if we're currently viewing that chat
+    if (data.chatId === activeChatId) {
+      // update all outgoing message checkmarks to blue
+      document.querySelectorAll('.chat-message-row.outgoing .message-status').forEach(el => {
+        el.classList.add('read')
+      })
+    }
+  })
+}
+
 async function markChatAsRead(chatId) {
   await fetch(`/api/messages/chat/${chatId}/read`, {
     method: 'POST',
@@ -165,7 +192,21 @@ async function loadMessages(chatId) {
     const isOwn = msg.senderId === currentUser.userId
     const row = document.createElement('div')
     row.className = `chat-message-row ${isOwn ? 'outgoing' : 'incoming'}`
-    row.innerHTML = `<div class="chat-bubble">${msg.messageText}</div>`
+
+    let statusHtml = ''
+    if (isOwn) {
+        const readByOther = msg.statuses?.find(
+            s => s.userId !== currentUser.userId && s.readAt !== null
+        )
+        statusHtml = `<div class="message-status ${readByOther ? 'read' : ''}">✓✓</div>`
+    }
+
+    row.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:${isOwn ? 'flex-end' : 'flex-start'};">
+        <div class="chat-bubble">${msg.messageText}</div>
+        ${statusHtml}
+      </div>
+    `
     chatArea.appendChild(row)
   })
 
@@ -200,10 +241,14 @@ async function sendMessage(text) {
   const emptyMsg = chatArea.querySelector('p')
   if (emptyMsg) emptyMsg.remove()
 
-  // append the message to the UI immediately
   const row = document.createElement('div')
   row.className = 'chat-message-row outgoing'
-  row.innerHTML = `<div class="chat-bubble">${text}</div>`
+  row.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:flex-end;">
+      <div class="chat-bubble">${text}</div>
+      <div class="message-status">✓✓</div>
+    </div>
+  `
   chatArea.appendChild(row)
   chatArea.scrollTop = chatArea.scrollHeight
 }
@@ -371,4 +416,5 @@ if (backBtn) {
 setTimeout(() => {
   loadChats()
   subscribeToUserChannel()
+  subscribeToReadReceipts()
 }, 100)

@@ -4,7 +4,14 @@ import { DateTime } from 'luxon'
 
 export class MessageService {
   public async sendMessage(senderId: number, chatId: number, messageText: string) {
-    let message = await Message.create({ senderId, chatId, messageText })
+    const message = await Message.create({ senderId, chatId, messageText })
+
+    await MessageStatus.create({
+      messageId: message.id,
+      userId: senderId,
+      status: 'sent',
+      sentAt: DateTime.now()
+    })
     return message
   }
 
@@ -40,6 +47,14 @@ export class MessageService {
       messageStatus.userId = userId
       messageStatus.status = status
       messageStatus.sentAt = DateTime.now()
+
+      if (status === 'read') {
+        messageStatus.readAt = DateTime.now()
+      } else if (status === 'delivered') {
+        messageStatus.deliveredAt = DateTime.now()
+      } else if (status === 'failed') {
+        messageStatus.failedAt = DateTime.now()
+      }
     } else {
       messageStatus.status = status
       if (status === 'delivered') {

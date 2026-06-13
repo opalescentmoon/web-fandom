@@ -113,6 +113,7 @@ export default class MessagesController {
     }
 
     await this.messageService.markChatAsRead(chatId, userId)
+    await this.chatService.broadcastReadReceipts(chatId, userId)
     return response.ok({ message: 'Messages marked as read' })
   }
 }

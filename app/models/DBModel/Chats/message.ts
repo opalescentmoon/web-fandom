@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Media from '../media.js'
 import User from '../User/user.js'
 import Chat from './chat.js'
+import MessageStatus from './message_status.js'
 
 export default class Message extends BaseModel {
   @column({ isPrimary: true, columnName: 'message_id' })
@@ -41,4 +42,7 @@ export default class Message extends BaseModel {
 
   @hasMany(() => User)
   public user!: HasMany<typeof User>
+
+  @hasMany(() => MessageStatus, { foreignKey: 'messageId' })
+  public statuses!: HasMany<typeof MessageStatus>
 }
