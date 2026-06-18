@@ -39,6 +39,13 @@ export class FandomService {
     return fandom
   }
 
+  public async editFandomImage(fandomId: number, thumbnailMediaId: number) {
+    const fandom = await Fandom.findOrFail(fandomId)
+    fandom.thumbnailMediaId = thumbnailMediaId
+    await fandom.save()
+    return fandom
+  }
+
   public async deleteFandom(fandomId: number) {
     const fandom = await Fandom.findOrFail(fandomId)
     await fandom.delete()

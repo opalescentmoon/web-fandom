@@ -21,9 +21,9 @@ export default class Fandom extends BaseModel {
 
   @belongsTo(() => Media, {
     foreignKey: 'thumbnailMediaId', // fandom.thumbnail_media_id
-    localKey: 'id',            // media.media_id
+    localKey: 'id', // media.media_id
   })
-declare thumbnailMedia: BelongsTo<typeof Media>
+  declare thumbnailMedia: BelongsTo<typeof Media>
 
   @belongsTo(() => Category, { foreignKey: 'categoryId' })
   public category!: BelongsTo<typeof Category>

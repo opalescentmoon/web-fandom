@@ -23,7 +23,7 @@ export default class FandomsController {
       const fandom = await this.fandomService.createFandom(fandomName, categoryId)
 
       return response.ok(fandom)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -40,7 +40,7 @@ export default class FandomsController {
       const result = await this.fandomService.joinFandom(user.userId, fandomId)
 
       return response.ok(result)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -54,9 +54,7 @@ export default class FandomsController {
       return response.badRequest({ error: 'Invalid categoryId' })
     }
 
-    const fandoms = await Fandom.query()
-      .where('category_id', categoryId)
-      .preload('thumbnailMedia')
+    const fandoms = await Fandom.query().where('category_id', categoryId).preload('thumbnailMedia')
 
     return response.ok(fandoms)
   }
@@ -90,7 +88,7 @@ export default class FandomsController {
 
       const fandom = await this.fandomService.editFandomName(fandomId, newName)
       return response.ok(fandom)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -111,7 +109,25 @@ export default class FandomsController {
 
       const fandom = await this.fandomService.editFandomCategory(fandomId, categoryId)
       return response.ok(fandom)
-    } catch (error) {
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
+    }
+  }
+
+  public async editFandomImage({ request, auth, response }: HttpContext) {
+    try {
+      const { fandomId, thumbnailMediaId } = request.only(['fandomId', 'thumbnailMediaId'])
+
+      const userId = auth.user!.userId
+      const isMod = await this.modService.checkMod(userId)
+
+      if (!isMod) {
+        return response.forbidden({ message: 'You are not a moderator' })
+      }
+
+      const fandom = await this.fandomService.editFandomImage(fandomId, thumbnailMediaId)
+      return response.ok(fandom)
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -132,7 +148,7 @@ export default class FandomsController {
 
       const fandom = await this.fandomService.deleteFandom(fandomId)
       return response.ok(fandom)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
