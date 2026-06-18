@@ -10,15 +10,9 @@ export default class FandomsController {
   /**
    * Create a new fandom
    */
-  public async create({ request, auth, response }: HttpContext) {
+  public async create({ request, response }: HttpContext) {
     try {
       const { fandomName, categoryId } = request.only(['fandomName', 'categoryId'])
-      const userId = auth.user!.userId
-      const isMod = await this.modService.checkMod(userId)
-
-      if (!isMod) {
-        return response.forbidden({ message: 'You are not a moderator' })
-      }
 
       const fandom = await this.fandomService.createFandom(fandomName, categoryId)
 
