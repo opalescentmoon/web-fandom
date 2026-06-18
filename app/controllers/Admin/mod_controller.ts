@@ -14,12 +14,13 @@ export default class ModController {
    */
   public async add({ request, response }: HttpContext) {
     const userId = request.input('user_id')
+    const fandomId = request.input('fandom_id')
 
-    if (!userId) {
-      return response.badRequest({ message: 'user_id is required' })
+    if (!userId || !fandomId) {
+      return response.badRequest({ message: 'user_id and fandom_id are required' })
     }
 
-    const mod = await this.modService.addMod(userId)
+    const mod = await this.modService.addMod(userId, fandomId)
     return response.created({ message: 'Moderator added', data: mod })
   }
 

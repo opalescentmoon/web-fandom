@@ -71,6 +71,11 @@ const shieldConfig = defineConfig({
       '/__transmit/subscribe', 
       '/__transmit/unsubscribe',
       '/__transmit/*',
+
+      '/api/fandom/create',
+      '/api/fandom/edit/name',
+      '/api/fandom/edit/category',
+      '/api/fandom/delete',
     ],
     enableXsrfCookie: false,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],

@@ -18,6 +18,7 @@
     data-initial-has-joined="{{ hasJoined ? 'true' : 'false' }}"
     data-active-tab="{{ activeTab ?? 'fanworks' }}"
     data-is-search="{{ $props.isSearch ? 'true' : 'false' }}"
+    data-fandom-category-id="{{ fandomCategoryId ?? '' }}"
     >
     <!-- Top red header -->
     <header class="fandom-header">
@@ -29,6 +30,7 @@
 
       <div class="fandom-header-center">
         <span class="fandom-name">{{ $props.fandomName || 'Fandom Name' }}</span>
+        <button class="icon-button fandom-mod-menu-btn" id="fandomModBtn" style="display:none;">···</button>
       </div>
 
       <button class="icon-button">
@@ -104,6 +106,46 @@
       <aside class="fandom-filter">
         {{{ await ($slots.filter?.() || '') }}}
       </aside>
+    </div>
+
+    <!-- Mod dropdown -->
+    <div class="fandom-mod-dropdown" id="fandomModDropdown" style="display:none;">
+      <button class="fandom-mod-option" id="fandomEditBtn">Edit Fandom</button>
+      <button class="fandom-mod-option fandom-mod-danger" id="fandomDeleteBtn">Delete Fandom</button>
+    </div>
+
+    <!-- Edit Fandom Modal -->
+    <div class="modal-overlay" id="editFandomOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Edit Fandom</h3>
+          <button class="modal-close" id="editFandomCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="editFandomError" class="modal-error" style="display:none;"></div>
+          <div class="modal-field">
+            <label class="modal-label">Fandom Name</label>
+            <input class="modal-input" type="text" id="editFandomName" />
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Category</label>
+            <select class="modal-input" id="editFandomCategory">
+              <option value="1">Anime &amp; Manga</option>
+              <option value="2">Books &amp; Literatures</option>
+              <option value="3">Cartoons &amp; Comics</option>
+              <option value="4">Movies</option>
+              <option value="5">Musics</option>
+              <option value="6">TV Shows</option>
+              <option value="7">Video Games</option>
+              <option value="8">Other Media</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="editFandomCancelBtn">Cancel</button>
+          <button class="modal-save-btn" id="editFandomSaveBtn">Save</button>
+        </div>
+      </div>
     </div>
 
     @include('components/auth_modal')
@@ -202,7 +244,6 @@
         </div>
       </div>
     </div>
-
 
     <script src="/js/script_fandom.js"></script>
   </body>

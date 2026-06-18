@@ -1,9 +1,12 @@
 import Fandom from '#models/DBModel/fandom'
 import User from '#models/DBModel/User/user'
+import { ModService } from './mod_service.js'
 
 export class FandomService {
-  public async createFandom(fandomName: string, categoryId: number) {
-    let fandom = await Fandom.create({ fandomName, categoryId })
+  public async createFandom(fandomName: string, categoryId: number, userId: number) {
+    const fandom = await Fandom.create({ fandomName, categoryId })
+    const modService = new ModService()
+    await modService.addMod(userId, fandom.fandomId)
     return fandom
   }
 

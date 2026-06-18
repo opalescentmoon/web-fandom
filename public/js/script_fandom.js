@@ -1020,3 +1020,178 @@ document.addEventListener('click', async (event) => {
     if (countEl) countEl.textContent = String(currentCount)
   }
 })
+
+// ===== MOD CHECK =====
+;(function () {
+  const fandomId = document.body.dataset.fandomId
+  const modBtn = document.getElementById('fandomModBtn')
+  if (!fandomId || !modBtn) return
+
+  const token = localStorage.getItem('accessToken')
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+  if (!token || !currentUser?.userId) return
+
+  fetch(`/api/mods/fandom/${fandomId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    },
+  })
+    .then(r => r.json())
+    .then(data => {
+      const mods = data?.data || []
+      const isMod = mods.some(m => m.userId === currentUser.userId)
+      if (isMod) modBtn.style.display = 'inline-block'
+    })
+    .catch(console.error)
+})()
+
+// ===== MOD DROPDOWN TOGGLE + EDIT/DELETE =====
+;(function () {
+  const modBtn = document.getElementById('fandomModBtn')
+  const dropdown = document.getElementById('fandomModDropdown')
+  const editBtn = document.getElementById('fandomEditBtn')
+  const deleteBtn = document.getElementById('fandomDeleteBtn')
+
+  const editOverlay = document.getElementById('editFandomOverlay')
+  const editCloseBtn = document.getElementById('editFandomCloseBtn')
+  const editCancelBtn = document.getElementById('editFandomCancelBtn')
+  const editSaveBtn = document.getElementById('editFandomSaveBtn')
+  const editNameInput = document.getElementById('editFandomName')
+  const editCategorySelect = document.getElementById('editFandomCategory')
+  const editErrorEl = document.getElementById('editFandomError')
+
+  const fandomId = document.body.dataset.fandomId
+  const token = localStorage.getItem('accessToken')
+
+  // dropdown toggle
+  if (modBtn && dropdown) {
+    modBtn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const isOpen = dropdown.style.display === 'block'
+      dropdown.style.display = isOpen ? 'none' : 'block'
+    })
+
+    document.addEventListener('click', () => {
+      dropdown.style.display = 'none'
+    })
+  }
+
+  // open edit modal
+  function openEditModal() {
+    if (!editOverlay) return
+    // prefill current values
+    if (editNameInput) editNameInput.value = document.body.dataset.fandomName || ''
+    if (editCategorySelect && document.body.dataset.fandomCategoryId) {
+      editCategorySelect.value = document.body.dataset.fandomCategoryId
+    }
+    if (editErrorEl) { editErrorEl.style.display = 'none'; editErrorEl.textContent = '' }
+    editOverlay.style.display = 'flex'
+  }
+
+  function closeEditModal() {
+    if (editOverlay) editOverlay.style.display = 'none'
+  }
+
+  if (editBtn) editBtn.addEventListener('click', openEditModal)
+  if (editCloseBtn) editCloseBtn.addEventListener('click', closeEditModal)
+  if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditModal)
+
+  if (editOverlay) {
+    editOverlay.addEventListener('click', (e) => {
+      if (e.target === editOverlay) closeEditModal()
+    })
+  }
+
+  // save edits
+  if (editSaveBtn) {
+    editSaveBtn.addEventListener('click', async () => {
+      const newName = editNameInput?.value.trim()
+      const newCategoryId = Number(editCategorySelect?.value)
+
+      if (!newName) {
+        editErrorEl.textContent = 'Fandom name cannot be empty.'
+        editErrorEl.style.display = 'block'
+        return
+      }
+
+      try {
+        // update name
+        const nameRes = await fetch('/api/fandom/edit/name', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fandomId: Number(fandomId), newName }),
+        })
+
+        if (!nameRes.ok) {
+          const data = await nameRes.json()
+          editErrorEl.textContent = data?.error || 'Failed to update name.'
+          editErrorEl.style.display = 'block'
+          return
+        }
+
+        // update category
+        const catRes = await fetch('/api/fandom/edit/category', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fandomId: Number(fandomId), categoryId: newCategoryId }),
+        })
+
+        if (!catRes.ok) {
+          const data = await catRes.json()
+          editErrorEl.textContent = data?.error || 'Failed to update category.'
+          editErrorEl.style.display = 'block'
+          return
+        }
+
+        closeEditModal()
+        alert('Fandom updated!')
+        const currentUrl = new URL(location.href)
+        currentUrl.searchParams.set('fandom_name', newName)
+        location.href = currentUrl.toString()
+      } catch (err) {
+        editErrorEl.textContent = 'Network error. Please try again.'
+        editErrorEl.style.display = 'block'
+      }
+    })
+  }
+
+  // delete fandom
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', async () => {
+      const confirmed = confirm('Are you sure you want to delete this fandom? This cannot be undone.')
+      if (!confirmed) return
+
+      try {
+        const res = await fetch('/api/fandom/delete', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fandomId: Number(fandomId) }),
+        })
+
+        if (!res.ok) {
+          const data = await res.json()
+          alert(data?.error || 'Failed to delete fandom.')
+          return
+        }
+
+        alert('Fandom deleted.')
+        location.href = '/'
+      } catch (err) {
+        alert('Network error. Please try again.')
+      }
+    })
+  }
+})()
