@@ -45,7 +45,7 @@ router.get('/', async ({ view, auth }) => {
 // FANWORKS
 router.get('/fanworks', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
-  const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  const fandom = await Fandom.query().where('fandom_name', fandomName).preload('thumbnailMedia').first()
   console.log(fandom)
   console.log('categoryId:', fandom?.categoryId, fandom?.$attributes?.categoryId)
   console.log('fandomCategoryId being passed:', String(fandom?.categoryId ?? ''))
@@ -67,6 +67,7 @@ router.get('/fanworks', async ({ request, view, auth }) => {
     activeTab: 'fanworks',
     fandomId,
     fandomCategoryId: fandom?.categoryId ?? null,
+    fandomThumbnailUrl: fandom?.thumbnailMedia?.fileUrl ?? null,
     hasJoined,
     user: auth.user,
     isSearch: false,
@@ -77,7 +78,7 @@ router.get('/fanworks', async ({ request, view, auth }) => {
 // WIKI
 router.get('/wiki', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
-  const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  const fandom = await Fandom.query().where('fandom_name', fandomName).preload('thumbnailMedia').first()
   const fandomId = fandom?.fandomId ?? null
 
   let hasJoined = false
@@ -96,6 +97,7 @@ router.get('/wiki', async ({ request, view, auth }) => {
     activeTab: 'wiki',
     fandomId,
     fandomCategoryId: fandom?.categoryId ?? null,
+    fandomThumbnailUrl: fandom?.thumbnailMedia?.fileUrl ?? null,
     hasJoined,
     user: auth.user,
     isSearch: false,
@@ -106,7 +108,7 @@ router.get('/wiki', async ({ request, view, auth }) => {
 // FORUM
 router.get('/forum', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
-  const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  const fandom = await Fandom.query().where('fandom_name', fandomName).preload('thumbnailMedia').first()
   const fandomId = fandom?.fandomId ?? null
 
   let hasJoined = false
@@ -125,6 +127,7 @@ router.get('/forum', async ({ request, view, auth }) => {
     activeTab: 'forum',
     fandomId,
     fandomCategoryId: fandom?.categoryId ?? null,
+    fandomThumbnailUrl: fandom?.thumbnailMedia?.fileUrl ?? null,
     hasJoined,
     user: auth.user,
     isSearch: false,
@@ -247,7 +250,7 @@ router
     router.post('/add/image', [FandomController, 'addMedia']).use(middleware.auth())
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
     router.put('/edit/image', [FandomController, 'editFandomImage']).use(middleware.auth())
-    router.delete('edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
+    router.delete('/edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
     router

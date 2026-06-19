@@ -1060,6 +1060,11 @@ document.addEventListener('click', async (event) => {
   const editNameInput = document.getElementById('editFandomName')
   const editCategorySelect = document.getElementById('editFandomCategory')
   const editErrorEl = document.getElementById('editFandomError')
+  const thumbnailInput = document.getElementById('editFandomThumbnailInput')
+  const thumbnailImg = document.getElementById('editFandomThumbnailImg')
+  const removeThumbnailBtn = document.getElementById('editFandomRemoveThumbnail')
+  let selectedThumbnailFile = null
+  let removeThumbnail = false
 
   const fandomId = document.body.dataset.fandomId
   const token = localStorage.getItem('accessToken')
@@ -1087,6 +1092,14 @@ document.addEventListener('click', async (event) => {
     }
     if (editErrorEl) { editErrorEl.style.display = 'none'; editErrorEl.textContent = '' }
     editOverlay.style.display = 'flex'
+    // prefill thumbnail preview if fandom already has one
+    removeThumbnail = false
+    selectedThumbnailFile = null
+    const currentThumbnail = document.body.dataset.fandomThumbnail
+    if (currentThumbnail && thumbnailImg) {
+      thumbnailImg.src = currentThumbnail
+      thumbnailImg.style.display = 'block'
+    }
   }
 
   function closeEditModal() {
@@ -1096,6 +1109,23 @@ document.addEventListener('click', async (event) => {
   if (editBtn) editBtn.addEventListener('click', openEditModal)
   if (editCloseBtn) editCloseBtn.addEventListener('click', closeEditModal)
   if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditModal)
+  if (thumbnailInput) {
+    thumbnailInput.addEventListener('change', () => {
+      selectedThumbnailFile = thumbnailInput.files?.[0] || null
+      if (!selectedThumbnailFile || !thumbnailImg) return
+      thumbnailImg.src = URL.createObjectURL(selectedThumbnailFile)
+      thumbnailImg.style.display = 'block'
+    })
+  }
+
+  if (removeThumbnailBtn) {
+    removeThumbnailBtn.addEventListener('click', () => {
+      selectedThumbnailFile = null
+      removeThumbnail = true
+      if (thumbnailImg) { thumbnailImg.src = ''; thumbnailImg.style.display = 'none' }
+      if (thumbnailInput) thumbnailInput.value = ''
+    })
+  }
 
   if (editOverlay) {
     editOverlay.addEventListener('click', (e) => {
@@ -1150,6 +1180,71 @@ document.addEventListener('click', async (event) => {
           editErrorEl.textContent = data?.error || 'Failed to update category.'
           editErrorEl.style.display = 'block'
           return
+        }
+
+        // upload new thumbnail if selected
+        if (selectedThumbnailFile) {
+          const fd = new FormData()
+          fd.append('media', selectedThumbnailFile)
+          fd.append('fandomId', fandomId)
+
+          const uploadRes = await fetch('/api/fandom/add/image', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: fd,
+          })
+          
+          const uploadData = await uploadRes.json()
+          
+          if (!uploadRes.ok) {
+            let errMsg = 'Failed to upload thumbnail.'
+            if (uploadRes.status === 400) {
+              errMsg = 'Invalid file. Please use JPG, JPEG, or PNG only.'
+            } else if (uploadRes.status === 500) {
+              errMsg = 'Server error. Please try again.'
+            }
+            editErrorEl.textContent = errMsg
+            editErrorEl.style.display = 'block'
+            return
+          }
+
+          // now update fandom with the new media url
+          const imageRes = await fetch('/api/fandom/edit/image', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              fandomId: Number(fandomId),
+              mediaUrl: uploadData.fileUrl,
+              mediaType: uploadData.mediaType,
+            }),
+          })
+
+          if (!imageRes.ok) {
+            const imageData = await imageRes.json()
+            editErrorEl.textContent = imageData?.error || 'Failed to update thumbnail.'
+            editErrorEl.style.display = 'block'
+            return
+          }
+        }
+
+        // handle remove thumbnail
+        if (removeThumbnail) {
+          await fetch('/api/fandom/edit/image/remove', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ fandomId: Number(fandomId) }),
+          })
         }
 
         closeEditModal()

@@ -113,9 +113,9 @@ export default class FandomsController {
     }
   }
 
-  public async addMedia({ params, request, response }: HttpContext) {
+  public async addMedia({ request, response }: HttpContext) {
     try {
-      const fandomId = Number(params.fandomId)
+      const fandomId = Number(request.input('fandomId'))
       if (!fandomId) return response.badRequest({ error: 'Invalid fandomId' })
 
       const file = request.file('media', {
@@ -154,9 +154,9 @@ export default class FandomsController {
   /**
    * Remove media
    */
-  public async removeMedia({ params, response }: HttpContext) {
+  public async removeMedia({ request, response }: HttpContext) {
     try {
-      const fandomId = Number(params.fandomId)
+      const fandomId = Number(request.input('fandomId'))
 
       const removed = await this.fandomService.removeFandomImage(fandomId)
       return response.ok(removed)
