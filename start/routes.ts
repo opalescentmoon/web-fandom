@@ -46,6 +46,9 @@ router.get('/', async ({ view, auth }) => {
 router.get('/fanworks', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
   const fandom = await Fandom.query().where('fandom_name', fandomName).first()
+  console.log(fandom)
+  console.log('categoryId:', fandom?.categoryId, fandom?.$attributes?.categoryId)
+  console.log('fandomCategoryId being passed:', String(fandom?.categoryId ?? ''))
   const fandomId = fandom?.fandomId ?? null
 
   let hasJoined = false
@@ -63,6 +66,7 @@ router.get('/fanworks', async ({ request, view, auth }) => {
     fandomName,
     activeTab: 'fanworks',
     fandomId,
+    fandomCategoryId: fandom?.categoryId ?? null,
     hasJoined,
     user: auth.user,
     isSearch: false,
@@ -91,6 +95,7 @@ router.get('/wiki', async ({ request, view, auth }) => {
     fandomName,
     activeTab: 'wiki',
     fandomId,
+    fandomCategoryId: fandom?.categoryId ?? null,
     hasJoined,
     user: auth.user,
     isSearch: false,
@@ -119,6 +124,7 @@ router.get('/forum', async ({ request, view, auth }) => {
     fandomName,
     activeTab: 'forum',
     fandomId,
+    fandomCategoryId: fandom?.categoryId ?? null,
     hasJoined,
     user: auth.user,
     isSearch: false,

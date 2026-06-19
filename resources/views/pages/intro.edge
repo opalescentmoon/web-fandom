@@ -36,6 +36,10 @@
 
     <section class="intro-section">
       <h2>EXPLORE</h2>
+      <p class="create-fandom-hint">
+        Don't see your fandom? 
+        <a href="#" id="openCreateFandom">Create one!</a>
+      </p>
       <div class="intro-card-grid" id="introFandomGrid">
         @each(fandom in fandoms)
           <a href="/fanworks?fandom_name={{ encodeURIComponent(fandom.fandomName) }}"
@@ -55,10 +59,48 @@
         @endeach
       </div>
     </section>
+    
+    <!-- Create Fandom Modal -->
+    <div class="modal-overlay" id="createFandomOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Create a Fandom</h3>
+          <button class="modal-close" id="closeCreateFandom">&times;</button>
+        </div>
 
+        <div class="modal-body">
+          <div id="createFandomError" class="modal-error" style="display:none;"></div>
 
+          <div class="modal-field">
+            <label class="modal-label">Fandom Name</label>
+            <input class="modal-input" type="text" id="createFandomName" placeholder="e.g. Honkai Star Rail" />
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Category</label>
+            <select class="modal-input" id="createFandomCategory">
+              <option value="">-- Select a category --</option>
+              <option value="1">Anime &amp; Manga</option>
+              <option value="2">Books &amp; Literatures</option>
+              <option value="3">Cartoons &amp; Comics</option>
+              <option value="4">Movies</option>
+              <option value="5">Musics</option>
+              <option value="6">TV Shows</option>
+              <option value="7">Video Games</option>
+              <option value="8">Other Media</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="closeCreateFandom2">Cancel</button>
+          <button class="modal-save-btn" id="submitCreateFandom">Create Fandom</button>
+        </div>
+      </div>
+    </div>
 @endslot
 @end
+
 
  {{--<section class="intro-section">
     <h2>RECENT</h2>

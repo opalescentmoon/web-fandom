@@ -13,11 +13,13 @@ export default class FandomsController {
   /**
    * Create a new fandom
    */
-  public async create({ request, response }: HttpContext) {
+  public async create({ request, auth, response }: HttpContext) {
     try {
-      const { fandomName, categoryId } = request.only(['fandomName', 'categoryId'])
+      const user = auth.user
+      if (!user) return response.unauthorized({ error: 'Not logged in' })
 
-      const fandom = await this.fandomService.createFandom(fandomName, categoryId)
+      const { fandomName, categoryId } = request.only(['fandomName', 'categoryId'])
+      const fandom = await this.fandomService.createFandom(fandomName, categoryId, user.userId)
 
       return response.ok(fandom)
     } catch (error: any) {

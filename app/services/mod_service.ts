@@ -2,8 +2,8 @@ import Moderator from '#models/DBModel/User/moderator'
 
 export class ModService {
   // Add a new moderator
-  public async addMod(userId: number) {
-    const mod = await Moderator.firstOrCreate({ userId })
+  public async addMod(userId: number, fandomId: number) {
+    const mod = await Moderator.create({ userId, fandomId })
     return mod
   }
 

@@ -342,3 +342,98 @@ updateCategoryActiveUI()
 loadFandoms().catch(console.error)
 })
 })
+
+// ===== CREATE FANDOM MODAL =====
+;(function () {
+  const overlay = document.getElementById('createFandomOverlay')
+  const openBtn = document.getElementById('openCreateFandom')
+  const closeBtns = [
+    document.getElementById('closeCreateFandom'),
+    document.getElementById('closeCreateFandom2'),
+  ]
+  const submitBtn = document.getElementById('submitCreateFandom')
+  const nameInput = document.getElementById('createFandomName')
+  const categorySelect = document.getElementById('createFandomCategory')
+  const errorEl = document.getElementById('createFandomError')
+
+  function openModal() {
+    if (!overlay) return
+    overlay.style.display = 'flex'
+  }
+
+  function closeModal() {
+    if (!overlay) return
+    overlay.style.display = 'none'
+    if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = '' }
+    if (nameInput) nameInput.value = ''
+    if (categorySelect) categorySelect.value = ''
+  }
+
+  if (openBtn) {
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault()
+      if (!window.IS_LOGGED_IN) {
+        openAuthModal('login')
+        return
+      }
+      openModal()
+    })
+  }
+
+  closeBtns.forEach(btn => { if (btn) btn.addEventListener('click', closeModal) })
+
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal()
+    })
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal()
+  })
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const fandomName = nameInput?.value.trim()
+      const categoryId = Number(categorySelect?.value)
+
+      if (!fandomName) {
+        errorEl.textContent = 'Please enter a fandom name.'
+        errorEl.style.display = 'block'
+        return
+      }
+      if (!categoryId) {
+        errorEl.textContent = 'Please select a category.'
+        errorEl.style.display = 'block'
+        return
+      }
+
+      const token = localStorage.getItem('accessToken')
+      try {
+        const res = await fetch('/api/fandom/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fandomName, categoryId }),
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          errorEl.textContent = data?.error || 'Something went wrong.'
+          errorEl.style.display = 'block'
+          return
+        }
+
+        closeModal()
+        alert(`Fandom "${fandomName}" created! You are now its moderator.`)
+        location.reload()
+      } catch (err) {
+        errorEl.textContent = 'Network error. Please try again.'
+        errorEl.style.display = 'block'
+      }
+    })
+  }
+})()
