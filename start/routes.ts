@@ -245,6 +245,8 @@ router
     router.get('/category', [FandomController, 'getByCategory'])
     router.get('/name', [FandomController, 'getByName'])
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
+    router.put('/edit/image', [FandomController, 'editFandomImage']).use(middleware.auth())
+    router.put('edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
     router
@@ -304,7 +306,7 @@ router
   })
   .prefix('/api/user')
   .use(middleware.auth())
-  
+
 //search user
 router.get('/api/users/search', [UserController, 'search']).use(middleware.auth())
 
