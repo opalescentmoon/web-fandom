@@ -4,6 +4,7 @@ import User from '#models/DBModel/User/user'
 import Like from '#models/DBModel/like'
 import Poll from '#models/DBModel/Polls/poll'
 import PollVote from '#models/DBModel/Polls/poll_vote'
+import { MediaService } from './media_service.js'
 
 export class PostService {
   // main post service
@@ -15,7 +16,7 @@ export class PostService {
     postType: string,
     contentId: number
   ) {
-    if (!parentId){
+    if (!parentId) {
       const user = await User.findOrFail(userId)
       const isMember = await user
         .related('fandoms')
@@ -85,12 +86,9 @@ export class PostService {
       })
       .firstOrFail()
 
-    const commentCount = await Post.query()
-    .where('parent_id', postId)
-    .count('* as total')
+    const commentCount = await Post.query().where('parent_id', postId).count('* as total')
 
     const total = Number((commentCount[0] as any).$extras?.total ?? 0)
-
 
     return {
       ...post.serialize(),
@@ -175,9 +173,7 @@ export class PostService {
     const countsByPost = new Map<number, Map<number, number>>()
 
     if (pollPostIds.length) {
-      const polls = await Poll.query()
-        .whereIn('post_id', pollPostIds)
-        .preload('options')
+      const polls = await Poll.query().whereIn('post_id', pollPostIds).preload('options')
 
       polls.forEach((poll) => pollByPostId.set(poll.postId, poll))
 
@@ -191,9 +187,7 @@ export class PostService {
 
       for (const r of voteCountRows as any[]) {
         const postId = Number(r.$extras?.post_id ?? r.post_id ?? r.postId)
-        const optionId = Number(
-          r.$extras?.poll_option_id ?? r.poll_option_id ?? r.pollOptionId
-        )
+        const optionId = Number(r.$extras?.poll_option_id ?? r.poll_option_id ?? r.pollOptionId)
         const total = Number(r.$extras?.total ?? r.total ?? 0)
 
         if (!countsByPost.has(postId)) countsByPost.set(postId, new Map())
@@ -213,9 +207,7 @@ export class PostService {
 
       for (const r of myVoteRows as any[]) {
         const postId = Number(r.$extras?.post_id)
-        const optId = Number(
-          r.pollOptionId ?? r.$extras?.poll_option_id ?? r.$extras?.pollOptionId
-        )
+        const optId = Number(r.pollOptionId ?? r.$extras?.poll_option_id ?? r.$extras?.pollOptionId)
         if (Number.isFinite(postId) && Number.isFinite(optId)) {
           myVoteByPostId.set(postId, optId)
         }
@@ -336,7 +328,9 @@ export class PostService {
         .whereIn('post_id', postIds)
         .select('post_id')
 
-      likedSet = new Set(likedRows.map((r: any) => Number(r.$extras?.post_id ?? r.post_id ?? r.postId)))
+      likedSet = new Set(
+        likedRows.map((r: any) => Number(r.$extras?.post_id ?? r.post_id ?? r.postId))
+      )
     }
 
     /**
@@ -371,9 +365,7 @@ export class PostService {
     const countsByPost = new Map<number, Map<number, number>>() // postId -> (optionId -> total)
 
     if (pollPostIds.length) {
-      const polls = await Poll.query()
-        .whereIn('post_id', pollPostIds)
-        .preload('options') // Poll must have hasMany options
+      const polls = await Poll.query().whereIn('post_id', pollPostIds).preload('options') // Poll must have hasMany options
 
       polls.forEach((poll) => pollByPostId.set(poll.postId, poll))
 
@@ -382,20 +374,13 @@ export class PostService {
         .join('poll_options', 'poll_options.id', 'poll_votes.poll_option_id')
         .join('polls', 'polls.id', 'poll_options.poll_id')
         .whereIn('polls.post_id', pollPostIds)
-        .select(
-          'polls.post_id as post_id',
-          'poll_votes.poll_option_id as poll_option_id'
-        )
+        .select('polls.post_id as post_id', 'poll_votes.poll_option_id as poll_option_id')
         .count('* as total')
         .groupBy('polls.post_id', 'poll_votes.poll_option_id')
 
       for (const r of voteCountRows as any[]) {
         const postId = Number(r.$extras?.post_id ?? r.post_id ?? r.postId)
-        const optionId = Number(
-          r.$extras?.poll_option_id ??
-          r.poll_option_id ??
-          r.pollOptionId
-        )
+        const optionId = Number(r.$extras?.poll_option_id ?? r.poll_option_id ?? r.pollOptionId)
         const total = Number(r.$extras?.total ?? r.total ?? 0)
 
         if (!countsByPost.has(postId)) countsByPost.set(postId, new Map())
@@ -411,18 +396,15 @@ export class PostService {
         .join('polls', 'polls.id', 'poll_options.poll_id')
         .where('poll_votes.user_id', userId)
         .whereIn('polls.post_id', pollPostIds)
-        .select(
-          'polls.post_id as post_id',
-          'poll_votes.poll_option_id as poll_option_id'
-        )
+        .select('polls.post_id as post_id', 'poll_votes.poll_option_id as poll_option_id')
 
       for (const r of myVoteRows as any[]) {
         const postId = Number(r.$extras?.post_id)
 
         const optId = Number(
-          r.pollOptionId ??               // main
-          r.$extras?.poll_option_id ??    // <-- fallback 
-          r.$extras?.pollOptionId         // <-- fallback
+          r.pollOptionId ?? // main
+            r.$extras?.poll_option_id ?? // <-- fallback
+            r.$extras?.pollOptionId // <-- fallback
         )
 
         if (Number.isFinite(postId) && Number.isFinite(optId)) {
@@ -430,7 +412,7 @@ export class PostService {
         }
       }
     }
-    
+
     /**
      * =========================
      * FINAL ATTACH
@@ -530,7 +512,7 @@ export class PostService {
       throw new Error('Media not found for this post.')
     }
 
-    await media.delete()
+    await MediaService.delete(mediaId)
   }
 
   // comments
@@ -557,12 +539,15 @@ export class PostService {
     branch?: string
   }) {
     const TAB_TO_CONTENT_NAME: Record<string, string> = {
-      fanworks: 'Fanwork',
+      fanworks: 'Fanworks',
       wiki: 'Official',
       forum: 'Forum',
     }
 
-    const key = String(q || '').replace(/^#/, '').trim().toLowerCase()
+    const key = String(q || '')
+      .replace(/^#/, '')
+      .trim()
+      .toLowerCase()
     if (!key) return []
 
     const query = Post.query()
@@ -600,5 +585,4 @@ export class PostService {
       ...p.$extras,
     }))
   }
-
 }

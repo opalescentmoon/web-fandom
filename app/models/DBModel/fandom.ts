@@ -17,7 +17,7 @@ export default class Fandom extends BaseModel {
   declare fandomName: string
 
   @column({ columnName: 'thumbnail_media_id' })
-  declare thumbnailMediaId: number
+  declare thumbnailMediaId: number | null
 
   @belongsTo(() => Media, {
     foreignKey: 'thumbnailMediaId', // fandom.thumbnail_media_id

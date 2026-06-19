@@ -1,7 +1,10 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { FandomService } from '#services/fandom_service'
 import { ModService } from '#services/mod_service'
+import { cuid } from '@adonisjs/core/helpers'
+import app from '@adonisjs/core/services/app'
 import Fandom from '#models/DBModel/fandom'
+import Media from '#models/DBModel/media'
 
 export default class FandomsController {
   private fandomService = new FandomService()
@@ -108,9 +111,75 @@ export default class FandomsController {
     }
   }
 
+  public async addMedia({ params, request, response }: HttpContext) {
+    try {
+      const fandomId = Number(params.fandomId)
+      if (!fandomId) return response.badRequest({ error: 'Invalid fandomId' })
+
+      const file = request.file('media', {
+        size: '500mb',
+        extnames: ['jpg', 'jpeg', 'png'],
+      })
+
+      if (!file) {
+        return response.badRequest({ error: 'No media file uploaded (field name must be "media")' })
+      }
+
+      const fileName = `${cuid()}.${file.extname}`
+      const uploadDir = app.makePath('public/images/media_assets')
+
+      await file.move(uploadDir, { name: fileName })
+
+      if (!file.isValid) {
+        return response.badRequest({ error: file.errors })
+      }
+
+      // Determine type
+      const mediaType = file.type === 'video' ? 'video' : 'image'
+
+      // Public URL path stored in DB
+      const fileUrl = `/images/media_assets/${fileName}`
+
+      // create media row w/o postId
+      const media = await Media.create({ fileUrl, mediaType })
+
+      return response.ok(media)
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
+    }
+  }
+
+  public async media({ params, response }: HttpContext) {
+    try {
+      const fandomId = Number(params.fandomId)
+      const mediaUrl = String(params.mediaUrl)
+      const mediaType = String(params.mediaType)
+
+      const media = await this.fandomService.editFandomImage(fandomId, mediaUrl, mediaType)
+      return response.ok(media)
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
+    }
+  }
+
+  /**
+   * Remove media
+   */
+  public async removeMedia({ params, response }: HttpContext) {
+    try {
+      const fandomId = Number(params.fandomId)
+
+      const removed = await this.fandomService.removeFandomImage(fandomId)
+      return response.ok(removed)
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
+    }
+  }
+
   public async editFandomImage({ request, auth, response }: HttpContext) {
     try {
-      const { fandomId, thumbnailMediaId } = request.only(['fandomId', 'thumbnailMediaId'])
+      const { fandomId } = request.only(['fandomId', 'thumbnailMediaId'])
+      const { mediaUrl, mediaType } = request.only(['mediaUrl', 'mediaType'])
 
       const userId = auth.user!.userId
       const isMod = await this.modService.checkMod(userId)
@@ -119,7 +188,7 @@ export default class FandomsController {
         return response.forbidden({ message: 'You are not a moderator' })
       }
 
-      const fandom = await this.fandomService.editFandomImage(fandomId, thumbnailMediaId)
+      const fandom = await this.fandomService.editFandomImage(fandomId, mediaUrl, mediaType)
       return response.ok(fandom)
     } catch (error: any) {
       return response.badRequest({ error: error.message })

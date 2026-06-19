@@ -1,5 +1,7 @@
 import Fandom from '#models/DBModel/fandom'
+import Media from '#models/DBModel/media'
 import User from '#models/DBModel/User/user'
+import { MediaService } from './media_service.js'
 
 export class FandomService {
   public async createFandom(fandomName: string, categoryId: number) {
@@ -39,10 +41,33 @@ export class FandomService {
     return fandom
   }
 
-  public async editFandomImage(fandomId: number, thumbnailMediaId: number) {
+  public async editFandomImage(fandomId: number, mediaUrl: string, mediaType: string) {
     const fandom = await Fandom.findOrFail(fandomId)
-    fandom.thumbnailMediaId = thumbnailMediaId
+
+    const oldThumbnail = fandom.thumbnailMediaId
+    const newThumbnail = await Media.create({ fileUrl: mediaUrl, mediaType })
+
+    fandom.thumbnailMediaId = newThumbnail.id
     await fandom.save()
+
+    if (oldThumbnail) {
+      await MediaService.delete(oldThumbnail)
+    }
+
+    return fandom
+  }
+
+  public async removeFandomImage(fandomId: number) {
+    const fandom = await Fandom.findOrFail(fandomId)
+    const oldThumbnail = fandom.thumbnailMediaId
+
+    if (!oldThumbnail) return fandom
+
+    fandom.thumbnailMediaId = null
+    await fandom.save()
+
+    await MediaService.delete(oldThumbnail)
+
     return fandom
   }
 
