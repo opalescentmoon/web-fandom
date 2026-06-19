@@ -151,19 +151,6 @@ export default class FandomsController {
     }
   }
 
-  public async media({ params, response }: HttpContext) {
-    try {
-      const fandomId = Number(params.fandomId)
-      const mediaUrl = String(params.mediaUrl)
-      const mediaType = String(params.mediaType)
-
-      const media = await this.fandomService.editFandomImage(fandomId, mediaUrl, mediaType)
-      return response.ok(media)
-    } catch (error: any) {
-      return response.badRequest({ error: error.message })
-    }
-  }
-
   /**
    * Remove media
    */

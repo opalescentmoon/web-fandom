@@ -244,9 +244,10 @@ router
     router.post('/join', [FandomController, 'join']).use(middleware.auth())
     router.get('/category', [FandomController, 'getByCategory'])
     router.get('/name', [FandomController, 'getByName'])
+    router.post('/add/image', [FandomController, 'addMedia']).use(middleware.auth())
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
     router.put('/edit/image', [FandomController, 'editFandomImage']).use(middleware.auth())
-    router.put('edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
+    router.delete('edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
     router
