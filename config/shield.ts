@@ -68,7 +68,7 @@ const shieldConfig = defineConfig({
 
       '/__transmit',
       '/__transmit/events',
-      '/__transmit/subscribe', 
+      '/__transmit/subscribe',
       '/__transmit/unsubscribe',
       '/__transmit/*',
 
@@ -76,6 +76,7 @@ const shieldConfig = defineConfig({
       '/api/fandom/edit/name',
       '/api/fandom/edit/category',
       '/api/fandom/add/image',
+      '/api/fandom/image/cleanup',
       '/api/fandom/edit/image',
       '/api/fandom/edit/image/remove',
       '/api/fandom/delete',
