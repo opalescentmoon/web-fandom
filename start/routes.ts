@@ -45,10 +45,10 @@ router.get('/', async ({ view, auth }) => {
 // FANWORKS
 router.get('/fanworks', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
-  const fandom = await Fandom.query().where('fandom_name', fandomName).preload('thumbnailMedia').first()
-  console.log(fandom)
-  console.log('categoryId:', fandom?.categoryId, fandom?.$attributes?.categoryId)
-  console.log('fandomCategoryId being passed:', String(fandom?.categoryId ?? ''))
+  const fandom = await Fandom.query()
+    .where('fandom_name', fandomName)
+    .preload('thumbnailMedia')
+    .first()
   const fandomId = fandom?.fandomId ?? null
 
   let hasJoined = false
@@ -78,7 +78,10 @@ router.get('/fanworks', async ({ request, view, auth }) => {
 // WIKI
 router.get('/wiki', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
-  const fandom = await Fandom.query().where('fandom_name', fandomName).preload('thumbnailMedia').first()
+  const fandom = await Fandom.query()
+    .where('fandom_name', fandomName)
+    .preload('thumbnailMedia')
+    .first()
   const fandomId = fandom?.fandomId ?? null
 
   let hasJoined = false
@@ -108,7 +111,10 @@ router.get('/wiki', async ({ request, view, auth }) => {
 // FORUM
 router.get('/forum', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
-  const fandom = await Fandom.query().where('fandom_name', fandomName).preload('thumbnailMedia').first()
+  const fandom = await Fandom.query()
+    .where('fandom_name', fandomName)
+    .preload('thumbnailMedia')
+    .first()
   const fandomId = fandom?.fandomId ?? null
 
   let hasJoined = false
@@ -250,6 +256,7 @@ router
     router.post('/add/image', [FandomController, 'addMedia']).use(middleware.auth())
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())
     router.put('/edit/image', [FandomController, 'editFandomImage']).use(middleware.auth())
+    router.post('/image/cleanup', [FandomController, 'cleanupUnusedMedia']).use(middleware.auth())
     router.delete('/edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())

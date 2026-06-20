@@ -1221,8 +1221,7 @@ document.addEventListener('click', async (event) => {
             },
             body: JSON.stringify({
               fandomId: Number(fandomId),
-              mediaUrl: uploadData.fileUrl,
-              mediaType: uploadData.mediaType,
+              mediaId: Number(uploadData.id),
             }),
           })
 

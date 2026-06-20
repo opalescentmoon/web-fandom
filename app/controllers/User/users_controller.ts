@@ -69,7 +69,6 @@ export default class UsersController {
     const user = await User.findOrFail(authUser.userId)
 
     await user.refresh()
-    console.log('testfile123')
 
     const file = request.file('avatar', {
       size: '5mb',

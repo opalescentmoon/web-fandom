@@ -5,6 +5,8 @@ import { cuid } from '@adonisjs/core/helpers'
 import app from '@adonisjs/core/services/app'
 import Fandom from '#models/DBModel/fandom'
 import Media from '#models/DBModel/media'
+import { MediaService } from '#services/media_service'
+import fs from 'node:fs/promises'
 
 export default class FandomsController {
   private fandomService = new FandomService()
@@ -123,8 +125,17 @@ export default class FandomsController {
         extnames: ['jpg', 'jpeg', 'png'],
       })
 
-      if (!file) {
-        return response.badRequest({ error: 'No media file uploaded (field name must be "media")' })
+      if (!file || !file.isValid) {
+        if (file && file.tmpPath) {
+          try {
+            await fs.unlink(file.tmpPath)
+          } catch (err: any) {
+            console.error('Failed to remove temp file:', err.message)
+          }
+        }
+        return response.badRequest({
+          message: 'Invalid file type. Only JPG, JPEG, and PNG are allowed.',
+        })
       }
 
       const fileName = `${cuid()}.${file.extname}`
@@ -168,7 +179,7 @@ export default class FandomsController {
   public async editFandomImage({ request, auth, response }: HttpContext) {
     try {
       const { fandomId } = request.only(['fandomId', 'thumbnailMediaId'])
-      const { mediaUrl, mediaType } = request.only(['mediaUrl', 'mediaType'])
+      const { mediaId } = request.only(['mediaId'])
 
       const userId = auth.user!.userId
       const isMod = await this.modService.checkMod(userId, fandomId)
@@ -177,11 +188,27 @@ export default class FandomsController {
         return response.forbidden({ message: 'You are not a moderator' })
       }
 
-      const fandom = await this.fandomService.editFandomImage(fandomId, mediaUrl, mediaType)
+      const fandom = await this.fandomService.editFandomImage(fandomId, mediaId)
       return response.ok(fandom)
     } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
+  }
+
+  // for media cleanup if thumbnail is rejected
+  public async cleanupUnusedMedia({ request, response }: HttpContext) {
+    const { mediaId } = request.only(['mediaId'])
+
+    if (mediaId) {
+      try {
+        await MediaService.deleteThumbnail(mediaId)
+        return response.ok({ message: 'Unused media cleaned up successfully' })
+      } catch (error) {
+        return response.badRequest({ error: 'Failed to purge media asset' })
+      }
+    }
+
+    return response.badRequest({ error: 'No mediaId provided' })
   }
 
   /**

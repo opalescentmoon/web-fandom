@@ -1,9 +1,7 @@
 import Fandom from '#models/DBModel/fandom'
-import Media from '#models/DBModel/media'
 import User from '#models/DBModel/User/user'
 import { ModService } from './mod_service.js'
 import { MediaService } from './media_service.js'
-import db from '@adonisjs/lucid/services/db'
 
 export class FandomService {
   public async createFandom(fandomName: string, categoryId: number, userId: number) {
@@ -45,30 +43,23 @@ export class FandomService {
     return fandom
   }
 
-  public async editFandomImage(fandomId: number, mediaUrl: string, mediaType: string) {
-    const trx = await db.transaction()
+  public async editFandomImage(fandomId: number, thumbnailMediaId: number) {
+    const fandom = await Fandom.findOrFail(fandomId)
 
-    try {
-      const fandom = await Fandom.findOrFail(fandomId)
+    const oldThumbnail = fandom.thumbnailMediaId
 
-      const oldThumbnail = fandom.thumbnailMediaId
-      const newThumbnail = await Media.create({ fileUrl: mediaUrl, mediaType }, { client: trx })
-
-      fandom.thumbnailMediaId = newThumbnail.id
-      fandom.useTransaction(trx)
-      await fandom.save()
-
-      await trx.commit()
-
-      if (oldThumbnail) {
-        await MediaService.deleteThumbnail(oldThumbnail)
-      }
-
+    if (oldThumbnail === thumbnailMediaId) {
       return fandom
-    } catch (error: any) {
-      await trx.rollback()
-      throw error
     }
+
+    fandom.thumbnailMediaId = thumbnailMediaId
+    await fandom.save()
+
+    if (oldThumbnail) {
+      await MediaService.deleteThumbnail(oldThumbnail)
+    }
+
+    return fandom
   }
 
   public async removeFandomImage(fandomId: number) {
@@ -89,11 +80,11 @@ export class FandomService {
     const fandom = await Fandom.findOrFail(fandomId)
     const oldThumbnail = fandom.thumbnailMediaId
 
+    await fandom.delete()
+
     if (oldThumbnail) {
       await MediaService.deleteThumbnail(oldThumbnail)
     }
-
-    await fandom.delete()
     return fandom
   }
 }
