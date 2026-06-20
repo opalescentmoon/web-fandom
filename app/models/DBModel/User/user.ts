@@ -35,7 +35,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare bio: string
 
   @column({ columnName: 'profile_picture' })
-  declare profilePicture: URL | null
+  declare profilePicture: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

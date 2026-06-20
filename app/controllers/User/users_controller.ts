@@ -6,7 +6,6 @@ import fs from 'node:fs/promises'
 import { join } from 'node:path'
 import Database from '@adonisjs/lucid/services/db'
 import User from '#models/DBModel/User/user'
-import { fileURLToPath } from 'node:url'
 
 export default class UsersController {
   private userService = new UserService()
@@ -64,8 +63,13 @@ export default class UsersController {
   }
 
   public async updateProfilePicture({ request, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) return response.unauthorized({ error: 'Not logged in' })
+    const authUser = auth.user
+    if (!authUser) return response.unauthorized({ error: 'Not logged in' })
+
+    const user = await User.findOrFail(authUser.userId)
+
+    await user.refresh()
+    console.log('testfile123')
 
     const file = request.file('avatar', {
       size: '5mb',
@@ -76,12 +80,7 @@ export default class UsersController {
 
     if (user.profilePicture) {
       try {
-        const oldURL = new URL(user.profilePicture)
-        const relativePath = oldURL.pathname
-
-        const publicPath = fileURLToPath(app.makePath('public'))
-
-        const oldFilePath = join(publicPath, relativePath)
+        const oldFilePath = join(process.cwd(), 'public', user.profilePicture)
         await fs.unlink(oldFilePath)
       } catch (error: any) {
         response.badRequest({ error: error.message })

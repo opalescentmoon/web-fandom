@@ -8,9 +8,11 @@ export class UserService {
     data: { displayName?: string; bio?: string; profilePicture?: string }
   ) {
     const user = await User.findOrFail(userId)
-    if (typeof data.bio !== 'undefined') user.bio = data.bio
-    if (typeof data.displayName !== 'undefined') user.displayName = data.displayName
-    if (typeof data.profilePicture !== 'undefined') user.profilePicture = data.profilePicture as any
+    const updates: Record<string, any> = {}
+    if (typeof data.bio !== 'undefined') updates.bio = data.bio
+    if (typeof data.displayName !== 'undefined') updates.displayName = data.displayName
+    if (typeof data.profilePicture !== 'undefined') updates.profilePicture = data.profilePicture
+    user.merge(updates)
     await user.save()
     return user
   }

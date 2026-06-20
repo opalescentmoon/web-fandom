@@ -3,8 +3,6 @@ import type { NextFn } from '@adonisjs/core/types/http'
 
 export default class AuthMiddleware {
   public async handle(ctx: HttpContext, next: NextFn) {
-    console.log('AUTH HEADER →', ctx.request.header('authorization'))
-
     if (!ctx.auth) {
       ctx.logger.error(
         'ctx.auth is undefined. Check that initialize_auth_middleware runs before auth middleware.'
