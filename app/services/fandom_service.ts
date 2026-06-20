@@ -69,7 +69,7 @@ export class FandomService {
     fandom.thumbnailMediaId = null
     await fandom.save()
 
-    await MediaService.delete(oldThumbnail)
+    await MediaService.deleteThumbnail(oldThumbnail)
 
     return fandom
   }

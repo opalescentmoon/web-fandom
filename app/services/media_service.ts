@@ -14,4 +14,16 @@ export class MediaService {
       await media.delete()
     }
   }
+
+  public static async deleteThumbnail(mediaId: number) {
+    const media = await Media.find(mediaId)
+    if (!media) return
+
+    if (media.fileUrl.startsWith('/images/media_assets/')) {
+      const filePath = path.join(process.cwd(), 'public', media.fileUrl)
+      await fs.unlink(filePath)
+
+      await media.delete()
+    }
+  }
 }

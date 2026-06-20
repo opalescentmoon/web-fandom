@@ -2,8 +2,11 @@ import { HttpContext } from '@adonisjs/core/http'
 import { UserService } from '#services/user_service'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
+import fs from 'node:fs/promises'
+import { join } from 'node:path'
 import Database from '@adonisjs/lucid/services/db'
 import User from '#models/DBModel/User/user'
+import { fileURLToPath } from 'node:url'
 
 export default class UsersController {
   private userService = new UserService()
@@ -70,6 +73,20 @@ export default class UsersController {
     })
 
     if (!file) return response.badRequest({ error: 'No file uploaded' })
+
+    if (user.profilePicture) {
+      try {
+        const oldURL = new URL(user.profilePicture)
+        const relativePath = oldURL.pathname
+
+        const publicPath = fileURLToPath(app.makePath('public'))
+
+        const oldFilePath = join(publicPath, relativePath)
+        await fs.unlink(oldFilePath)
+      } catch (error: any) {
+        response.badRequest({ error: error.message })
+      }
+    }
 
     const fileName = `${cuid()}.${file.extname}`
     await file.move(app.makePath('public/uploads/avatars'), { name: fileName })
