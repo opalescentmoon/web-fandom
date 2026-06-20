@@ -7,7 +7,9 @@ export default class SearchController {
   public async index({ request, response }: HttpContext) {
     try {
       const fandomId = Number(request.input('fandomId'))
-      const q = String(request.input('q') || '').trim().replace(/^#/, '')
+      const q = String(request.input('q') || '')
+        .trim()
+        .replace(/^#/, '')
       const tab = String(request.input('tab') || '')
       const branch = String(request.input('branch') || '')
 
@@ -23,7 +25,7 @@ export default class SearchController {
       })
 
       return response.ok(posts)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }

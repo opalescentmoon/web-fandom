@@ -14,19 +14,19 @@ export default class UsersController {
   }
 
   public async getById({ params, response }: HttpContext) {
-  try {
-    const user = await User.findOrFail(Number(params.userId))
-    return response.ok({
-      userId: user.userId,
-      username: user.username,
-      displayName: user.displayName,
-      bio: user.bio,
-      profilePicture: user.profilePicture,
-    })
-  } catch (error: any) {
-    return response.notFound({ error: 'User not found' })
+    try {
+      const user = await User.findOrFail(Number(params.userId))
+      return response.ok({
+        userId: user.userId,
+        username: user.username,
+        displayName: user.displayName,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
+      })
+    } catch (error: any) {
+      return response.notFound({ error: 'User not found' })
+    }
   }
-}
 
   public async joinedFandoms({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()

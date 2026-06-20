@@ -79,7 +79,7 @@ export default class FandomsController {
     try {
       const { fandomId, newName } = request.only(['fandomId', 'newName'])
       const userId = auth.user!.userId
-      const isMod = await this.modService.checkMod(userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({ message: 'You are not a moderator' })
@@ -100,7 +100,7 @@ export default class FandomsController {
       const { fandomId, categoryId } = request.only(['fandomId', 'categoryId'])
 
       const userId = auth.user!.userId
-      const isMod = await this.modService.checkMod(userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({ message: 'You are not a moderator' })
@@ -171,7 +171,7 @@ export default class FandomsController {
       const { mediaUrl, mediaType } = request.only(['mediaUrl', 'mediaType'])
 
       const userId = auth.user!.userId
-      const isMod = await this.modService.checkMod(userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({ message: 'You are not a moderator' })
@@ -192,7 +192,7 @@ export default class FandomsController {
       const { fandomId } = request.only(['fandomId'])
 
       const userId = auth.user!.userId
-      const isMod = await this.modService.checkMod(userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({ message: 'You are not a moderator' })

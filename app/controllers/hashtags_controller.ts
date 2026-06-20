@@ -12,7 +12,7 @@ export default class HashtagsController {
       const { tag } = request.only(['tag'])
       const hashtag = await this.hashtagService.findOrCreateHashtag(tag)
       return response.ok(hashtag)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -25,7 +25,7 @@ export default class HashtagsController {
       const { tag } = request.only(['tag'])
       const hashtag = await this.hashtagService.getHashtagByName(tag)
       return response.ok(hashtag)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -37,7 +37,7 @@ export default class HashtagsController {
     try {
       const hashtags = await this.hashtagService.getAllHashtags()
       return response.ok(hashtags)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -54,7 +54,7 @@ export default class HashtagsController {
 
       const result = await this.hashtagService.getTrendingByFandom(fandomId, limit)
       return response.ok(result)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -65,14 +65,14 @@ export default class HashtagsController {
   public async usedInBranch({ request, response }: HttpContext) {
     try {
       const fandomId = Number(request.input('fandomId'))
-      const branch = String(request.input('branch') || '').trim()   // Lore / World
-      if (!fandomId || !branch) return response.badRequest({ error: 'fandomId and branch are required' })
+      const branch = String(request.input('branch') || '').trim() // Lore / World
+      if (!fandomId || !branch)
+        return response.badRequest({ error: 'fandomId and branch are required' })
 
       const tags = await this.hashtagService.usedInBranch({ fandomId, branch })
       return response.ok(tags)
-    } catch (e) {
-      return response.internalServerError({ error: e.message })
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
     }
   }
-
 }

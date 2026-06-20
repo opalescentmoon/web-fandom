@@ -29,7 +29,8 @@ export default class ModController {
    */
   public async check({ params, response }: HttpContext) {
     const userId = Number(params.userId)
-    const isMod = await this.modService.checkMod(userId)
+    const fandomId = Number(params.fandomId)
+    const isMod = await this.modService.checkMod(userId, fandomId)
 
     return response.ok({ userId, isMod })
   }

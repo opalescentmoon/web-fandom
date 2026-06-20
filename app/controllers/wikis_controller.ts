@@ -12,10 +12,10 @@ export default class WikisController {
    */
   public async createWiki({ auth, request, response }: HttpContext) {
     try {
-      const user = auth.user!
+      const userId = auth.user!.userId
       const { fandomId, contentId, title } = request.only(['fandomId', 'contentId', 'title'])
 
-      const isMod = await this.modService.checkMod(user.userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({
@@ -24,7 +24,7 @@ export default class WikisController {
         })
       }
 
-      const wiki = await this.wikiService.createWiki(user.userId, fandomId, contentId, title)
+      const wiki = await this.wikiService.createWiki(userId, fandomId, contentId, title)
 
       return response.created({
         success: true,
@@ -46,11 +46,12 @@ export default class WikisController {
    */
   public async addWikiPage({ auth, params, request, response }: HttpContext) {
     try {
-      const user = auth.user!
+      const userId = auth.user!.userId
+      const { fandomId } = request.only(['fandomId'])
       const { wikiId } = params
       const { content } = request.only(['content'])
 
-      const isMod = await this.modService.checkMod(user.userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({
@@ -81,15 +82,11 @@ export default class WikisController {
    */
   public async editWikiPage({ auth, params, request, response }: HttpContext) {
     try {
-      const user = auth.user!
+      const userId = auth.user!.userId
       const { wikiId } = params
       const { content } = request.only(['content'])
 
-      const wikiPage = await this.wikiService.editWikiPage(
-        Number.parseInt(wikiId),
-        content,
-        user.userId
-      )
+      const wikiPage = await this.wikiService.editWikiPage(Number.parseInt(wikiId), content, userId)
 
       return response.created({
         success: true,
@@ -111,10 +108,11 @@ export default class WikisController {
    */
   public async approveWikiEdit({ auth, params, response }: HttpContext) {
     try {
-      const user = auth.user!
+      const userId = auth.user!.userId
+      const fandomId = Number(params.fandomId)
       const { editId } = params
 
-      const isMod = await this.modService.checkMod(user.userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({
@@ -123,7 +121,7 @@ export default class WikisController {
         })
       }
 
-      const wikiEdit = await this.wikiService.approveWikiEdit(Number.parseInt(editId), user.userId)
+      const wikiEdit = await this.wikiService.approveWikiEdit(Number.parseInt(editId), userId)
 
       return response.created({
         success: true,
@@ -145,10 +143,11 @@ export default class WikisController {
    */
   public async rejectWikiEdit({ auth, params, response }: HttpContext) {
     try {
-      const user = auth.user!
+      const userId = auth.user!.userId
+      const fandomId = Number(params.fandomId)
       const { editId } = params
 
-      const isMod = await this.modService.checkMod(user.userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({
@@ -157,7 +156,7 @@ export default class WikisController {
         })
       }
 
-      const wikiEdit = await this.wikiService.rejectWikiEdit(Number.parseInt(editId), user.userId)
+      const wikiEdit = await this.wikiService.rejectWikiEdit(Number.parseInt(editId), userId)
 
       return response.created({
         success: true,
@@ -179,10 +178,11 @@ export default class WikisController {
    */
   public async deleteWiki({ auth, params, response }: HttpContext) {
     try {
-      const user = auth.user!
+      const userId = auth.user!.userId
+      const fandomId = Number(params.fandomId)
       const { wikiId } = params
 
-      const isMod = await this.modService.checkMod(user.userId)
+      const isMod = await this.modService.checkMod(userId, fandomId)
 
       if (!isMod) {
         return response.forbidden({
@@ -191,7 +191,7 @@ export default class WikisController {
         })
       }
 
-      const wiki = await this.wikiService.deleteWiki(Number.parseInt(wikiId), user.userId)
+      const wiki = await this.wikiService.deleteWiki(Number.parseInt(wikiId), userId)
 
       return response.ok({
         success: true,

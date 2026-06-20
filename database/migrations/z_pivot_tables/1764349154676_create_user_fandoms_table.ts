@@ -7,12 +7,14 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.integer('fandom_id').unsigned()
-      // .references('fandom_id')
-      // .inTable('fandoms')
-      // .onDelete('CASCADE')
+      table
+        .integer('fandom_id')
+        .unsigned()
+        .references('fandom_id')
+        .inTable('fandoms')
+        .onDelete('CASCADE')
 
-      table.integer('user_id').unsigned() // .references('user_id').inTable('users').onDelete('CASCADE')
+      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
 
       table.unique(['fandom_id', 'user_id'])
     })

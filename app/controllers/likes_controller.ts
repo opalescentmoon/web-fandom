@@ -24,7 +24,7 @@ export default class LikesController {
   public async toggle({ request, auth, response }: HttpContext) {
     const userId = auth.user!.userId
     const postId = Number(request.input('post_id') ?? request.input('postId'))
-     if (!postId) {
+    if (!postId) {
       return response.badRequest({ message: 'postId is required' })
     }
 

@@ -12,7 +12,7 @@ export default class PollsController {
       const { postId, question } = request.only(['postId', 'question'])
       const poll = await this.pollService.createPoll(postId, question || '')
       return response.ok(poll)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -25,7 +25,7 @@ export default class PollsController {
       const { pollId, options } = request.only(['pollId', 'options'])
       const created = await this.pollService.addPollOptions(pollId, options)
       return response.ok(created)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -38,7 +38,7 @@ export default class PollsController {
       const { optionId } = request.only(['optionId'])
       const result = await this.pollService.removePollOption(optionId)
       return response.ok(result)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -56,7 +56,7 @@ export default class PollsController {
       const result = await this.pollService.votePoll(pollId, user.userId, pollOptionId)
 
       return response.ok(result)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }
@@ -69,7 +69,7 @@ export default class PollsController {
       const { pollId } = request.only(['pollId'])
       const poll = await this.pollService.deletePoll(pollId)
       return response.ok(poll)
-    } catch (error) {
+    } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
   }

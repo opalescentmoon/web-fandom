@@ -7,8 +7,11 @@ export class ModService {
     return mod
   }
 
-  public async checkMod(userId: number): Promise<boolean> {
-    const mod = await Moderator.query().where('user_id', userId).first()
+  public async checkMod(userId: number, fandomId: number): Promise<boolean> {
+    const mod = await Moderator.query()
+      .where('user_id', userId)
+      .where('fandom_id', fandomId)
+      .first()
     return !!mod
   }
 
