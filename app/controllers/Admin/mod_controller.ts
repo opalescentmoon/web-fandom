@@ -1,13 +1,11 @@
 // app/Controllers/Http/ModController.ts
 import { HttpContext } from '@adonisjs/core/http'
 import { ModService } from '#services/mod_service'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class ModController {
-  private modService: ModService
-
-  constructor() {
-    this.modService = new ModService()
-  }
+  constructor(protected modService: ModService) {}
 
   /**
    * Add a moderator

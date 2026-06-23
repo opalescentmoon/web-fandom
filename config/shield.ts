@@ -80,6 +80,11 @@ const shieldConfig = defineConfig({
       '/api/fandom/edit/image',
       '/api/fandom/edit/image/remove',
       '/api/fandom/delete',
+
+      '/api/fandom/members',
+      '/api/fandom/kick',
+      '/api/fandom/leave',
+      '/api/mods',
     ],
     enableXsrfCookie: false,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],

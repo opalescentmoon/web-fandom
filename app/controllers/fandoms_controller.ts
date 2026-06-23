@@ -8,6 +8,7 @@ import Media from '#models/DBModel/media'
 import { MediaService } from '#services/media_service'
 import fs from 'node:fs/promises'
 import { inject } from '@adonisjs/core'
+import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class FandomsController {
@@ -27,6 +28,7 @@ export default class FandomsController {
       const { fandomName, categoryId } = request.only(['fandomName', 'categoryId'])
       const fandom = await this.fandomService.createFandom(fandomName, categoryId)
       const newMod = await this.modService.addMod(user.userId, fandom.fandomId)
+      await this.fandomService.joinFandom(user.userId, fandom.fandomId)
 
       return response.ok({ fandom, moderator: newMod })
     } catch (error: any) {
@@ -52,7 +54,7 @@ export default class FandomsController {
   }
 
   public async getAllMembers({ request, response }: HttpContext) {
-    const fandomId = request.input('fandomId')
+    const fandomId = Number(request.input('fandomId'))
     const fandom = await Fandom.findOrFail(fandomId)
 
     const page = request.input('page', 1)
@@ -61,8 +63,9 @@ export default class FandomsController {
     const members = await fandom
       .related('users')
       .query()
-      .select('user_id', 'display_name', 'profile_picture')
       .paginate(page, limit)
+    const raw = await db.from('user_fandom').where('fandom_id', fandomId)
+    console.log('raw user_fandom:', raw)
     return response.ok(members)
   }
 

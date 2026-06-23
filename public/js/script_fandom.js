@@ -1021,37 +1021,13 @@ document.addEventListener('click', async (event) => {
   }
 })
 
-// ===== MOD CHECK =====
-;(function () {
-  const fandomId = document.body.dataset.fandomId
-  const modBtn = document.getElementById('fandomModBtn')
-  if (!fandomId || !modBtn) return
-
-  const token = localStorage.getItem('accessToken')
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
-  if (!token || !currentUser?.userId) return
-
-  fetch(`/api/mods/fandom/${fandomId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-    },
-  })
-    .then(r => r.json())
-    .then(data => {
-      const mods = data?.data || []
-      const isMod = mods.some(m => m.userId === currentUser.userId)
-      if (isMod) modBtn.style.display = 'inline-block'
-    })
-    .catch(console.error)
-})()
 
 // ===== MOD DROPDOWN TOGGLE + EDIT/DELETE =====
 ;(function () {
   const modBtn = document.getElementById('fandomModBtn')
   const dropdown = document.getElementById('fandomModDropdown')
-  const editBtn = document.getElementById('fandomEditBtn')
-  const deleteBtn = document.getElementById('fandomDeleteBtn')
+  let editBtn = null
+  let deleteBtn = null
 
   const editOverlay = document.getElementById('editFandomOverlay')
   const editCloseBtn = document.getElementById('editFandomCloseBtn')
@@ -1065,6 +1041,15 @@ document.addEventListener('click', async (event) => {
   const removeThumbnailBtn = document.getElementById('editFandomRemoveThumbnail')
   let selectedThumbnailFile = null
   let removeThumbnail = false
+
+  const membersBtn = document.getElementById('fandomMembersBtn')
+  const membersOverlay = document.getElementById('membersModalOverlay')
+  const membersCloseBtn = document.getElementById('membersModalCloseBtn')
+  const membersList = document.getElementById('membersList')
+  const loadMoreBtn = document.getElementById('membersLoadMoreBtn')
+  let membersPage = 1
+  let membersLastPage = 1
+  let fandomMods = []
 
   const fandomId = document.body.dataset.fandomId
   const token = localStorage.getItem('accessToken')
@@ -1082,8 +1067,263 @@ document.addEventListener('click', async (event) => {
     })
   }
 
+  // always show ··· button
+  if (modBtn) modBtn.style.display = 'inline-block'
+
+  function buildDropdown(isMod, hasJoined) {
+    console.log('buildDropdown called:', { isMod, hasJoined })
+    if (!dropdown) return
+    dropdown.innerHTML = ''
+
+    // everyone sees Members
+    const membersOpt = document.createElement('button')
+    membersOpt.className = 'fandom-mod-option'
+    membersOpt.textContent = 'Members'
+    membersOpt.addEventListener('click', openMembersModal)
+    dropdown.appendChild(membersOpt)
+
+    if (hasJoined && !isMod) {
+      const leaveOpt = document.createElement('button')
+      leaveOpt.className = 'fandom-mod-option fandom-mod-danger'
+      leaveOpt.textContent = 'Leave Fandom'
+      leaveOpt.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to leave this fandom?')) return
+        try {
+          const res = await fetch('/api/fandom/leave', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ fandomId: Number(fandomId) }),
+          })
+          if (res.ok) {
+            alert('You have left the fandom.')
+            location.href = '/'
+          } else {
+            alert('Failed to leave fandom.')
+          }
+        } catch (err) {
+          alert('Network error. Please try again.')
+        }
+      })
+      dropdown.appendChild(leaveOpt)
+    }
+
+    if (isMod) {
+      const editOpt = document.createElement('button')
+      editOpt.className = 'fandom-mod-option'
+      editOpt.textContent = 'Edit Fandom'
+      editOpt.addEventListener('click', openEditModal)
+      dropdown.appendChild(editOpt)
+
+      const deleteOpt = document.createElement('button')
+      deleteOpt.className = 'fandom-mod-option fandom-mod-danger'
+      deleteOpt.textContent = 'Delete Fandom'
+      deleteOpt.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to delete this fandom? This cannot be undone.')) return
+        try {
+          const res = await fetch('/api/fandom/delete', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ fandomId: Number(fandomId) }),
+          })
+          if (res.ok) {
+            alert('Fandom deleted.')
+            location.href = '/'
+          } else {
+            const data = await res.json()
+            alert(data?.error || 'Failed to delete fandom.')
+          }
+        } catch (err) {
+          alert('Network error. Please try again.')
+        }
+      })
+      dropdown.appendChild(deleteOpt)
+    }
+  }
+
+  async function init() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+
+    if (!token || !currentUser?.userId) {
+      buildDropdown(false, false)
+      return
+    }
+
+    try {
+      const [modRes, joinedStatus] = await Promise.all([
+        fetch(`/api/mods/fandom/${fandomId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }),
+        fetchJoinStatus(Number(fandomId))
+      ])
+
+      const data = await modRes.json()
+      const mods = data?.data || []
+      const isMod = mods.some(m => m.userId === currentUser.userId)
+      buildDropdown(isMod, joinedStatus)
+    } catch (err) {
+      console.error(err)
+      buildDropdown(false, false)
+    }
+  }
+
+  init()
+
+  function renderMember(member, isMod) {
+    const userId = member.userId ?? member.user_id
+    const displayName = member.displayName ?? member.display_name ?? member.username ?? 'User'
+    const avatar = member.profilePicture ?? member.profile_picture ?? null
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+    const isSelf = userId === currentUser.userId
+
+    return `
+      <div class="modal-user-item" style="justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="modal-user-avatar" style="${avatar ? `background-image:url('${avatar}'); background-size:cover; background-position:center;` : ''}"></div>
+          <div>
+            <div class="modal-user-name">${escapeHtml(displayName)}</div>
+            ${isMod ? '<div style="font-size:0.75rem; color:#c76369;">Mod</div>' : ''}
+          </div>
+        </div>
+        ${!isSelf ? `
+          <div style="display:flex; gap:0.4rem;">
+            ${!isMod ? `<button class="modal-cancel-btn js-make-mod-btn" style="font-size:0.75rem; padding:0.2rem 0.5rem;" data-user-id="${userId}">Make Mod</button>` : ''}
+            <button class="modal-cancel-btn js-kick-btn" style="font-size:0.75rem; padding:0.2rem 0.5rem; color:#c0392b; border-color:#c0392b;" data-user-id="${userId}">Kick</button>
+          </div>
+        ` : ''}
+      </div>
+    `
+  }
+
+  async function loadMembers(page = 1) {
+    if (!membersList) return
+
+    try {
+      // fetch mods for this fandom
+      if (page === 1) {
+        const modRes = await fetch(`/api/mods/fandom/${fandomId}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        })
+        const modData = await modRes.json()
+        fandomMods = (modData?.data || []).map(m => m.userId ?? m.user_id)
+      }
+
+      const res = await fetch(`/api/fandom/members?fandomId=${fandomId}&page=${page}`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      })
+      const data = await res.json()
+
+      const members = data?.data || []
+      membersLastPage = data?.meta?.lastPage ?? 1
+
+      if (page === 1) membersList.innerHTML = ''
+
+      if (!members.length && page === 1) {
+        membersList.innerHTML = '<div style="font-size:0.88rem; color:#999; text-align:center;">No members yet</div>'
+        return
+      }
+
+      members.forEach(member => {
+        const isMod = fandomMods.includes(member.userId ?? member.user_id)
+        membersList.innerHTML += renderMember(member, isMod)
+      })
+
+      loadMoreBtn.style.display = membersPage < membersLastPage ? 'block' : 'none'
+    } catch (err) {
+      console.error(err)
+      membersList.innerHTML = '<div style="font-size:0.88rem; color:#999;">Failed to load members.</div>'
+    }
+  }
+
+  window.openMembersModal = function() {
+    if (!membersOverlay) return
+    membersPage = 1
+    membersOverlay.style.display = 'flex'
+    loadMembers(1)
+  }
+
+  function closeMembersModal() {
+    if (membersOverlay) membersOverlay.style.display = 'none'
+  }
+
+  if (membersCloseBtn) membersCloseBtn.addEventListener('click', closeMembersModal)
+  if (membersOverlay) {
+    membersOverlay.addEventListener('click', (e) => {
+      if (e.target === membersOverlay) closeMembersModal()
+    })
+  }
+
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      membersPage++
+      loadMembers(membersPage)
+    })
+  }
+
+  // kick and make mod buttons (delegated)
+  if (membersList) {
+    membersList.addEventListener('click', async (e) => {
+      const kickBtn = e.target.closest('.js-kick-btn')
+      const makeModBtn = e.target.closest('.js-make-mod-btn')
+
+      if (kickBtn) {
+        const userId = Number(kickBtn.dataset.userId)
+        if (!confirm('Are you sure you want to kick this member?')) return
+
+        const res = await fetch('/api/fandom/kick', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fandomId: Number(fandomId), userId }),
+        })
+
+        if (res.ok) {
+          membersPage = 1
+          loadMembers(1)
+        } else {
+          alert('Failed to kick member.')
+        }
+      }
+
+      if (makeModBtn) {
+        const userId = Number(makeModBtn.dataset.userId)
+        if (!confirm('Make this user a moderator?')) return
+
+        const res = await fetch('/api/mods', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ user_id: userId, fandom_id: Number(fandomId) }),
+        })
+
+        if (res.ok) {
+          membersPage = 1
+          loadMembers(1)
+        } else {
+          alert('Failed to make user a moderator.')
+        }
+      }
+    })
+  }
+
   // open edit modal
-  function openEditModal() {
+  window.openEditModal = function() {
     if (!editOverlay) return
     // prefill current values
     if (editNameInput) editNameInput.value = document.body.dataset.fandomName || ''
@@ -1106,7 +1346,6 @@ document.addEventListener('click', async (event) => {
     if (editOverlay) editOverlay.style.display = 'none'
   }
 
-  if (editBtn) editBtn.addEventListener('click', openEditModal)
   if (editCloseBtn) editCloseBtn.addEventListener('click', closeEditModal)
   if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditModal)
   if (thumbnailInput) {
@@ -1254,37 +1493,6 @@ document.addEventListener('click', async (event) => {
       } catch (err) {
         editErrorEl.textContent = 'Network error. Please try again.'
         editErrorEl.style.display = 'block'
-      }
-    })
-  }
-
-  // delete fandom
-  if (deleteBtn) {
-    deleteBtn.addEventListener('click', async () => {
-      const confirmed = confirm('Are you sure you want to delete this fandom? This cannot be undone.')
-      if (!confirmed) return
-
-      try {
-        const res = await fetch('/api/fandom/delete', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ fandomId: Number(fandomId) }),
-        })
-
-        if (!res.ok) {
-          const data = await res.json()
-          alert(data?.error || 'Failed to delete fandom.')
-          return
-        }
-
-        alert('Fandom deleted.')
-        location.href = '/'
-      } catch (err) {
-        alert('Network error. Please try again.')
       }
     })
   }

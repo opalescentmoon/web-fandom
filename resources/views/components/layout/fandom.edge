@@ -110,10 +110,7 @@
     </div>
 
     <!-- Mod dropdown -->
-    <div class="fandom-mod-dropdown" id="fandomModDropdown" style="display:none;">
-      <button class="fandom-mod-option" id="fandomEditBtn">Edit Fandom</button>
-      <button class="fandom-mod-option fandom-mod-danger" id="fandomDeleteBtn">Delete Fandom</button>
-    </div>
+    <div class="fandom-mod-dropdown" id="fandomModDropdown" style="display:none;"></div>
 
     <!-- Edit Fandom Modal -->
     <div class="modal-overlay" id="editFandomOverlay" style="display:none;">
@@ -160,6 +157,20 @@
         <div class="modal-footer">
           <button class="modal-cancel-btn" id="editFandomCancelBtn">Cancel</button>
           <button class="modal-save-btn" id="editFandomSaveBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members Modal -->
+    <div class="modal-overlay" id="membersModalOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Members</h3>
+          <button class="modal-close" id="membersModalCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body" id="membersModalBody" style="max-height:400px; overflow-y:auto;">
+          <div id="membersList"></div>
+          <button class="modal-cancel-btn" id="membersLoadMoreBtn" style="display:none; width:100%; margin-top:0.5rem;">Load more</button>
         </div>
       </div>
     </div>
