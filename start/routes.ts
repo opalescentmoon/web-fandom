@@ -252,6 +252,7 @@ router
     router.post('/create', [FandomController, 'create']).use(middleware.auth())
     router.post('/join', [FandomController, 'join']).use(middleware.auth())
     router.get('/category', [FandomController, 'getByCategory'])
+    router.get('/members', [FandomController, 'getAllMembers'])
     router.get('/name', [FandomController, 'getByName'])
     router.post('/add/image', [FandomController, 'addMedia']).use(middleware.auth())
     router.put('/edit/name', [FandomController, 'editName']).use(middleware.auth())

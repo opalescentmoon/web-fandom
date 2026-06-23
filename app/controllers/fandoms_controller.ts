@@ -50,6 +50,21 @@ export default class FandomsController {
     }
   }
 
+  public async getAllMembers({ request, response }: HttpContext) {
+    const fandomId = request.input('fandomId')
+    const fandom = await Fandom.findOrFail(fandomId)
+
+    const page = request.input('page', 1)
+    const limit = 20
+
+    const members = await fandom
+      .related('users')
+      .query()
+      .select('user_id', 'display_name', 'profile_picture')
+      .paginate(page, limit)
+    return response.ok(members)
+  }
+
   /**
    * Get fandoms by category
    */
