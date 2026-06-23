@@ -1,6 +1,11 @@
 import Moderator from '#models/DBModel/User/moderator'
+import { FandomService } from './fandom_service.js'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export class ModService {
+  constructor(protected fandomService: FandomService) {}
+
   // Add a new moderator
   public async addMod(userId: number, fandomId: number) {
     const mod = await Moderator.create({ userId, fandomId })
@@ -22,6 +27,10 @@ export class ModService {
   public async getModsByFandom(fandomId: number) {
     const mod = await Moderator.query().where('fandom_id', fandomId).preload('user')
     return mod
+  }
+
+  public async kickFandomMember(userId: number, fandomId: number) {
+    await this.fandomService.removeUserFromFandom(userId, fandomId)
   }
 
   public async deleteMod(id: number) {

@@ -7,10 +7,14 @@ import Fandom from '#models/DBModel/fandom'
 import Media from '#models/DBModel/media'
 import { MediaService } from '#services/media_service'
 import fs from 'node:fs/promises'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class FandomsController {
-  private fandomService = new FandomService()
-  private modService = new ModService()
+  constructor(
+    protected fandomService: FandomService,
+    protected modService: ModService
+  ) {}
 
   /**
    * Create a new fandom
@@ -21,7 +25,7 @@ export default class FandomsController {
       if (!user) return response.unauthorized({ error: 'Not logged in' })
 
       const { fandomName, categoryId } = request.only(['fandomName', 'categoryId'])
-      const fandom = await this.fandomService.createFandom(fandomName, categoryId, user.userId)
+      const fandom = await this.fandomService.createFandom(fandomName, categoryId)
 
       return response.ok(fandom)
     } catch (error: any) {
@@ -209,6 +213,36 @@ export default class FandomsController {
     }
 
     return response.badRequest({ error: 'No mediaId provided' })
+  }
+
+  public async leaveFandom({ request, auth, response }: HttpContext) {
+    try {
+      const { fandomId } = request.only(['fandomId'])
+      const userId = auth.user!.userId
+
+      await this.fandomService.removeUserFromFandom(userId, fandomId)
+      return response.ok({ message: 'Successfully left fandom' })
+    } catch (err: any) {
+      return response.badRequest({ error: err.message })
+    }
+  }
+
+  public async kickFromFandom({ request, auth, response }: HttpContext) {
+    try {
+      const { fandomId } = request.only(['fandomId'])
+      const modId = auth.user!.userId
+      const isMod = await this.modService.checkMod(modId, fandomId)
+
+      if (!isMod) {
+        return response.forbidden({ message: 'You are not a moderator' })
+      }
+
+      const { userId } = request.only(['userId'])
+      await this.modService.kickFandomMember(userId, fandomId)
+      return response.ok({ message: 'Successfully kicked user' })
+    } catch (err: any) {
+      return response.badRequest({ message: err.message })
+    }
   }
 
   /**

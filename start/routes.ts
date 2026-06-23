@@ -259,6 +259,8 @@ router
     router.post('/image/cleanup', [FandomController, 'cleanupUnusedMedia']).use(middleware.auth())
     router.delete('/edit/image/remove', [FandomController, 'removeMedia']).use(middleware.auth())
     router.put('/edit/category', [FandomController, 'editCategory']).use(middleware.auth())
+    router.delete('/leave', [FandomController, 'leaveFandom']).use(middleware.auth())
+    router.post('/kick', [FandomController, 'kickFromFandom']).use(middleware.auth())
     router.delete('/delete', [FandomController, 'delete']).use(middleware.auth())
     router
       .get('/join-status', async ({ request, auth }) => {
