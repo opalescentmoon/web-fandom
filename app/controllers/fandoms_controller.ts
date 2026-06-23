@@ -26,8 +26,9 @@ export default class FandomsController {
 
       const { fandomName, categoryId } = request.only(['fandomName', 'categoryId'])
       const fandom = await this.fandomService.createFandom(fandomName, categoryId)
+      const newMod = await this.modService.addMod(user.userId, fandom.fandomId)
 
-      return response.ok(fandom)
+      return response.ok({ fandom, moderator: newMod })
     } catch (error: any) {
       return response.badRequest({ error: error.message })
     }
