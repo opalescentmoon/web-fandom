@@ -317,6 +317,7 @@ router
     router.put('/password', [UserController, 'changePassword'])
     router.delete('/delete', [UserController, 'deleteUser'])
     router.get('/:userId', [UserController, 'getById'])
+    router.get('/:userId/joined-fandoms', [UserController, 'joinedFandomsById'])
   })
   .prefix('/api/user')
   .use(middleware.auth())

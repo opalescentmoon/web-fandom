@@ -45,6 +45,19 @@ export default class UsersController {
     return response.ok(rows)
   }
 
+  public async joinedFandomsById({ params, response }: HttpContext) {
+    const rows = await Database.from('user_fandom')
+      .join('fandoms', 'fandoms.fandom_id', 'user_fandom.fandom_id')
+      .where('user_fandom.user_id', Number(params.userId))
+      .select(
+        Database.raw('fandoms.fandom_id as "fandomId"'),
+        Database.raw('fandoms.fandom_name as "fandomName"')
+      )
+      .orderBy('fandoms.fandom_name', 'asc')
+
+    return response.ok(rows)
+  }
+
   /**
    * Edit user profile (bio, profile picture)
    */

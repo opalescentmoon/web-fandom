@@ -63,7 +63,10 @@ async function loadJoinedFandoms() {
   const list = document.getElementById('joinedFandomsList')
   if (!list) return
 
-  const fandoms = await fetchJson('/api/user/me/joined-fandoms')
+  const targetUserId = me?.userId
+  if (!targetUserId) return
+
+  const fandoms = await fetchJson(`/api/user/${targetUserId}/joined-fandoms`)
 
   if (!Array.isArray(fandoms) || fandoms.length === 0) {
     list.innerHTML = `<li class="muted">No joined fandoms yet</li>`
@@ -71,15 +74,13 @@ async function loadJoinedFandoms() {
   }
 
   list.innerHTML = fandoms
-    .map(
-      (f) => `
+    .map((f) => `
       <li>
         <a href="#" class="js-fandom" data-fandom-id="${f.fandomId}">
           ${escapeHtml(f.fandomName)}
         </a>
       </li>
-    `
-    )
+    `)
     .join('')
 }
 
