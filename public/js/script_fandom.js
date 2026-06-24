@@ -514,13 +514,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 const POST_CONTENT_TYPES = {
   fanworks: ['#Fanfiction', '#Fanart', '#Merch'],
-  wiki: ['Announcement', 'Lore', 'Worldbuilding'],
+  official: ['Announcement', 'Lore', 'Worldbuilding'],
   forum: ['#Discussion', '#Poll', '#QnA']
 }
 
 const CONTENT_ID_MAP = {
   fanworks: { '#Fanart': 1, '#Fanfiction': 2, '#Merch': 3 },
-  wiki: { 'Announcement': 4, 'Lore': 5, 'Worldbuilding': 6 },
+  official: { 'Announcement': 4, 'Lore': 5, 'Worldbuilding': 6 },
   forum: { '#Discussion': 7, '#Poll': 8, '#QnA': 9 },
 }
 

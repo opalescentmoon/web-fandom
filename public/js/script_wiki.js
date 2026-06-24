@@ -76,8 +76,6 @@ document.addEventListener(
   true
 )
 
-
-
 async function loadBranchTagList(branch, ulId) {
   const ul = document.getElementById(ulId)
   if (!ul) return

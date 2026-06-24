@@ -82,11 +82,11 @@
           </a>
           <a
             href="{{ isSearch 
-            ? '/search?tab=wiki&fandomId=' + $props.fandomId + '&fandom_name=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '')
-            : '/wiki?fandom_name=' + encodeURIComponent($props.fandomName)}}"
-            class="fandom-tab {{ $props.activeTab === 'wiki' ? 'is-active' : '' }}"
+            ? '/search?tab=official&fandomId=' + $props.fandomId + '&fandom_name=' + encodeURIComponent($props.fandomName) + '&q=' + encodeURIComponent(currentQuery || '')
+            : '/official?fandom_name=' + encodeURIComponent($props.fandomName)}}"
+            class="fandom-tab {{ $props.activeTab === 'official' ? 'is-active' : '' }}"
           >
-            Wiki
+            Official
           </a>
           <a
             href="{{ isSearch 
@@ -259,7 +259,7 @@
               <label class="sr-only" for="postTabSelect">Post to</label>
               <select id="postTabSelect" class="post-tab-select">
                 <option value="fanworks">Fanworks</option>
-                <option value="wiki">Wiki</option>
+                <option value="official">official</option>
                 <option value="forum">Forum</option>
               </select>
 
