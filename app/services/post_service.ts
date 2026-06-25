@@ -262,7 +262,7 @@ export class PostService {
   ) {
     const TAB_TO_CONTENT_NAME: Record<string, string> = {
       fanworks: 'Fanwork',
-      wiki: 'Official',
+      official: 'Official',
       forum: 'Forum',
     }
 
@@ -540,7 +540,7 @@ export class PostService {
   }) {
     const TAB_TO_CONTENT_NAME: Record<string, string> = {
       fanworks: 'Fanworks',
-      wiki: 'Official',
+      official: 'Official',
       forum: 'Forum',
     }
 

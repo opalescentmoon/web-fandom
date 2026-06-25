@@ -75,8 +75,8 @@ router.get('/fanworks', async ({ request, view, auth }) => {
   })
 })
 
-// WIKI
-router.get('/wiki', async ({ request, view, auth }) => {
+// OFFICIAL
+router.get('/official', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
   const fandom = await Fandom.query()
     .where('fandom_name', fandomName)
@@ -94,10 +94,10 @@ router.get('/wiki', async ({ request, view, auth }) => {
     hasJoined = !!row
   }
 
-  return view.render('pages/homepage/wiki', {
+  return view.render('pages/homepage/official', {
     title: fandomName,
     fandomName,
-    activeTab: 'wiki',
+    activeTab: 'official',
     fandomId,
     fandomCategoryId: fandom?.categoryId ?? null,
     fandomThumbnailUrl: fandom?.thumbnailMedia?.fileUrl ?? null,
