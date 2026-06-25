@@ -74,10 +74,51 @@ export default class ModController {
   /**
    * Delete a moderator
    */
-  public async delete({ params, response }: HttpContext) {
-    const id = Number(params.id)
-    const deleted = await this.modService.deleteMod(id)
+  public async delete({ params, auth, response }: HttpContext) {
+    try {
+      const modId = Number(params.id)
+      if (!modId) {
+        return response.badRequest({ message: 'Invalid moderator ID.' })
+      }
+      const currentUser = auth.user!
 
-    return response.ok({ message: 'Moderator removed', data: deleted })
+      const targetMod = await this.modService.queryMods(modId)
+      if (!targetMod) {
+        return response.notFound({ message: 'Moderator not found.' })
+      }
+
+      const fandomId = targetMod.fandomId
+      const targetUserId = targetMod.userId
+
+      // 2. Count total mods in this fandom to prevent leaving a fandom abandoned
+      const totalMods = await this.modService.countModsByFandom(fandomId)
+      if (totalMods <= 1) {
+        return response.badRequest({
+          message:
+            'Cannot remove moderator. There must be at least one moderator left in the fandom.',
+        })
+      }
+
+      // 3. Security Check: Is the currentUser allowed to do this?
+      const isSelf = currentUser.userId === targetUserId
+      const currentUserIsMod = await this.modService.checkMod(currentUser.userId, fandomId)
+
+      if (!currentUserIsMod && !isSelf) {
+        return response.forbidden({
+          message: 'You do not have permission to manage moderators for this fandom.',
+        })
+      }
+
+      const deleted = await this.modService.deleteMod(modId)
+
+      return response.ok({
+        message: isSelf
+          ? 'You have successfully stepped down as a moderator.'
+          : 'Moderator removed.',
+        data: deleted,
+      })
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
+    }
   }
 }

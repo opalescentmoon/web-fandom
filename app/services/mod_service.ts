@@ -21,7 +21,22 @@ export class ModService {
   }
 
   public async queryMods(userId: number) {
-    return await Moderator.query().where('user_id', userId).preload('user')
+    return await Moderator.query().where('user_id', userId).preload('user').first()
+  }
+
+  public async queryModsbyFandom(userId: number, fandomId: number) {
+    return await Moderator.query()
+      .where('user_id', userId)
+      .where('fandom_id', fandomId)
+      .preload('user')
+      .first()
+  }
+
+  public async countModsByFandom(fandomId: number): Promise<number> {
+    const result = await Moderator.query().where('fandom_id', fandomId).count('* as total').first()
+
+    // Lucid returns the aggregate result inside an object, or null if nothing matched
+    return result ? Number(result.$extras.total) : 0
   }
 
   public async getModsByFandom(fandomId: number) {
