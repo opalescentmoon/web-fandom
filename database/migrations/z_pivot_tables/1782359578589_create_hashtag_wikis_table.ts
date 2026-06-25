@@ -1,7 +1,7 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'hashtag_posts'
+  protected tableName = 'hashtag_wikis'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
@@ -14,9 +14,9 @@ export default class extends BaseSchema {
         .inTable('hashtags')
         .onDelete('CASCADE')
 
-      table.integer('post_id').unsigned().references('post_id').inTable('posts').onDelete('CASCADE')
+      table.integer('wiki_id').unsigned().references('id').inTable('wiki_pages').onDelete('CASCADE')
 
-      table.unique(['post_id', 'hashtag_id'])
+      table.unique(['wiki_id', 'hashtag_id'])
     })
   }
 
