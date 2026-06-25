@@ -10,16 +10,34 @@ export default class ModController {
   /**
    * Add a moderator
    */
-  public async add({ request, response }: HttpContext) {
-    const userId = request.input('user_id')
-    const fandomId = request.input('fandom_id')
+  public async add({ request, auth, response }: HttpContext) {
+    try {
+      const targetUserId = Number(request.input('user_id'))
+      const fandomId = Number(request.input('fandom_id'))
 
-    if (!userId || !fandomId) {
-      return response.badRequest({ message: 'user_id and fandom_id are required' })
+      if (!targetUserId || !fandomId) {
+        return response.badRequest({ message: 'user_id and fandom_id are required' })
+      }
+
+      const currentUser = auth.user!
+
+      const currentUserIsMod = await this.modService.checkMod(currentUser.userId, fandomId)
+      if (!currentUserIsMod) {
+        return response.forbidden({
+          message: 'You do not have permission to add moderators to this fandom.',
+        })
+      }
+
+      const isTargetMod = await this.modService.checkMod(targetUserId, fandomId)
+      if (isTargetMod) {
+        return response.conflict({ message: 'User is already a moderator for this fandom' })
+      }
+
+      const mod = await this.modService.addMod(targetUserId, fandomId)
+      return response.created({ message: 'Moderator added successfully', data: mod })
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
     }
-
-    const mod = await this.modService.addMod(userId, fandomId)
-    return response.created({ message: 'Moderator added', data: mod })
   }
 
   /**
