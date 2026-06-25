@@ -1,6 +1,7 @@
 import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
 import type { ManyToMany } from '@adonisjs/lucid/types/relations'
 import Post from './User/post.js'
+import WikiPages from './Wikis/wiki_page.js'
 
 export default class Hashtag extends BaseModel {
   @column({ isPrimary: true })
@@ -18,4 +19,14 @@ export default class Hashtag extends BaseModel {
     relatedKey: 'postId',
   })
   public posts!: ManyToMany<typeof Post>
+
+  @manyToMany(() => WikiPages, {
+    pivotTable: 'hashtag_wikis',
+    pivotForeignKey: 'hashtag_id',
+    pivotRelatedForeignKey: 'wiki_id',
+
+    localKey: 'id',
+    relatedKey: 'id',
+  })
+  public hashtags!: ManyToMany<typeof WikiPages>
 }

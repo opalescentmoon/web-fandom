@@ -380,21 +380,35 @@ router
     /**
      * CREATE + DELETE
      */
-    router.post('/', [WikisController, 'createWiki'])
-    router.delete('/:wikiId', [WikisController, 'deleteWiki'])
+    router.post('/', [WikisController, 'createWiki']).use(middleware.auth())
+    router.delete('/:wikiId', [WikisController, 'deleteWiki']).use(middleware.auth())
 
     /**
      * PAGE + REVISIONS
      */
     router.get('/:wikiId', [WikisController, 'getWikiPage'])
-    router.post('/:wikiId/edits', [WikisController, 'addWikiPage'])
+    router.post('/:wikiId/edits/add', [WikisController, 'addWikiPage']).use(middleware.auth())
     router.get('/:wikiId/edits', [WikisController, 'getWikiEditsForPage'])
-    router.post('/:wikiId/edit', [WikisController, 'editWikiPage'])
+    router.post('/:wikiId/edit', [WikisController, 'editWikiPage']).use(middleware.auth())
 
     /**
      * EDIT APPROVAL WORKFLOW
      */
-    router.post('/edits/:editId/approve', [WikisController, 'approveWikiEdit'])
-    router.post('/edits/:editId/reject', [WikisController, 'rejectWikiEdit'])
+    router
+      .post('/edits/:editId/approve', [WikisController, 'approveWikiEdit'])
+      .use(middleware.auth())
+    router.post('/edits/:editId/reject', [WikisController, 'rejectWikiEdit']).use(middleware.auth())
+
+    router.get('/hashtag/:hashtagId', [WikisController, 'getByHashtag'])
+
+    router.post('/:wikiId/add/media', [WikisController, 'addMedia']).use(middleware.auth())
+    router.delete('/:wikiId/delete/media', [WikisController, 'removeMedia']).use(middleware.auth())
+
+    router
+      .post('/:wikiId/add/hashtags', [WikisController, 'addHashtagToWiki'])
+      .use(middleware.auth())
+    router
+      .delete('/:wikiId/delete/hashtags/:hashtagId', [WikisController, 'removeHashtagFromWiki'])
+      .use(middleware.auth())
   })
   .prefix('/api/wikis')

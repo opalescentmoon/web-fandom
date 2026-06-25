@@ -1,10 +1,18 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { WikiService } from '#services/wiki_service'
 import { ModService } from '#services/mod_service'
+import { inject } from '@adonisjs/core'
+import { cuid } from '@adonisjs/core/helpers'
+import Media from '#models/DBModel/media'
+import fs from 'node:fs/promises'
+import app from '@adonisjs/core/services/app'
 
+@inject()
 export default class WikisController {
-  private wikiService = new WikiService()
-  private modService = new ModService()
+  constructor(
+    protected wikiService: WikiService,
+    protected modService: ModService
+  ) {}
 
   /**
    * Create a new wiki page
@@ -250,6 +258,213 @@ export default class WikisController {
         message: 'Failed to fetch wiki edits',
         error: error instanceof Error ? error.message : 'Unknown error',
       })
+    }
+  }
+
+  public async addMedia({ request, auth, response }: HttpContext) {
+    try {
+      let uploadedFile: any = null
+      const wikiId = Number(request.input('wikiId'))
+      const fandomId = Number(request.input('fandomId'))
+      if (!wikiId || !fandomId) return response.badRequest({ error: 'Invalid wikiId or fandomId' })
+
+      const file = request.file('media', {
+        size: '500mb',
+        extnames: ['jpg', 'jpeg', 'png'],
+      })
+
+      if (!file || !file.isValid) {
+        if (file && file.tmpPath) {
+          try {
+            await fs.unlink(file.tmpPath)
+          } catch (err: any) {
+            console.error('Failed to remove temp file:', err.message)
+          }
+        }
+        return response.badRequest({
+          message: 'Invalid file type. Only JPG, JPEG, and PNG are allowed.',
+        })
+      }
+
+      const fileName = `${cuid()}.${file.extname}`
+      const uploadDir = app.makePath('public/images/media_assets')
+
+      uploadedFile = file
+      await file.move(uploadDir, { name: fileName })
+
+      if (!file.isValid) {
+        return response.badRequest({ error: file.errors })
+      }
+
+      // Determine type
+      const mediaType = file.type === 'video' ? 'video' : 'image'
+
+      // Public URL path stored in DB
+      const fileUrl = `/images/media_assets/${fileName}`
+
+      try {
+        const media = await Media.create({ fileUrl, mediaType })
+        const user = auth.user!
+
+        const isMod = await this.modService.checkMod(user.userId, fandomId)
+
+        if (isMod) {
+          const result = await this.wikiService.addMediaToWiki(
+            wikiId,
+            media.fileUrl,
+            media.mediaType
+          )
+          return response.ok({ status: 'approved', data: result, media })
+        } else {
+          const suggestion = await this.wikiService.editWikiPage(
+            wikiId,
+            JSON.stringify({
+              action: 'ADD_MEDIA',
+              mediaId: media.id,
+              fileUrl: media.fileUrl,
+            }),
+            user.userId
+          )
+
+          return response.created({
+            status: 'pending',
+            message: 'Your addition has been submitted as an edit suggestion.',
+            data: suggestion,
+          })
+        }
+      } catch (error: any) {
+        if (uploadedFile?.filePath) {
+          await fs.unlink(uploadedFile.filePath).catch(() => {})
+        }
+        return response.internalServerError({ error: error.message })
+      }
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
+    }
+  }
+
+  /**
+   * Remove media
+   */
+  public async removeMedia({ request, auth, response }: HttpContext) {
+    try {
+      const wikiId = Number(request.input('wikiId'))
+      const mediaId = Number(request.input('mediaId'))
+      const fandomId = Number(request.input('fandomId'))
+
+      if (!wikiId || !mediaId || !fandomId) {
+        return response.badRequest({ error: 'Missing wikiId, mediaId, or fandomId' })
+      }
+
+      const user = auth.user!
+      const isMod = await this.modService.checkMod(user.userId, fandomId)
+
+      if (isMod) {
+        const result = await this.wikiService.removeMediaFromWiki(wikiId, mediaId)
+        return response.ok({ status: 'removed', data: result })
+      } else {
+        const suggestion = await this.wikiService.editWikiPage(
+          wikiId,
+          JSON.stringify({
+            action: 'REMOVE_MEDIA',
+            mediaId: mediaId,
+          }),
+          user.userId
+        )
+
+        return response.created({
+          status: 'pending',
+          message: 'Your removal request has been submitted as an edit suggestion.',
+          data: suggestion,
+        })
+      }
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
+    }
+  }
+
+  public async addHashtagToWiki({ params, request, auth, response }: HttpContext) {
+    try {
+      const wikiId = Number(params.wikiId)
+      const hashtagId = Number(request.input('hashtagId'))
+      const fandomId = Number(request.input('fandomId'))
+
+      if (!wikiId || !hashtagId || !fandomId) {
+        return response.badRequest({ error: 'Missing wikiId, hashtagId, or fandomId' })
+      }
+
+      const user = auth.user!
+      const isMod = await this.modService.checkMod(user.userId, fandomId)
+
+      if (isMod) {
+        const wikipage = await this.wikiService.addHashtagsToWiki(wikiId, hashtagId)
+        return response.ok({ status: 'approved', data: wikipage })
+      } else {
+        const suggestion = await this.wikiService.editWikiPage(
+          wikiId,
+          JSON.stringify({
+            action: 'ADD_HASHTAG',
+            hashtagId: hashtagId,
+          }),
+          user.userId
+        )
+
+        return response.created({
+          status: 'pending',
+          message: 'Your hashtag addition has been submitted as an edit suggestion.',
+          data: suggestion,
+        })
+      }
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
+    }
+  }
+
+  public async removeHashtagFromWiki({ params, request, auth, response }: HttpContext) {
+    try {
+      const wikiId = Number(params.wikiId)
+      const hashtagId = Number(params.hashtagId)
+      const fandomId = Number(request.input('fandomId')) // Extracted from request query/body
+
+      if (!wikiId || !hashtagId || !fandomId) {
+        return response.badRequest({ error: 'Missing wikiId, hashtagId, or fandomId' })
+      }
+
+      const user = auth.user!
+
+      const isMod = await this.modService.checkMod(user.userId, fandomId)
+
+      if (isMod) {
+        const wikipage = await this.wikiService.removeHashtagsFromWiki(wikiId, hashtagId)
+        return response.ok({ status: 'removed', data: wikipage })
+      } else {
+        const suggestion = await this.wikiService.editWikiPage(
+          wikiId,
+          JSON.stringify({
+            action: 'REMOVE_HASHTAG',
+            hashtagId: hashtagId,
+          }),
+          user.userId
+        )
+
+        return response.created({
+          status: 'pending',
+          message: 'Your hashtag removal request has been submitted as an edit suggestion.',
+          data: suggestion,
+        })
+      }
+    } catch (error: any) {
+      return response.internalServerError({ error: error.message })
+    }
+  }
+
+  public async getByHashtag({ params, response }: HttpContext) {
+    try {
+      const hashtagId = Number(params.hashtagId)
+      const wikipage = await this.wikiService.getWikisWithHashtag(hashtagId)
+      return response.ok(wikipage)
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
     }
   }
 }

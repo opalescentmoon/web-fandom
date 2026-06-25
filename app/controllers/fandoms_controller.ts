@@ -60,10 +60,7 @@ export default class FandomsController {
     const page = request.input('page', 1)
     const limit = 20
 
-    const members = await fandom
-      .related('users')
-      .query()
-      .paginate(page, limit)
+    const members = await fandom.related('users').query().paginate(page, limit)
     const raw = await db.from('user_fandom').where('fandom_id', fandomId)
     console.log('raw user_fandom:', raw)
     return response.ok(members)

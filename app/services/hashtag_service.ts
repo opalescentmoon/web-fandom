@@ -4,7 +4,9 @@ import db from '@adonisjs/lucid/services/db'
 export class HashtagService {
   // Your code here
   public async findOrCreateHashtag(tag: string) {
-    const name = String(tag || '').replace(/^#/, '').trim()
+    const name = String(tag || '')
+      .replace(/^#/, '')
+      .trim()
     if (!name) throw new Error('Tag is required')
     let hashtag = await Hashtag.query().where('hashtag_name', name).first()
     if (!hashtag) {
@@ -55,9 +57,8 @@ export class HashtagService {
       .where('contents.content_branch', branch)
       .groupBy('hashtags.id', 'hashtags.hashtag_name')
       .orderBy('hashtags.hashtag_name', 'asc')
-      .pojo() 
+      .pojo()
 
     return rows
   }
-
 }
