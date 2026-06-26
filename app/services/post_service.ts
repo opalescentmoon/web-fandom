@@ -261,7 +261,7 @@ export class PostService {
     userId?: number | null
   ) {
     const TAB_TO_CONTENT_NAME: Record<string, string> = {
-      fanworks: 'Fanwork',
+      fanworks: 'Fanworks',
       official: 'Official',
       forum: 'Forum',
     }
