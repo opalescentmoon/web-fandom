@@ -12,53 +12,105 @@
 })
 
   @slot('main')
-    <section class="feed-section" id="feedSection">
-      <div class="feed-loading">Loading posts...</div>
+    {{-- ANNOUNCEMENT SECTION --}}
+    <section class="official-section" id="announcementSection">
+      <div class="official-section-header">
+        <h4 class="official-section-title">Announcement</h4>
+        <button class="official-load-more-btn" id="loadMoreAnnouncementBtn">
+          Load More Announcement
+        </button>
+      </div>
+      <div id="announcementFeed">
+        <div class="feed-loading">Loading...</div>
+      </div>
+    </section>
+
+    {{-- WIKI SECTION --}}
+    <section class="official-section" id="wikiSection">
+      <div class="official-section-header">
+        <h4 class="official-section-title">Wiki</h4>
+        <button class="official-create-wiki-btn js-create-wiki" id="createWikiBtn" style="display:none;">
+          + Create Wiki
+        </button>
+      </div>
+      <div id="wikiFeed">
+        <div class="feed-loading">Loading...</div>
+      </div>
     </section>
   @endslot
 
   @slot('filter')
-  <div class="filter-section">
-    <h4>Filter by Branch</h4>
-    <p class="filter-static-link">
-      <a href="#" class="js-branch" data-branch="Announcement">Announcement</a>
-    </p>
-  </div>
+    <div class="filter-section">
+      <h4>Filter by Branch</h4>
+      <p class="filter-static-link">
+        <a href="#" class="js-branch" data-branch="Announcement">Announcement</a>
+      </p>
+    </div>
 
-  <!-- Lore collapsible -->
-  <div class="filter-section">
-    <a
-      class="collapse-header js-branch"
-      type="button"
-      data-branch="Lore"
-      data-collapse-target="lore-list"
-    >
-      <span>Lore</span>
-      <span class="collapse-chevron">▾</span>
-    </a>
+    <div class="filter-section">
+      <a
+        class="collapse-header js-branch"
+        href="#"
+        data-branch="Lore"
+        data-collapse-target="lore-list"
+      >
+        <span>Lore</span>
+        <span class="collapse-chevron">▾</span>
+      </a>
+      <ul id="lore-list" class="collapse-body">
+        <li class="muted">Loading...</li>
+      </ul>
+    </div>
 
-    <ul id="lore-list" class="collapse-body">
-      <li class="muted">Loading...</li>
-    </ul>
-  </div>
+    <div class="filter-section">
+      <a
+        class="collapse-header js-branch"
+        href="#"
+        data-branch="Worldbuilding"
+        data-collapse-target="world-list"
+      >
+        <span>World</span>
+        <span class="collapse-chevron">▾</span>
+      </a>
+      <ul id="world-list" class="collapse-body">
+        <li class="muted">Loading...</li>
+      </ul>
+    </div>
 
-  <!-- World collapsible -->
-  <div class="filter-section">
-    <a
-      class="collapse-header js-branch"
-      type="button"
-      data-branch="Worldbuilding"
-      data-collapse-target="world-list"
-    >
-      <span>World</span>
-      <span class="collapse-chevron">▾</span>
-    </a>
+    {{-- CREATE WIKI MODAL --}}
+    <div class="modal-overlay" id="createWikiOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Create Wiki Page</h3>
+          <button class="modal-close" id="createWikiCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="createWikiError" class="modal-error" style="display:none;"></div>
+          <div class="modal-field">
+            <label class="modal-label">Branch</label>
+            <select class="modal-input" id="createWikiBranch">
+              <option value="5">Lore</option>
+              <option value="6">Worldbuilding</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Title</label>
+            <input class="modal-input" type="text" id="createWikiTitle" placeholder="e.g. Kafka, Astral Express..." />
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Content</label>
+            <textarea class="modal-input" id="createWikiContent" rows="6" placeholder="Write the wiki content here..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="createWikiCancelBtn">Cancel</button>
+          <button class="modal-save-btn" id="createWikiSaveBtn">Create</button>
+        </div>
+      </div>
+    </div>
 
-    <ul id="world-list" class="collapse-body">
-      <li class="muted">Loading...</li>
-    </ul>
-  </div>
-<script src="/js/script_wiki.js"></script>
-@endslot
+    <script src="/js/script_wiki.js"></script>
+  @endslot
 
+  
 @end

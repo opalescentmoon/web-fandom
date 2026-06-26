@@ -1,12 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { WikiService } from '#services/wiki_service'
 import { ModService } from '#services/mod_service'
-import { inject } from '@adonisjs/core'
 import { cuid } from '@adonisjs/core/helpers'
 import Media from '#models/DBModel/media'
 import fs from 'node:fs/promises'
 import app from '@adonisjs/core/services/app'
+import { inject } from '@adonisjs/core'
+import WikiPages from '#models/DBModel/Wikis/wiki_page'
 
+@inject()
 @inject()
 export default class WikisController {
   constructor(
@@ -20,6 +22,7 @@ export default class WikisController {
    */
   public async createWiki({ auth, request, response }: HttpContext) {
     try {
+      await auth.authenticate()
       const userId = auth.user!.userId
       const { fandomId, contentId, title } = request.only(['fandomId', 'contentId', 'title'])
 
@@ -54,6 +57,7 @@ export default class WikisController {
    */
   public async addWikiPage({ auth, params, request, response }: HttpContext) {
     try {
+      await auth.authenticate()
       const userId = auth.user!.userId
       const { fandomId } = request.only(['fandomId'])
       const { wikiId } = params
@@ -68,7 +72,7 @@ export default class WikisController {
         })
       }
 
-      const wikiPage = await this.wikiService.addWikiPage(Number.parseInt(wikiId), content)
+      const wikiPage = await this.wikiService.addWikiPage(Number.parseInt(wikiId), content, userId)
 
       return response.created({
         success: true,
@@ -90,7 +94,8 @@ export default class WikisController {
    */
   public async editWikiPage({ auth, params, request, response }: HttpContext) {
     try {
-      const userId = auth.user!.userId
+      await auth.authenticate()
+const userId = auth.user!.userId
       const { wikiId } = params
       const { content } = request.only(['content'])
 
@@ -116,7 +121,8 @@ export default class WikisController {
    */
   public async approveWikiEdit({ auth, params, response }: HttpContext) {
     try {
-      const userId = auth.user!.userId
+      await auth.authenticate()
+const userId = auth.user!.userId
       const fandomId = Number(params.fandomId)
       const { editId } = params
 
@@ -151,7 +157,8 @@ export default class WikisController {
    */
   public async rejectWikiEdit({ auth, params, response }: HttpContext) {
     try {
-      const userId = auth.user!.userId
+      await auth.authenticate()
+const userId = auth.user!.userId
       const fandomId = Number(params.fandomId)
       const { editId } = params
 
@@ -186,7 +193,8 @@ export default class WikisController {
    */
   public async deleteWiki({ auth, params, response }: HttpContext) {
     try {
-      const userId = auth.user!.userId
+      await auth.authenticate()
+const userId = auth.user!.userId
       const fandomId = Number(params.fandomId)
       const { wikiId } = params
 
@@ -233,6 +241,36 @@ export default class WikisController {
       return response.internalServerError({
         success: false,
         message: 'Failed to fetch wiki page',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  /**
+ * Get all wiki pages for a fandom
+ * GET /api/wikis/fandom/:fandomId
+ */
+public async getWikisByFandom({ request, params, response }: HttpContext) {
+    try {
+      const { fandomId } = params
+      const contentId = request.input('contentId')
+
+      const query = WikiPages.query().where('fandom_id', fandomId)
+
+      if (contentId) {
+        query.andWhere('content_id', contentId)
+      }
+
+      const wikis = await query.orderBy('created_at', 'desc')
+
+      return response.ok({
+        success: true,
+        data: wikis,
+      })
+    } catch (error) {
+      return response.internalServerError({
+        success: false,
+        message: 'Failed to fetch wiki pages',
         error: error instanceof Error ? error.message : 'Unknown error',
       })
     }

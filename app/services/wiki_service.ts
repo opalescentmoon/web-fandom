@@ -9,12 +9,12 @@ export class WikiService {
     return wiki
   }
 
-  public async addWikiPage(wikiId: number, content: string) {
+  public async addWikiPage(wikiId: number, content: string, userId: number) {
     let wikiPage = await WikiEdit.create({
       pageId: wikiId,
       content,
-      editorId: 0,
-      status: 'pending',
+      editorId: userId,
+      status: 'Pending',
     })
     return wikiPage
   }
@@ -57,7 +57,17 @@ export class WikiService {
 
   public async getWikiPage(wikiId: number) {
     const wikiPage = await WikiPages.findOrFail(wikiId)
-    return wikiPage
+    
+    // get latest approved edit as current content
+    const latestEdit = await WikiEdit.query()
+      .where('page_id', wikiId)
+      .orderBy('created_at', 'desc')
+      .first()
+
+    return {
+      ...wikiPage.toJSON(),
+      content: latestEdit?.content ?? null,
+    }
   }
 
   public async getWikiEditsForPage(wikiId: number) {

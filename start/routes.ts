@@ -108,6 +108,14 @@ router.get('/official', async ({ request, view, auth }) => {
   })
 })
 
+//WIKI PAGE
+router.get('/wiki/:wikiId', async ({ params, view, auth }) => {
+  return view.render('pages/homepage/wiki', {
+    wikiId: Number(params.wikiId),
+    user: auth.user,
+  })
+})
+
 // FORUM
 router.get('/forum', async ({ request, view, auth }) => {
   const fandomName = request.input('fandom_name') || 'Fandom Name'
@@ -386,6 +394,7 @@ router
     /**
      * PAGE + REVISIONS
      */
+    router.get('/fandom/:fandomId', [WikisController, 'getWikisByFandom'])
     router.get('/:wikiId', [WikisController, 'getWikiPage'])
     router.post('/:wikiId/edits/add', [WikisController, 'addWikiPage']).use(middleware.auth())
     router.get('/:wikiId/edits', [WikisController, 'getWikiEditsForPage'])
@@ -394,11 +403,8 @@ router
     /**
      * EDIT APPROVAL WORKFLOW
      */
-    router
-      .post('/edits/:editId/approve', [WikisController, 'approveWikiEdit'])
-      .use(middleware.auth())
+    router.post('/edits/:editId/approve', [WikisController, 'approveWikiEdit']).use(middleware.auth())
     router.post('/edits/:editId/reject', [WikisController, 'rejectWikiEdit']).use(middleware.auth())
-
     router.get('/hashtag/:hashtagId', [WikisController, 'getByHashtag'])
 
     router.post('/:wikiId/add/media', [WikisController, 'addMedia']).use(middleware.auth())

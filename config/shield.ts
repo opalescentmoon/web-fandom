@@ -85,6 +85,11 @@ const shieldConfig = defineConfig({
       '/api/fandom/kick',
       '/api/fandom/leave',
       '/api/mods',
+
+      '/api/wikis/fandom/:fandomId',
+      '/api/wikis',
+      '/api/wikis/:wikiId/edits/add',
+      
     ],
     enableXsrfCookie: false,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],

@@ -216,37 +216,33 @@ function renderPostCard (p) {
   `
 }
 
-async function loadFeed () {
+async function loadFeed() {
   const feed = document.getElementById('feedSection')
   if (!feed) return
 
   const body = document.body
   const activeTab = body.dataset.activeTab || 'fanworks'
-  const activeBranch = document.body.dataset.activeBranch || '' 
+  const activeBranch = body.dataset.activeBranch || ''
   const fandomId = Number(body.dataset.fandomId)
 
   const params = new URLSearchParams()
   params.set('tab', activeTab)
   if (activeBranch) params.set('branch', activeBranch)
 
-  const accessToken = localStorage.getItem('accessToken')
-
   const res = await fetch(`/api/posts/fandom/${fandomId}?${params}`, {
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...(window.IS_LOGGED_IN ? authHeaders() : {}),
     },
   })
 
   const posts = await res.json()
 
-
   if (!res.ok) {
     feed.innerHTML = `<div class="feed-loading">Failed to load posts</div>`
     return
   }
 
-  // filter by tab (because you are storing tab as postType)
   if (!Array.isArray(posts) || !posts.length) {
     feed.innerHTML = `<div class="feed-loading">No posts yet</div>`
     return
@@ -514,13 +510,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 const POST_CONTENT_TYPES = {
   fanworks: ['#Fanfiction', '#Fanart', '#Merch'],
-  official: ['Announcement', 'Lore', 'Worldbuilding'],
+  official: ['Announcement'],
   forum: ['#Discussion', '#Poll', '#QnA']
 }
 
 const CONTENT_ID_MAP = {
   fanworks: { '#Fanart': 1, '#Fanfiction': 2, '#Merch': 3 },
-  official: { 'Announcement': 4, 'Lore': 5, 'Worldbuilding': 6 },
+  official: { 'Announcement': 4 },
   forum: { '#Discussion': 7, '#Poll': 8, '#QnA': 9 },
 }
 
@@ -618,6 +614,18 @@ function setupPostModal () {
     const chosenTab = tab || initialTab || 'fanworks'
     tabSelect.value = chosenTab
     fillTypeOptions(chosenTab)
+
+    // hide Official option if not mod
+    const officialOption = tabSelect.querySelector('option[value="official"]')
+    if (officialOption) {
+      officialOption.style.display = window.isMod ? '' : 'none'
+    }
+
+    // if current tab is official and not mod, switch to fanworks
+    if (chosenTab === 'official' && !window.isMod) {
+      tabSelect.value = 'fanworks'
+      fillTypeOptions('fanworks')
+    }
 
     updatePollAvailability()
     resetPollInputs()
@@ -1170,6 +1178,7 @@ document.addEventListener('click', async (event) => {
       const data = await modRes.json()
       const mods = data?.data || []
       const isMod = mods.some(m => m.userId === currentUser.userId)
+      window.isMod = isMod 
       buildDropdown(isMod, joinedStatus)
     } catch (err) {
       console.error(err)
