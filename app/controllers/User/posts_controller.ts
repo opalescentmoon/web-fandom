@@ -3,6 +3,7 @@ import { PostService } from '#services/post_service'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
 import Media from '#models/DBModel/media'
+import db from '@adonisjs/lucid/services/db'
 
 export default class PostsController {
   private postService = new PostService()
@@ -23,13 +24,25 @@ export default class PostsController {
         'parentId',
       ])
 
+      let finalContentId = contentId
+
+      if (!finalContentId) {
+        // Look for a generic or default row in your contents table
+        const defaultContent = await db
+          .from('contents')
+          .where('content_name', 'Forum') // or whatever your default type is
+          .first()
+
+        finalContentId = defaultContent ? defaultContent.content_id : 1
+      }
+
       const post = await this.postService.createPost(
         user.userId,
         fandomId,
         caption,
         parentId || null,
         postType || 'post',
-        contentId || 0
+        contentId || finalContentId
       )
 
       if (!post) {
