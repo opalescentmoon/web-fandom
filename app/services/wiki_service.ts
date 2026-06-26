@@ -10,23 +10,30 @@ export class WikiService {
   }
 
   public async addWikiPage(wikiId: number, content: string, userId: number) {
-    let wikiPage = await WikiEdit.create({
+    // insert ke wiki_edits dengan status Approved
+    const wikiEdit = await WikiEdit.create({
       pageId: wikiId,
       content,
       editorId: userId,
-      status: 'Pending',
+      status: 'Approved',
     })
-    return wikiPage
+
+    // update content di wiki_pages juga
+    await WikiPages.query()
+      .where('id', wikiId)
+      .update({ content })
+
+    return wikiEdit
   }
 
   public async editWikiPage(wikiId: number, content: string, editorId: number) {
-    let wikiPage = await WikiEdit.create({ pageId: wikiId, content, editorId, status: 'pending' })
+    let wikiPage = await WikiEdit.create({ pageId: wikiId, content, editorId, status: 'Pending' })
     return wikiPage
   }
 
   public async approveWikiEdit(editId: number, reviewerId: number) {
     const wikiEdit = await WikiEdit.findOrFail(editId)
-    wikiEdit.status = 'approved'
+    wikiEdit.status = 'Approved'
     wikiEdit.reviewedBy = reviewerId.toString()
     await wikiEdit.save()
 
@@ -40,7 +47,7 @@ export class WikiService {
 
   public async rejectWikiEdit(editId: number, reviewerId: number) {
     const wikiEdit = await WikiEdit.findOrFail(editId)
-    wikiEdit.status = 'rejected'
+    wikiEdit.status = 'Rejected'
     wikiEdit.reviewedBy = reviewerId.toString()
     await wikiEdit.save()
     return wikiEdit
@@ -57,21 +64,13 @@ export class WikiService {
 
   public async getWikiPage(wikiId: number) {
     const wikiPage = await WikiPages.findOrFail(wikiId)
-    
-    // get latest approved edit as current content
-    const latestEdit = await WikiEdit.query()
-      .where('page_id', wikiId)
-      .orderBy('created_at', 'desc')
-      .first()
-
-    return {
-      ...wikiPage.toJSON(),
-      content: latestEdit?.content ?? null,
-    }
+    return wikiPage
   }
 
   public async getWikiEditsForPage(wikiId: number) {
-    const wikiEdits = await WikiEdit.query().where('page_id', wikiId)
+    const wikiEdits = await WikiEdit.query()
+    .where('page_id', wikiId)
+    .preload('editor')
     return wikiEdits
   }
 

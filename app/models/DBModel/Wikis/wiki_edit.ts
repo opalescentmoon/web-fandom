@@ -29,7 +29,7 @@ export default class WikiEdit extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @belongsTo(() => User, { foreignKey: 'userId' })
+  @belongsTo(() => User, { foreignKey: 'editorId' })
   public editor!: BelongsTo<typeof User>
 
   @belongsTo(() => WikiPages, { foreignKey: 'id' })

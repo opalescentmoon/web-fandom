@@ -17,6 +17,173 @@ function authHeaders() {
 
 const IS_LOGGED_IN = !!localStorage.getItem('accessToken')
 
+async function checkIsMod(fandomId) {
+  const token = localStorage.getItem('accessToken')
+  if (!token) return false
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+  if (!currentUser?.userId) return false
+
+  try {
+    const res = await fetch(`/api/mods/fandom/${fandomId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    })
+    const data = await res.json()
+    const mods = data?.data || []
+    return mods.some(m => m.userId === currentUser.userId)
+  } catch {
+    return false
+  }
+}
+
+// ─── Pending Edits (mod only) ─────────────────────────────────────────────────
+
+async function loadPendingEdits() {
+  const wikiId = document.body.dataset.wikiId
+  const section = document.getElementById('pendingEditsSection')
+  if (!section) return
+
+  try {
+    const res = await fetch(`/api/wikis/${wikiId}/edits`, {
+      headers: {
+        Accept: 'application/json',
+        ...authHeaders(),
+      },
+    })
+
+    const json = await res.json().catch(() => ({}))
+    const edits = Array.isArray(json.data) ? json.data : []
+
+    const pending = edits.filter(e => e.status === 'Pending')
+
+    if (!pending.length) {
+      section.innerHTML = `<div class="feed-loading">No pending edits</div>`
+      return
+    }
+
+    section.innerHTML = pending.map(e => {
+      const username = e.editor?.displayName ?? e.editor?.username ?? 'Unknown'
+      return `
+        <div class="post-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-size:0.9rem;">Proposed by <strong>${escapeHtml(username)}</strong></div>
+          <button class="modal-save-btn js-review-btn" 
+            data-edit-id="${e.id}" 
+            data-content="${escapeHtml(e.content)}"
+            data-author="${escapeHtml(username)}"
+            style="padding:0.3rem 0.8rem; font-size:0.85rem;">
+            Review
+          </button>
+        </div>
+      `
+    }).join('')
+
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+function setupReviewModal() {
+  const overlay = document.getElementById('reviewEditOverlay')
+  const closeBtn = document.getElementById('reviewEditCloseBtn')
+  const approveBtn = document.getElementById('reviewEditApproveBtn')
+  const rejectBtn = document.getElementById('reviewEditRejectBtn')
+  let currentEditId = null
+
+  function closeReviewModal() {
+    if (overlay) overlay.style.display = 'none'
+    currentEditId = null
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeReviewModal)
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeReviewModal()
+    })
+  }
+
+  // open modal when Review button clicked (delegated)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.js-review-btn')
+    if (!btn) return
+
+    currentEditId = btn.dataset.editId
+    const author = btn.dataset.author
+    const content = btn.dataset.content
+
+    document.getElementById('reviewEditAuthor').textContent = author
+    document.getElementById('reviewEditContent').textContent = content
+    if (overlay) overlay.style.display = 'flex'
+  })
+
+  if (approveBtn) {
+    approveBtn.addEventListener('click', async () => {
+      if (!currentEditId) return
+      try {
+        approveBtn.disabled = true
+        approveBtn.textContent = 'Approving...'
+
+        const res = await fetch(`/api/wikis/edits/${currentEditId}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ fandomId: Number(document.body.dataset.fandomId) }),
+        })
+
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.message || 'Failed to approve edit')
+
+        closeReviewModal()
+        alert('Edit approved!')
+        await loadWiki()
+        await loadPendingEdits()
+      } catch (err) {
+        alert(err.message || 'Something went wrong.')
+      } finally {
+        approveBtn.disabled = false
+        approveBtn.textContent = 'Approve'
+      }
+    })
+  }
+
+  if (rejectBtn) {
+    rejectBtn.addEventListener('click', async () => {
+      if (!currentEditId) return
+      try {
+        rejectBtn.disabled = true
+        rejectBtn.textContent = 'Rejecting...'
+
+        const res = await fetch(`/api/wikis/edits/${currentEditId}/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ fandomId: Number(document.body.dataset.fandomId) }),
+        })
+
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.message || 'Failed to reject edit')
+
+        closeReviewModal()
+        alert('Edit rejected.')
+        await loadPendingEdits()
+      } catch (err) {
+        alert(err.message || 'Something went wrong.')
+      } finally {
+        rejectBtn.disabled = false
+        rejectBtn.textContent = 'Reject'
+      }
+    })
+  }
+}
+
 // ─── Load Wiki ────────────────────────────────────────────────────────────────
 
 async function loadWiki() {
@@ -44,45 +211,205 @@ async function loadWiki() {
     const fandomId = data.fandomId ?? data.fandom_id
     if (fandomId) document.body.dataset.fandomId = fandomId
 
+    // check mod status
+    const isMod = fandomId ? await checkIsMod(fandomId) : false
+
     const contentId = data.contentId ?? data.content_id
     const branch = contentId === 5 ? 'Lore' : contentId === 6 ? 'Worldbuilding' : 'Official'
     const content = data.content ?? 'No content yet.'
 
     section.innerHTML = `
-      <article class="post-card">
+    <article class="post-card">
         <header class="post-header">
-          <div class="post-user-text">
+        <div class="post-user-text">
             <div class="post-username">${escapeHtml(data.title ?? 'Untitled')}</div>
-          </div>
-          <div class="post-branch">${escapeHtml(branch)}</div>
+        </div>
+        <div class="post-branch">${escapeHtml(branch)}</div>
         </header>
         <main class="post-body">
-          <p>${escapeHtml(content)}</p>
+        <p>${escapeHtml(content)}</p>
         </main>
         <footer class="post-footer">
-          <div class="post-actions">
-            <button class="wiki-request-edit-btn" id="requestEditBtn">+ Request Edit</button>
-          </div>
+        <div class="post-actions">
+            ${IS_LOGGED_IN ? `
+            <button class="wiki-request-edit-btn" id="requestEditBtn">
+                ${isMod ? '+ Edit' : '+ Request Edit'}
+            </button>
+            ` : ''}
+        </div>
         </footer>
-      </article>
+    </article>
     `
 
-    // show request edit button only if logged in
     const requestEditBtn = document.getElementById('requestEditBtn')
     if (requestEditBtn) {
-      if (!IS_LOGGED_IN) {
-        requestEditBtn.style.display = 'none'
-      } else {
-        requestEditBtn.addEventListener('click', () => {
-          // hook up later
-          console.log('open request edit modal')
-        })
-      }
+    requestEditBtn.addEventListener('click', () => {
+        if (isMod) {
+        openEditModal(content)
+        } else {
+        openRequestEditModal(content)
+        }
+    })
+    }
+
+    if (isMod) {
+        const pendingSection = document.createElement('div')
+        pendingSection.id = 'pendingEditsSection'
+        pendingSection.innerHTML = `
+            <div style="margin-top:1rem;">
+            <h4 style="margin-bottom:0.5rem;">Pending Edits</h4>
+            <div class="feed-loading">Loading...</div>
+            </div>
+        `
+        section.appendChild(pendingSection)
+        await loadPendingEdits()
     }
 
   } catch (err) {
     console.error(err)
     section.innerHTML = `<div class="feed-loading">Failed to load wiki page</div>`
+  }
+}
+
+function openRequestEditModal(currentContent) {
+  const overlay = document.getElementById('requestEditOverlay')
+  const textarea = document.getElementById('requestEditContent')
+  const errorEl = document.getElementById('requestEditError')
+  if (!overlay) return
+
+  if (textarea) textarea.value = currentContent
+  if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = '' }
+  overlay.style.display = 'flex'
+}
+
+function openEditModal(currentContent) {
+  const overlay = document.getElementById('editWikiOverlay')
+  const textarea = document.getElementById('editWikiContent')
+  const errorEl = document.getElementById('editWikiError')
+  if (!overlay) return
+
+  if (textarea) textarea.value = currentContent
+  if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = '' }
+  overlay.style.display = 'flex'
+}
+
+function setupModals() {
+  const wikiId = document.body.dataset.wikiId
+
+  // ── Request Edit Modal (non-mod) ──
+  const requestEditOverlay = document.getElementById('requestEditOverlay')
+  const requestEditCloseBtn = document.getElementById('requestEditCloseBtn')
+  const requestEditCancelBtn = document.getElementById('requestEditCancelBtn')
+  const requestEditSaveBtn = document.getElementById('requestEditSaveBtn')
+  const requestEditError = document.getElementById('requestEditError')
+
+  function closeRequestEditModal() {
+    if (requestEditOverlay) requestEditOverlay.style.display = 'none'
+  }
+
+  if (requestEditCloseBtn) requestEditCloseBtn.addEventListener('click', closeRequestEditModal)
+  if (requestEditCancelBtn) requestEditCancelBtn.addEventListener('click', closeRequestEditModal)
+  if (requestEditOverlay) {
+    requestEditOverlay.addEventListener('click', (e) => {
+      if (e.target === requestEditOverlay) closeRequestEditModal()
+    })
+  }
+
+  if (requestEditSaveBtn) {
+    requestEditSaveBtn.addEventListener('click', async () => {
+      const content = document.getElementById('requestEditContent')?.value.trim()
+      if (!content) {
+        requestEditError.textContent = 'Content cannot be empty.'
+        requestEditError.style.display = 'block'
+        return
+      }
+
+      try {
+        requestEditSaveBtn.disabled = true
+        requestEditSaveBtn.textContent = 'Submitting...'
+
+        const res = await fetch(`/api/wikis/${wikiId}/edit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ content }),
+        })
+
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.message || 'Failed to submit edit')
+
+        closeRequestEditModal()
+        alert('Edit submitted for review!')
+      } catch (err) {
+        requestEditError.textContent = err.message || 'Something went wrong.'
+        requestEditError.style.display = 'block'
+      } finally {
+        requestEditSaveBtn.disabled = false
+        requestEditSaveBtn.textContent = 'Submit'
+      }
+    })
+  }
+
+  // ── Edit Modal (mod) ──
+  const editWikiOverlay = document.getElementById('editWikiOverlay')
+  const editWikiCloseBtn = document.getElementById('editWikiCloseBtn')
+  const editWikiCancelBtn = document.getElementById('editWikiCancelBtn')
+  const editWikiSaveBtn = document.getElementById('editWikiSaveBtn')
+  const editWikiError = document.getElementById('editWikiError')
+  const fandomId = document.body.dataset.fandomId
+
+  function closeEditWikiModal() {
+    if (editWikiOverlay) editWikiOverlay.style.display = 'none'
+  }
+
+  if (editWikiCloseBtn) editWikiCloseBtn.addEventListener('click', closeEditWikiModal)
+  if (editWikiCancelBtn) editWikiCancelBtn.addEventListener('click', closeEditWikiModal)
+  if (editWikiOverlay) {
+    editWikiOverlay.addEventListener('click', (e) => {
+      if (e.target === editWikiOverlay) closeEditWikiModal()
+    })
+  }
+
+  if (editWikiSaveBtn) {
+    editWikiSaveBtn.addEventListener('click', async () => {
+      const content = document.getElementById('editWikiContent')?.value.trim()
+      if (!content) {
+        editWikiError.textContent = 'Content cannot be empty.'
+        editWikiError.style.display = 'block'
+        return
+      }
+
+      try {
+        editWikiSaveBtn.disabled = true
+        editWikiSaveBtn.textContent = 'Saving...'
+
+        const res = await fetch(`/api/wikis/${wikiId}/edits/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({ fandomId: Number(fandomId), content }),
+        })
+
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.message || 'Failed to save edit')
+
+        closeEditWikiModal()
+        alert('Wiki updated!')
+        await loadWiki()
+      } catch (err) {
+        editWikiError.textContent = err.message || 'Something went wrong.'
+        editWikiError.style.display = 'block'
+      } finally {
+        editWikiSaveBtn.disabled = false
+        editWikiSaveBtn.textContent = 'Save'
+      }
+    })
   }
 }
 
@@ -246,4 +573,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadComments()
   loadTrendingHashtags()
   setupCommentInput()
+  setupModals() 
+  setupReviewModal()
 })

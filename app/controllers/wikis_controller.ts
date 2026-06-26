@@ -119,11 +119,11 @@ const userId = auth.user!.userId
    * Approve a wiki edit
    * POST /api/wikis/edits/:editId/approve
    */
-  public async approveWikiEdit({ auth, params, response }: HttpContext) {
+  public async approveWikiEdit({ auth, params, request, response }: HttpContext) {
     try {
       await auth.authenticate()
-const userId = auth.user!.userId
-      const fandomId = Number(params.fandomId)
+      const userId = auth.user!.userId
+      const fandomId = Number(request.input('fandomId'))
       const { editId } = params
 
       const isMod = await this.modService.checkMod(userId, fandomId)
@@ -155,11 +155,11 @@ const userId = auth.user!.userId
    * Reject a wiki edit
    * POST /api/wikis/edits/:editId/reject
    */
-  public async rejectWikiEdit({ auth, params, response }: HttpContext) {
+  public async rejectWikiEdit({ auth, params, request, response }: HttpContext) {
     try {
       await auth.authenticate()
-const userId = auth.user!.userId
-      const fandomId = Number(params.fandomId)
+      const userId = auth.user!.userId
+      const fandomId = Number(request.input('fandomId'))
       const { editId } = params
 
       const isMod = await this.modService.checkMod(userId, fandomId)

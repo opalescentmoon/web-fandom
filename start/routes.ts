@@ -109,10 +109,9 @@ router.get('/official', async ({ request, view, auth }) => {
 })
 
 //WIKI PAGE
-router.get('/wiki/:wikiId', async ({ params, view, auth }) => {
+router.get('/wiki/:wikiId', async ({ params, view }) => {
   return view.render('pages/homepage/wiki', {
     wikiId: Number(params.wikiId),
-    user: auth.user,
   })
 })
 

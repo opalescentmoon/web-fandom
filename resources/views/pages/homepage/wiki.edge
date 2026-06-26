@@ -1,96 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Wiki</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/styles.css" />
-  </head>
-  <body class="fandom-body" data-wiki-id="{{ wikiId }}">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Wiki</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/css/styles.css" />
+    </head>
 
-    <!-- Top red header -->
-    <header class="fandom-header">
-      <button class="icon-button" onclick="history.back()">
-        <img src="/images/left.png" alt="Back" width="24" height="24" />
-      </button>
-      <div class="fandom-header-center">
-        <span class="fandom-name" id="wikiFandomName">Loading...</span>
-      </div>
-      <button class="icon-button">
-        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
-      </button>
-    </header>
-
-    <!-- 3-column layout -->
-    <div class="fandom-layout">
-
-      <!-- Left sidebar -->
-      <aside class="fandom-sidebar">
-        <button class="sidebar-icon">
-          <a href="/">
-            <img src="/images/home.png" alt="Home" width="24" height="24" />
-          </a>
-        </button>
-        <button class="sidebar-icon">
-          <a href="/search">
-            <img src="/images/loupe.png" alt="Search" width="24" height="24" />
-          </a>
-        </button>
-        <button class="sidebar-icon">
-          <a href="/chats">
-            <img src="/images/chat.png" alt="Chat" width="24" height="24" />
-          </a>
-        </button>
-        <button class="sidebar-icon">
-          <a href="/profile">
-            <img src="/images/user.png" alt="Profile" width="24" height="24" />
-          </a>
-        </button>
-      </aside>
-
-      <!-- Middle column: wiki content + comments -->
-      <section class="fandom-middle">
-        <main class="fandom-main">
-
-          <!-- Wiki content -->
-          <div id="wikiSection">
-            <div class="feed-loading">Loading...</div>
-          </div>
-
-          <!-- Comment input -->
-          <div class="comment-input-box" id="commentInputBox" style="display:none">
-            <div class="post-user-mini">
-              <div class="avatar-circle" id="commentAvatar"></div>
+    <body 
+    class="fandom-body" 
+    data-wiki-id="{{ wikiId }}"
+    data-is-mod="{{ isMod ? 'true' : 'false' }}"
+    >
+        <!-- Top red header -->
+        <header class="fandom-header">
+            <button class="icon-button" onclick="history.back()">
+                <img src="/images/left.png" alt="Back" width="24" height="24" />
+            </button>
+            <div class="fandom-header-center">
+                <span class="fandom-name" id="wikiFandomName">Loading...</span>
             </div>
-            <input
-              type="text"
-              id="commentInput"
-              class="comment-input"
-              placeholder="Write a comment as {{ user ? user.displayName || user.username : 'guest' }}..."
-            />
-            <button class="post-submit-btn" id="commentSubmitBtn">Post</button>
-          </div>
+            <button class="icon-button">
+                <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+            </button>
+        </header>
 
-          <!-- Comments -->
-          <div id="commentsSection">
-            <div class="feed-loading">Loading comments...</div>
-          </div>
+        <!-- 3-column layout -->
+        <div class="fandom-layout">
 
-        </main>
-      </section>
+            <!-- Left sidebar -->
+            <aside class="fandom-sidebar">
+                <button class="sidebar-icon">
+                    <a href="/">
+                    <img src="/images/home.png" alt="Home" width="24" height="24" />
+                    </a>
+                </button>
+                <button class="sidebar-icon">
+                    <a href="/search">
+                    <img src="/images/loupe.png" alt="Search" width="24" height="24" />
+                    </a>
+                </button>
+                <button class="sidebar-icon">
+                    <a href="/chats">
+                    <img src="/images/chat.png" alt="Chat" width="24" height="24" />
+                    </a>
+                </button>
+                <button class="sidebar-icon">
+                    <a href="/profile">
+                    <img src="/images/user.png" alt="Profile" width="24" height="24" />
+                    </a>
+                </button>
+            </aside>
 
-      <!-- Right column: trending -->
-      <aside class="fandom-filter">
-        <div class="filter-section">
-          <h4>Trending</h4>
-          <ul class="filter-list" id="trendingList">
-            <li class="feed-loading">Loading...</li>
-          </ul>
+            <!-- Middle column: wiki content + comments -->
+            <section class="fandom-middle">
+            <main class="fandom-main">
+
+                <!-- Wiki content -->
+                <div id="wikiSection">
+                <div class="feed-loading">Loading...</div>
+                </div>
+
+                <!-- Comment input -->
+                <div class="comment-input-box" id="commentInputBox" style="display:none">
+                <div class="post-user-mini">
+                    <div class="avatar-circle" id="commentAvatar"></div>
+                </div>
+                <input
+                    type="text"
+                    id="commentInput"
+                    class="comment-input"
+                    placeholder="Write a comment as {{ user ? user.displayName || user.username : 'guest' }}..."
+                />
+                <button class="post-submit-btn" id="commentSubmitBtn">Post</button>
+                </div>
+
+                <!-- Comments -->
+                <div id="commentsSection">
+                <div class="feed-loading">Loading comments...</div>
+                </div>
+            </main>
+            </section>
+
+            <!-- Right column: trending -->
+            <aside class="fandom-filter">
+            <div class="filter-section">
+                <h4>Trending</h4>
+                <ul class="filter-list" id="trendingList">
+                <li class="feed-loading">Loading...</li>
+                </ul>
+            </div>
+            </aside>
         </div>
-      </aside>
 
-    </div>
+        {{-- REQUEST EDIT MODAL (non-mod) --}}
+        <div class="modal-overlay" id="requestEditOverlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+            <h3 class="modal-title">Request Edit</h3>
+            <button class="modal-close" id="requestEditCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+            <div id="requestEditError" class="modal-error" style="display:none;"></div>
+            <div class="modal-field">
+                <label class="modal-label">Proposed Content</label>
+                <textarea class="modal-input" id="requestEditContent" rows="8"></textarea>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button class="modal-cancel-btn" id="requestEditCancelBtn">Cancel</button>
+            <button class="modal-save-btn" id="requestEditSaveBtn">Submit</button>
+            </div>
+        </div>
+        </div>
 
-    <script src="/js/script_wiki_page.js"></script>
-  </body>
+        {{-- EDIT MODAL (mod only) --}}
+        <div class="modal-overlay" id="editWikiOverlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+            <h3 class="modal-title">Edit Wiki</h3>
+            <button class="modal-close" id="editWikiCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+            <div id="editWikiError" class="modal-error" style="display:none;"></div>
+            <div class="modal-field">
+                <label class="modal-label">Content</label>
+                <textarea class="modal-input" id="editWikiContent" rows="8"></textarea>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button class="modal-cancel-btn" id="editWikiCancelBtn">Cancel</button>
+            <button class="modal-save-btn" id="editWikiSaveBtn">Save</button>
+            </div>
+        </div>
+        </div>
+
+        {{-- REVIEW EDIT MODAL (mod only) --}}
+        <div class="modal-overlay" id="reviewEditOverlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+            <h3 class="modal-title">Review Edit</h3>
+            <button class="modal-close" id="reviewEditCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+            <div class="modal-field">
+                <label class="modal-label">Proposed by</label>
+                <div id="reviewEditAuthor" style="font-size:0.9rem; color:#666;"></div>
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">Proposed Content</label>
+                <div id="reviewEditContent" style="max-height:300px; overflow-y:auto; background:#f9f0f0; border-radius:8px; padding:1rem; font-size:0.9rem; white-space:pre-wrap;"></div>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button class="modal-cancel-btn" id="reviewEditRejectBtn">Reject</button>
+            <button class="modal-save-btn" id="reviewEditApproveBtn">Approve</button>
+            </div>
+        </div>
+        </div>
+        <script src="/js/script_wiki_page.js"></script>
+    </body>
 </html>

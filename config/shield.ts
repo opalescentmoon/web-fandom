@@ -20,7 +20,7 @@ const shieldConfig = defineConfig({
     exceptRoutes: [
       // '/auth/login',
       '/auth/register',
-      // '/auth/logout',
+      '/auth/logout',
       '/api/*',
 
       '/api/poll/create',
@@ -89,6 +89,9 @@ const shieldConfig = defineConfig({
       '/api/wikis/fandom/:fandomId',
       '/api/wikis',
       '/api/wikis/:wikiId/edits/add',
+      '/api/wikis/:wikiId/edit',
+      '/api/wikis/edits/:editId/approve',
+      '/api/wikis/edits/:editId/reject',
       
     ],
     enableXsrfCookie: false,
