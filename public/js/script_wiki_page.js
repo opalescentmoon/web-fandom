@@ -217,24 +217,47 @@ async function loadWiki() {
     const contentId = data.contentId ?? data.content_id
     const branch = contentId === 5 ? 'Lore' : contentId === 6 ? 'Worldbuilding' : 'Official'
     const content = data.content ?? 'No content yet.'
+    const hashtags = Array.isArray(data.hashtags) ? data.hashtags : []
+    const hashtagHtml = hashtags.map(h => {
+    const name = h.name ?? h.hashtagName ?? h.hashtag_name ?? ''
+    if (!name) return ''
+    return `<a href="#" class="post-hashtag js-hashtag" data-tag="${escapeHtml(name)}">#${escapeHtml(name)}</a>`
+    }).filter(Boolean).join(' ')
+    const media = Array.isArray(data.media) ? data.media : []
+    const mediaHtml = media.map(m => {
+    const url = m.fileUrl ?? m.file_url
+    if (!url) return ''
+    return `
+        <div class="post-media-wrap" style="position:relative; display:inline-block;">
+        <img class="post-media" src="${url}" alt="Wiki media" />
+        ${isMod ? `<button class="js-remove-media-btn" data-media-id="${m.id}" style="position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;">×</button>` : ''}
+        </div>
+    `
+    }).join('')
 
     section.innerHTML = `
     <article class="post-card">
         <header class="post-header">
         <div class="post-user-text">
-            <div class="post-username">${escapeHtml(data.title ?? 'Untitled')}</div>
+            <div class="wiki-card-title">${escapeHtml(data.title ?? 'Untitled')}</div>
         </div>
         <div class="post-branch">${escapeHtml(branch)}</div>
         </header>
         <main class="post-body">
         <p>${escapeHtml(content)}</p>
+        ${mediaHtml}
         </main>
         <footer class="post-footer">
+        <div class="post-hashtags">${hashtagHtml}</div>
         <div class="post-actions">
             ${IS_LOGGED_IN ? `
             <button class="wiki-request-edit-btn" id="requestEditBtn">
                 ${isMod ? '+ Edit' : '+ Request Edit'}
             </button>
+            ${isMod ? `
+                <button class="wiki-request-edit-btn" id="addMediaBtn">📷 Add Image</button>
+                <input type="file" id="wikiMediaInput" accept="image/jpg,image/jpeg,image/png" style="display:none;" />
+            ` : ''}
             ` : ''}
         </div>
         </footer>
@@ -245,12 +268,83 @@ async function loadWiki() {
     if (requestEditBtn) {
     requestEditBtn.addEventListener('click', () => {
         if (isMod) {
-        openEditModal(content)
+        openEditModal(content, data.hashtags ?? [])
         } else {
         openRequestEditModal(content)
         }
     })
     }
+
+    // add media button (mod only)
+    const addMediaBtn = document.getElementById('addMediaBtn')
+    const wikiMediaInput = document.getElementById('wikiMediaInput')
+
+    if (addMediaBtn && wikiMediaInput) {
+    addMediaBtn.addEventListener('click', () => wikiMediaInput.click())
+
+    wikiMediaInput.addEventListener('change', async () => {
+        const file = wikiMediaInput.files?.[0]
+        if (!file) return
+
+        try {
+        addMediaBtn.disabled = true
+        addMediaBtn.textContent = 'Uploading...'
+
+        const fd = new FormData()
+        fd.append('media', file)
+        fd.append('wikiId', wikiId)
+        fd.append('fandomId', document.body.dataset.fandomId)
+
+        const res = await fetch(`/api/wikis/${wikiId}/add/media`, {
+            method: 'POST',
+            headers: { ...authHeaders() },
+            body: fd,
+        })
+
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.error || 'Failed to upload media')
+
+        await loadWiki()
+        } catch (err) {
+        alert(err.message || 'Failed to upload media')
+        } finally {
+        addMediaBtn.disabled = false
+        addMediaBtn.textContent = '📷 Add Image'
+        }
+    })
+    }
+
+    // remove media buttons (mod only)
+    document.querySelectorAll('.js-remove-media-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        e.stopPropagation()
+        const mediaId = btn.dataset.mediaId
+        if (!confirm('Remove this image?')) return
+
+        try {
+        const res = await fetch(`/api/wikis/${wikiId}/delete/media`, {
+            method: 'DELETE',
+            headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...authHeaders(),
+            },
+            body: JSON.stringify({
+            wikiId: Number(wikiId),
+            mediaId: Number(mediaId),
+            fandomId: Number(document.body.dataset.fandomId),
+            }),
+        })
+
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.error || 'Failed to remove media')
+
+        await loadWiki()
+        } catch (err) {
+        alert(err.message || 'Failed to remove media')
+        }
+    })
+    })
 
     if (isMod) {
         const pendingSection = document.createElement('div')
@@ -282,13 +376,18 @@ function openRequestEditModal(currentContent) {
   overlay.style.display = 'flex'
 }
 
-function openEditModal(currentContent) {
+function openEditModal(currentContent, currentHashtags = []) {
   const overlay = document.getElementById('editWikiOverlay')
   const textarea = document.getElementById('editWikiContent')
+  const tagsInput = document.getElementById('editWikiTags')
   const errorEl = document.getElementById('editWikiError')
   if (!overlay) return
 
   if (textarea) textarea.value = currentContent
+  if (tagsInput) {
+    // prefill dengan hashtags yang udah ada
+    tagsInput.value = currentHashtags.map(h => `#${h.name ?? h.hashtagName ?? h.hashtag_name ?? ''}`).join(' ')
+  }
   if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = '' }
   overlay.style.display = 'flex'
 }
@@ -376,6 +475,7 @@ function setupModals() {
   if (editWikiSaveBtn) {
     editWikiSaveBtn.addEventListener('click', async () => {
       const content = document.getElementById('editWikiContent')?.value.trim()
+      const tagsRaw = document.getElementById('editWikiTags')?.value.trim()
       if (!content) {
         editWikiError.textContent = 'Content cannot be empty.'
         editWikiError.style.display = 'block'
@@ -398,6 +498,73 @@ function setupModals() {
 
         const json = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(json?.message || 'Failed to save edit')
+        
+        // step 2: sync hashtags
+        const newTags = (tagsRaw || '')
+            .split(/[\s,]+/)
+            .map(t => t.replace(/^#/, '').trim().toLowerCase())
+            .filter(Boolean)
+
+        // get current hashtags from page
+        const currentWikiRes = await fetch(`/api/wikis/${wikiId}`, {
+            headers: { Accept: 'application/json', ...authHeaders() },
+        })
+        const currentWikiJson = await currentWikiRes.json()
+        const currentWikiData = currentWikiJson.data ?? currentWikiJson
+        const currentHashtags = Array.isArray(currentWikiData.hashtags) ? currentWikiData.hashtags : []
+        const currentTagNames = currentHashtags.map(h => (h.name ?? h.hashtagName ?? '').toLowerCase())
+        const currentTagMap = new Map(currentHashtags.map(h => [
+            (h.name ?? h.hashtagName ?? '').toLowerCase(),
+            h.id
+        ]))
+
+        // tags to add
+        const tagsToAdd = newTags.filter(t => !currentTagNames.includes(t))
+        // tags to remove
+        const tagsToRemove = currentHashtags.filter(h => 
+            !newTags.includes((h.name ?? h.hashtagName ?? '').toLowerCase())
+        )
+
+        // add new tags
+        for (const tag of tagsToAdd) {
+            const hRes = await fetch('/api/hashtags/find-or-create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                ...authHeaders(),
+            },
+            body: JSON.stringify({ tag }),
+            })
+            const hashtag = await hRes.json().catch(() => ({}))
+            if (!hRes.ok) continue
+
+            const hashtagId = hashtag.hashtagId ?? hashtag.id ?? hashtag.hashtag?.id
+            if (!hashtagId) continue
+
+            await fetch(`/api/wikis/${wikiId}/add/hashtags`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                ...authHeaders(),
+            },
+            body: JSON.stringify({ hashtagId, fandomId: Number(fandomId) }),
+            })
+        }
+
+        // remove old tags
+        for (const hashtag of tagsToRemove) {
+            await fetch(`/api/wikis/${wikiId}/delete/hashtags/${hashtag.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                ...authHeaders(),
+            },
+            body: JSON.stringify({ fandomId: Number(fandomId) }),
+            })
+        }
 
         closeEditWikiModal()
         alert('Wiki updated!')

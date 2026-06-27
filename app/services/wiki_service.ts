@@ -63,7 +63,11 @@ export class WikiService {
   }
 
   public async getWikiPage(wikiId: number) {
-    const wikiPage = await WikiPages.findOrFail(wikiId)
+    const wikiPage = await WikiPages.query()
+      .where('id', wikiId)
+      .preload('hashtags')
+      .preload('media')
+      .firstOrFail()
     return wikiPage
   }
 
@@ -138,7 +142,9 @@ export class WikiService {
   }
 
   public async addMediaToWiki(wikiId: number, mediaUrl: string, mediaType: string) {
-    const media = await Media.create({ wikiId, fileUrl: mediaUrl, mediaType })
+    const media = await Media.create({ fileUrl: mediaUrl, mediaType })
+    const wikiPage = await WikiPages.findOrFail(wikiId)
+    await wikiPage.related('media').attach([media.id])
     return media
   }
 

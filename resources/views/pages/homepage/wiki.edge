@@ -127,34 +127,14 @@
                 <label class="modal-label">Content</label>
                 <textarea class="modal-input" id="editWikiContent" rows="8"></textarea>
             </div>
+            <div class="modal-field">
+                <label class="modal-label">Tags</label>
+                <input class="modal-input" type="text" id="editWikiTags" placeholder="#add tags" />
+            </div>
             </div>
             <div class="modal-footer">
             <button class="modal-cancel-btn" id="editWikiCancelBtn">Cancel</button>
             <button class="modal-save-btn" id="editWikiSaveBtn">Save</button>
-            </div>
-        </div>
-        </div>
-
-        {{-- REVIEW EDIT MODAL (mod only) --}}
-        <div class="modal-overlay" id="reviewEditOverlay" style="display:none;">
-        <div class="modal-box">
-            <div class="modal-header">
-            <h3 class="modal-title">Review Edit</h3>
-            <button class="modal-close" id="reviewEditCloseBtn">&times;</button>
-            </div>
-            <div class="modal-body">
-            <div class="modal-field">
-                <label class="modal-label">Proposed by</label>
-                <div id="reviewEditAuthor" style="font-size:0.9rem; color:#666;"></div>
-            </div>
-            <div class="modal-field">
-                <label class="modal-label">Proposed Content</label>
-                <div id="reviewEditContent" style="max-height:300px; overflow-y:auto; background:#f9f0f0; border-radius:8px; padding:1rem; font-size:0.9rem; white-space:pre-wrap;"></div>
-            </div>
-            </div>
-            <div class="modal-footer">
-            <button class="modal-cancel-btn" id="reviewEditRejectBtn">Reject</button>
-            <button class="modal-save-btn" id="reviewEditApproveBtn">Approve</button>
             </div>
         </div>
         </div>

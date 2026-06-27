@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 
 import User from '../User/user.js'
 import Fandom from '../fandom.js'
@@ -48,8 +48,14 @@ export default class WikiPages extends BaseModel {
   @belongsTo(() => Content, { foreignKey: 'contentId' })
   public contentRelation!: BelongsTo<typeof Content>
 
-  @hasMany(() => Media, { foreignKey: 'id' })
-  declare media: HasMany<typeof Media>
+  @manyToMany(() => Media, {
+    pivotTable: 'wiki_medias',
+    pivotForeignKey: 'wiki_id',
+    pivotRelatedForeignKey: 'media_id',
+    localKey: 'id',
+    relatedKey: 'id',
+  })
+  declare media: ManyToMany<typeof Media>
 
   @manyToMany(() => Hashtag, {
     pivotTable: 'hashtag_wikis',

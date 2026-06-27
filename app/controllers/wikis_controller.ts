@@ -255,7 +255,9 @@ public async getWikisByFandom({ request, params, response }: HttpContext) {
       const { fandomId } = params
       const contentId = request.input('contentId')
 
-      const query = WikiPages.query().where('fandom_id', fandomId)
+      const query = WikiPages.query()
+      .where('fandom_id', fandomId)
+      .preload('hashtags')
 
       if (contentId) {
         query.andWhere('content_id', contentId)

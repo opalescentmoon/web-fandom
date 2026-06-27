@@ -92,7 +92,10 @@ const shieldConfig = defineConfig({
       '/api/wikis/:wikiId/edit',
       '/api/wikis/edits/:editId/approve',
       '/api/wikis/edits/:editId/reject',
-      
+      '/api/wikis/:wikiId/add/hashtags',
+      '/api/wikis/:wikiId/delete/hashtags/:hashtagId',
+      '/api/wikis/:wikiId/add/media',
+      '/api/wikis/:wikiId/delete/media'
     ],
     enableXsrfCookie: false,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],

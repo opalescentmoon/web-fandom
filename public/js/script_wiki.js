@@ -63,20 +63,27 @@ function renderWikiCard(w) {
   const title = w.title ?? 'Untitled'
   const contentId = w.contentId ?? w.content_id
   const branch = contentId === 5 ? 'Lore' : contentId === 6 ? 'Worldbuilding' : 'Official'
+  const hashtags = Array.isArray(w.hashtags) ? w.hashtags : []
+  const hashtagHtml = hashtags.map(h => {
+    const name = h.name ?? h.hashtagName ?? h.hashtag_name ?? ''
+    if (!name) return ''
+    return `<a href="#" class="post-hashtag js-hashtag" data-tag="${escapeHtml(name)}">#${escapeHtml(name)}</a>`
+  }).filter(Boolean).join(' ')
 
   return `
     <article class="post-card" onclick="window.location.href='/wiki/${wikiId}'" style="cursor:pointer">
       <header class="post-header">
-        <div class="post-user-mini">
-          <div class="post-user-text">
-            <div class="post-username">${escapeHtml(title)}</div>
-          </div>
+        <div class="post-user-text">
+          <div class="wiki-card-title">${escapeHtml(title)}</div>  
         </div>
         <div class="post-branch">${escapeHtml(branch)}</div>
       </header>
       <main class="post-body">
         <p class="wiki-card-hint">Click to read more</p>
       </main>
+      <footer class="post-footer">
+        <div class="post-hashtags">${hashtagHtml}</div>
+      </footer>
     </article>
   `
 }
@@ -349,6 +356,45 @@ function setupCreateWikiModal() {
           },
           body: JSON.stringify({ fandomId, content }),
         })
+
+        // step 3: attach hashtags
+        const tagsRaw = document.getElementById('createWikiTags')?.value.trim()
+        if (tagsRaw) {
+          const tagList = tagsRaw
+            .split(/[\s,]+/)
+            .map(t => t.replace(/^#/, '').trim())
+            .filter(Boolean)
+
+          for (const tag of tagList) {
+            // find or create hashtag
+            const hRes = await fetch('/api/hashtags/find-or-create', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                ...authHeaders(),
+              },
+              body: JSON.stringify({ tag }),
+            })
+
+            const hashtag = await hRes.json().catch(() => ({}))
+            if (!hRes.ok) continue
+
+            const hashtagId = hashtag.hashtagId ?? hashtag.id ?? hashtag.hashtag?.id
+            if (!hashtagId) continue
+
+            // attach to wiki
+            await fetch(`/api/wikis/${wikiId}/add/hashtags`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                ...authHeaders(),
+              },
+              body: JSON.stringify({ hashtagId, fandomId }),
+            })
+          }
+        }
 
         const contentJson = await contentRes.json().catch(() => ({}))
         if (!contentRes.ok) throw new Error(contentJson?.message || 'Failed to add wiki content')
