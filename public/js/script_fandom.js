@@ -1204,7 +1204,7 @@ document.addEventListener('click', async (event) => {
             ${isMod ? '<div style="font-size:0.75rem; color:#c76369;">Mod</div>' : ''}
           </div>
         </div>
-        ${!isSelf ? `
+        ${!isSelf && window.isMod ? `
           <div style="display:flex; gap:0.4rem;">
             ${!isMod ? `<button class="modal-cancel-btn js-make-mod-btn" style="font-size:0.75rem; padding:0.2rem 0.5rem;" data-user-id="${userId}">Make Mod</button>` : ''}
             <button class="modal-cancel-btn js-kick-btn" style="font-size:0.75rem; padding:0.2rem 0.5rem; color:#c0392b; border-color:#c0392b;" data-user-id="${userId}">Kick</button>
