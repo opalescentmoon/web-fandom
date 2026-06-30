@@ -16,12 +16,13 @@ export default class PostsController {
       const user = auth.getUserOrFail()
       if (!user) return response.unauthorized({ error: 'Not logged in' })
 
-      const { caption, postType, contentId, fandomId, parentId } = request.only([
+      const { caption, postType, contentId, fandomId, parentId, wikiId } = request.only([
         'caption',
         'postType',
         'contentId',
         'fandomId',
         'parentId',
+        'wikiId',
       ])
 
       let finalContentId = contentId
@@ -41,6 +42,7 @@ export default class PostsController {
         fandomId,
         caption,
         parentId || null,
+        wikiId || null,
         postType || 'post',
         contentId || finalContentId
       )
@@ -196,8 +198,13 @@ export default class PostsController {
    */
   public async comments({ params, response }: HttpContext) {
     try {
-      const postId = Number(params.postId)
-      const comments = await this.postService.getCommentsForPost(postId)
+      const postId = params.postId ? Number(params.postId) : undefined
+      const wikiId = params.wikiId ? Number(params.wikiId) : undefined
+
+      if (!postId && !wikiId) {
+        return response.badRequest({ error: 'Missing postId or wikiId parameter' })
+      }
+      const comments = await this.postService.getCommentsForPost({ postId, wikiId })
       return response.ok(comments)
     } catch (error: any) {
       return response.badRequest({ error: error.message })

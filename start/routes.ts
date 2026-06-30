@@ -402,7 +402,9 @@ router
     /**
      * EDIT APPROVAL WORKFLOW
      */
-    router.post('/edits/:editId/approve', [WikisController, 'approveWikiEdit']).use(middleware.auth())
+    router
+      .post('/edits/:editId/approve', [WikisController, 'approveWikiEdit'])
+      .use(middleware.auth())
     router.post('/edits/:editId/reject', [WikisController, 'rejectWikiEdit']).use(middleware.auth())
     router.get('/hashtag/:hashtagId', [WikisController, 'getByHashtag'])
 
@@ -415,5 +417,7 @@ router
     router
       .delete('/:wikiId/delete/hashtags/:hashtagId', [WikisController, 'removeHashtagFromWiki'])
       .use(middleware.auth())
+
+    router.get('/:wikiId/comments', [PostsController, 'comments'])
   })
   .prefix('/api/wikis')

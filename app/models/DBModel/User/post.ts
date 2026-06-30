@@ -9,6 +9,7 @@ import Media from '#models/DBModel/media'
 import Content from '../content.js'
 import Like from '../like.js'
 import Hashtag from '../hashtag.js'
+import WikiPages from '../Wikis/wiki_page.js'
 
 export default class Post extends BaseModel {
   @column({ isPrimary: true, columnName: 'post_id' })
@@ -29,6 +30,9 @@ export default class Post extends BaseModel {
   @column({ columnName: 'parent_id' })
   declare parentId: number | null
 
+  @column({ columnName: 'wiki_id' })
+  declare wikiId: number | null
+
   @column({ columnName: 'caption' })
   declare caption: string
 
@@ -38,19 +42,22 @@ export default class Post extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => User, { foreignKey: 'userId' })
+  @belongsTo(() => User, { foreignKey: 'user_id' })
   public user!: BelongsTo<typeof User>
 
-  @belongsTo(() => Fandom, { foreignKey: 'fandomId' })
+  @belongsTo(() => Fandom, { foreignKey: 'fandom_id' })
   public fandom!: BelongsTo<typeof Fandom>
 
-  @belongsTo(() => Content, { foreignKey: 'contentId' })
+  @belongsTo(() => Content, { foreignKey: 'content_id' })
   public content!: BelongsTo<typeof Content>
 
   @belongsTo(() => Post, { foreignKey: 'parent_id' })
   public comment!: BelongsTo<typeof Post>
 
-  @hasMany(() => Media, { foreignKey: 'postId' })
+  @belongsTo(() => WikiPages, { foreignKey: 'wiki_id' })
+  public wiki!: BelongsTo<typeof WikiPages>
+
+  @hasMany(() => Media, { foreignKey: 'post_id' })
   declare media: HasMany<typeof Media>
 
   @hasMany(() => Like, { foreignKey: 'id' })

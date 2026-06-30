@@ -33,6 +33,14 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
         .nullable()
 
+      table
+        .integer('wiki_id')
+        .unsigned()
+        .references('id')
+        .inTable('wiki_pages')
+        .onDelete('CASCADE')
+        .nullable()
+
       table.text('caption').nullable()
 
       table.timestamp('created_at')

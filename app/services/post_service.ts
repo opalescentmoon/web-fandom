@@ -13,10 +13,11 @@ export class PostService {
     fandomId: number,
     caption: string,
     parentId: number | null,
+    wikiId: number | null,
     postType: string,
     contentId: number
   ) {
-    if (!parentId) {
+    if (!parentId && !wikiId) {
       const user = await User.findOrFail(userId)
       const isMember = await user
         .related('fandoms')
@@ -33,6 +34,7 @@ export class PostService {
       userId,
       fandomId,
       parentId,
+      wikiId,
       contentId,
       postType,
       caption,
@@ -454,15 +456,23 @@ export class PostService {
     return posts
   }
 
-  public async getCommentsForPost(postId: number) {
-    const comments = await Post.query()
-      .where('parent_id', postId)
+  public async getCommentsForPost({ postId, wikiId }: { postId?: number; wikiId?: number }) {
+    const query = Post.query()
       .preload('user', (u) => {
         u.select(['user_id', 'user_name', 'display_name', 'profile_picture'])
       })
       .preload('media')
       .orderBy('created_at', 'asc')
 
+    if (postId) {
+      query.where('parent_id', postId)
+    } else if (wikiId) {
+      query.where('wiki_id', wikiId)
+    } else {
+      return []
+    }
+
+    const comments = await query
     return comments.map((c) => c.serialize())
   }
 
