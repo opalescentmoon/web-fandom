@@ -130,9 +130,9 @@ export default class UsersController {
       const user = auth.user
       if (!user) return response.unauthorized({ error: 'Not logged in' })
 
-      const { email } = request.only(['email'])
+      const { email, currentPassword } = request.only(['email', 'currentPassword'])
 
-      const updated = await this.userService.updateEmail(user.userId, email)
+      const updated = await this.userService.updateEmail(user.userId, currentPassword, email)
       return response.ok(updated)
     } catch (error: any) {
       return response.badRequest({ error: error.message })
@@ -147,9 +147,9 @@ export default class UsersController {
       const user = auth.user
       if (!user) return response.unauthorized({ error: 'Not logged in' })
 
-      const { newPassword } = request.only(['newPassword'])
+      const { newPassword, currentPassword } = request.only(['newPassword', 'currentPassword'])
 
-      await this.userService.changePassword(user.userId, newPassword)
+      await this.userService.changePassword(user.userId, currentPassword, newPassword)
       return response.ok({ message: 'Password updated successfully' })
     } catch (error: any) {
       return response.badRequest({ error: error.message })

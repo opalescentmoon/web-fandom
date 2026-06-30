@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body class="settings-page-body">
+    <!-- Top red header -->
+    <header class="settings-header">
+      <button class="icon-button" id="settingsBackButton">
+        <img src="/images/left.png" alt="Back" width="24" height="24" />
+      </button>
+
+      <button class="icon-button">
+        <img src="/images/notification-bell.png" alt="Notifications" width="24" height="24" />
+      </button>
+    </header>
+
+    <!-- 2-column settings layout -->
+    <div class="settings-shell">
+      <!-- Left: sidebar nav -->
+      <aside class="settings-list">
+        <h2 class="settings-list-title">Settings</h2>
+        <div class="settings-search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search..." />
+        </div>
+
+        <div class="settings-list-items">
+          <button class="settings-list-item is-active" data-panel="myAccount">
+            <span class="settings-list-name">My account</span>
+            <span class="settings-arrow">&rsaquo;</span>
+          </button>
+
+          <button class="settings-list-item" data-panel="contentModeration">
+            <span class="settings-list-name">Content moderation</span>
+            <span class="settings-arrow">&rsaquo;</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right: content panel -->
+      <section class="settings-main">
+        <!-- My account panel -->
+        <div class="settings-panel" id="panel-myAccount">
+          <h1 class="settings-panel-title">My account</h1>
+          <p class="settings-panel-subtitle">Manage your account information</p>
+
+          <div class="settings-row" id="openChangeEmail">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Change email</div>
+              <div class="settings-row-desc">Update the email linked to your account</div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-row-value" id="currentEmailDisplay">Loading...</span>
+              <span class="settings-arrow">&rsaquo;</span>
+            </div>
+          </div>
+
+          <div class="settings-row" id="openChangeUsername">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Change username</div>
+              <div class="settings-row-desc">Update your unique username</div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-row-value" id="currentUsernameDisplay">Loading...</span>
+              <span class="settings-arrow">&rsaquo;</span>
+            </div>
+          </div>
+
+          <div class="settings-row" id="openChangePassword">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Change password</div>
+              <div class="settings-row-desc">Update your account password</div>
+            </div>
+            <span class="settings-arrow">&rsaquo;</span>
+          </div>
+
+          <div class="settings-row settings-row-danger" id="openDeleteAccount">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Delete account</div>
+              <div class="settings-row-desc">Permanently delete your account and all data</div>
+            </div>
+            <span class="settings-arrow">&rsaquo;</span>
+          </div>
+        </div>
+
+        <!-- Content moderation panel (placeholder) -->
+        <div class="settings-panel" id="panel-contentModeration" style="display:none;">
+          <h1 class="settings-panel-title">Content moderation</h1>
+          <p class="settings-panel-subtitle">Manage what content you see and share on Space</p>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Fandoms</div>
+              <div class="settings-row-desc">Manage your joined fandoms</div>
+            </div>
+            <span class="settings-arrow">&rsaquo;</span>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Content you see</div>
+              <div class="settings-row-desc">Manage what content you see based on your interest</div>
+            </div>
+            <span class="settings-arrow">&rsaquo;</span>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Mute and Block</div>
+              <div class="settings-row-desc">Manage accounts and tags you've muted or block</div>
+            </div>
+            <span class="settings-arrow">&rsaquo;</span>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <div class="settings-row-label">Chats</div>
+              <div class="settings-row-desc">Manage who can chat you directly</div>
+            </div>
+            <span class="settings-arrow">&rsaquo;</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Change Email Modal -->
+    <div class="modal-overlay" id="changeEmailOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Change Email</h3>
+          <button class="modal-close" id="closeChangeEmail">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="changeEmailError" class="modal-error" style="display:none;"></div>
+
+          <div class="modal-field">
+            <label class="modal-label">New Email</label>
+            <input class="modal-input" type="email" id="newEmailInput" placeholder="you@example.com" />
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Current Password</label>
+            <input class="modal-input" type="password" id="emailCurrentPasswordInput" placeholder="Enter current password" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="closeChangeEmail2">Cancel</button>
+          <button class="modal-save-btn" id="submitChangeEmail">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Username Modal -->
+    <div class="modal-overlay" id="changeUsernameOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Change Username</h3>
+          <button class="modal-close" id="closeChangeUsername">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="changeUsernameError" class="modal-error" style="display:none;"></div>
+
+          <div class="modal-field">
+            <label class="modal-label">New Username</label>
+            <input class="modal-input" type="text" id="newUsernameInput" placeholder="Enter new username" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="closeChangeUsername2">Cancel</button>
+          <button class="modal-save-btn" id="submitChangeUsername">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="changePasswordOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Change Password</h3>
+          <button class="modal-close" id="closeChangePassword">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="changePasswordError" class="modal-error" style="display:none;"></div>
+
+          <div class="modal-field">
+            <label class="modal-label">Current Password</label>
+            <input class="modal-input" type="password" id="currentPasswordInput" placeholder="Enter current password" />
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">New Password</label>
+            <input class="modal-input" type="password" id="newPasswordInput" placeholder="Enter new password" />
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Confirm New Password</label>
+            <input class="modal-input" type="password" id="confirmNewPasswordInput" placeholder="Re-enter new password" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-cancel-btn" id="closeChangePassword2">Cancel</button>
+          <button class="modal-save-btn" id="submitChangePassword">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/script_settings.js"></script>
+  </body>
+</html>

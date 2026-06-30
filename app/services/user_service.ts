@@ -24,15 +24,23 @@ export class UserService {
     return user
   }
 
-  public async updateEmail(userId: number, email: string) {
+  public async updateEmail(userId: number, currentPassword: string, email: string) {
     const user = await User.findOrFail(userId)
+
+    const isValid = await hash.verify(user.password, currentPassword)
+    if (!isValid) throw new Error('Current password is incorrect')
+
     user.email = email
     await user.save()
     return user
   }
 
-  public async changePassword(userId: number, newPassword: string) {
+  public async changePassword(userId: number, currentPassword: string, newPassword: string) {
     const user = await User.findOrFail(userId)
+
+    const isValid = await hash.verify(user.password, currentPassword)
+    if (!isValid) throw new Error('Current password is incorrect')
+
     user.password = await hash.make(newPassword)
     await user.save()
     return user

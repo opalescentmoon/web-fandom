@@ -187,6 +187,12 @@ router.get('/search', async ({ request, view, auth }) => {
 
 router.get('/api/search', [SearchController, 'index'])
 
+// SETTING PAGE
+router.get('/settings', async ({ view }) => {
+  return view.render('pages/settings')
+})
+
+// ========= API ROUTES =========
 // LIKE ROUTES
 router
   .group(() => {

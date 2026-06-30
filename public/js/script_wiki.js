@@ -225,8 +225,11 @@ document.addEventListener('click', async (e) => {
   const loadMoreBtn = e.target.closest('#loadMoreAnnouncementBtn')
   if (loadMoreBtn) {
     e.preventDefault()
-    showingAllAnnouncements = true
-    await loadAnnouncements(true)
+    selectedBranch = 'Announcement'
+    closeAllCollapses(null)
+    getBody().dataset.activeBranch = 'Announcement'
+    setBranchActiveUI()
+    await applyBranchFilter('Announcement')
     return
   }
 }, true)

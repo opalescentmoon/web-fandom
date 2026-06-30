@@ -95,7 +95,13 @@ const shieldConfig = defineConfig({
       '/api/wikis/:wikiId/add/hashtags',
       '/api/wikis/:wikiId/delete/hashtags/:hashtagId',
       '/api/wikis/:wikiId/add/media',
-      '/api/wikis/:wikiId/delete/media'
+      '/api/wikis/:wikiId/delete/media',
+
+      '/api/user/username',
+      '/api/user/email',
+      '/api/user/password',
+      '/api/user/update',
+      
     ],
     enableXsrfCookie: false,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
