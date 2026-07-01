@@ -142,7 +142,7 @@ function renderPostCard(p) {
     : ''
 
   return `
-    <article class="post-card" data-post-id="${postId}">
+    <article class="post-card" data-post-id="${postId}" onclick="if(!event.target.closest('.post-like-btn') && !event.target.closest('.js-hashtag')) window.location.href='/posts/${postId}'" style="cursor:pointer">
       <header class="post-header">
         <div class="post-user-mini">
           <div class="avatar-circle" style="${avatarUrl ? `background-image:url('${avatarUrl}'); background-size:cover; background-position:center;` : ''}"></div>

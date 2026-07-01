@@ -32,6 +32,26 @@ function setupBranchFilterToggle() {
   })
 }
 
+// ===== SIDEBAR CURRENT-PAGE HIGHLIGHT =====
+const FANDOM_HOME_PATHS = ['/fanworks', '/official', '/forum']
+
+function setupSidebarActiveIcon() {
+  const currentPath = window.location.pathname
+
+  document.querySelectorAll('.sidebar-icon').forEach((btn) => {
+    const link = btn.querySelector('a')
+    if (!link) return
+
+    const linkPath = new URL(link.href, window.location.origin).pathname
+    const isHomeIcon = linkPath === '/fanworks'
+
+    // Home stays lit across all three fandom pages, others match exactly
+    if ((isHomeIcon && FANDOM_HOME_PATHS.includes(currentPath)) || linkPath === currentPath) {
+      btn.classList.add('is-active')
+    }
+  })
+}
+
 
 // ===== AUTH MODAL JS =====
 const authOverlay = document.getElementById('authOverlay')
@@ -428,6 +448,7 @@ document.addEventListener('click', async (e) => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupBranchFilterToggle()
+  setupSidebarActiveIcon()
 
   // determine login state
   const token = localStorage.getItem('accessToken')
@@ -614,6 +635,25 @@ function setupPostModal () {
     const chosenTab = tab || initialTab || 'fanworks'
     tabSelect.value = chosenTab
     fillTypeOptions(chosenTab)
+
+    // populate avatar + display name from localStorage (SSR $props.user is never
+    // populated since auth is handled client-side, so this was always blank before)
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+    const modalAvatar = modal.querySelector('.avatar-circle')
+    const modalUsername = modal.querySelector('.post-username')
+
+    if (modalUsername) {
+      modalUsername.textContent = currentUser.displayName || currentUser.username || 'Username'
+    }
+    if (modalAvatar) {
+      if (currentUser.profilePicture) {
+        modalAvatar.style.backgroundImage = `url('${currentUser.profilePicture}')`
+        modalAvatar.style.backgroundSize = 'cover'
+        modalAvatar.style.backgroundPosition = 'center'
+      } else {
+        modalAvatar.style.backgroundImage = ''
+      }
+    }
 
     // hide Official option if not mod
     const officialOption = tabSelect.querySelector('option[value="official"]')
