@@ -616,13 +616,8 @@ async function loadComments() {
         ...(IS_LOGGED_IN ? authHeaders() : {}),
       },
     })
-
-    if (!res.ok) {
-      section.innerHTML = `<div class="feed-loading">No comments yet.</div>`
-      return
-    }
-
     const comments = await res.json()
+    if (!res.ok) throw new Error(comments?.error || 'Failed to load comments')
 
     if (!Array.isArray(comments) || !comments.length) {
       section.innerHTML = `<div class="feed-loading">No comments yet. Be the first!</div>`
@@ -690,10 +685,10 @@ async function submitComment() {
       body: JSON.stringify({
         caption,
         parentId: null,
+        wikiId: Number(wikiId),
         postType: 'normal',
         fandomId: null,
-        contentId: 0,
-        wikiId: Number(wikiId),
+        contentId: null,
       }),
     })
 
@@ -703,6 +698,7 @@ async function submitComment() {
     input.value = ''
     await loadComments()
   } catch (err) {
+    console.error(err)
     alert('Failed to post comment. Please try again.')
   }
 }

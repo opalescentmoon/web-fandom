@@ -14,6 +14,8 @@ public/assets
 public/uploads/
 public/images/media_assets
 
+database\migrations\1782904512183_create_add_post_id_to_medias_table
+
 # Build tools specific
 npm-debug.log
 yarn-error.log
