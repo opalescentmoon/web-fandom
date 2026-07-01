@@ -42,28 +42,28 @@ export default class Post extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => User, { foreignKey: 'user_id' })
+  @belongsTo(() => User, { foreignKey: 'userId' })
   public user!: BelongsTo<typeof User>
 
-  @belongsTo(() => Fandom, { foreignKey: 'fandom_id' })
+  @belongsTo(() => Fandom, { foreignKey: 'fandomId' })
   public fandom!: BelongsTo<typeof Fandom>
 
-  @belongsTo(() => Content, { foreignKey: 'content_id' })
+  @belongsTo(() => Content, { foreignKey: 'contentId' })
   public content!: BelongsTo<typeof Content>
 
-  @belongsTo(() => Post, { foreignKey: 'parent_id' })
+  @belongsTo(() => Post, { foreignKey: 'parentId' })
   public comment!: BelongsTo<typeof Post>
 
-  @belongsTo(() => WikiPages, { foreignKey: 'wiki_id' })
+  @belongsTo(() => WikiPages, { foreignKey: 'wikiId' })
   public wiki!: BelongsTo<typeof WikiPages>
 
-  @hasMany(() => Media, { foreignKey: 'post_id' })
+  @hasMany(() => Media, { foreignKey: 'postId' })
   declare media: HasMany<typeof Media>
 
   @hasMany(() => Like, { foreignKey: 'id' })
   public like!: HasMany<typeof Like>
 
-  @hasMany(() => Post, { foreignKey: 'parent_id' })
+  @hasMany(() => Post, { foreignKey: 'parentId' })
   public parent!: HasMany<typeof Post>
 
   @manyToMany(() => Hashtag, {

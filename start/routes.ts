@@ -424,6 +424,6 @@ router
       .delete('/:wikiId/delete/hashtags/:hashtagId', [WikisController, 'removeHashtagFromWiki'])
       .use(middleware.auth())
 
-    router.get('/:wikiId/comments', [PostsController, 'comments'])
+    router.get('/:wikiId/comments', [PostsController, 'wikiComments'])
   })
   .prefix('/api/wikis')

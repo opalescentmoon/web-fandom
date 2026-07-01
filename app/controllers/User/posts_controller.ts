@@ -198,13 +198,22 @@ export default class PostsController {
    */
   public async comments({ params, response }: HttpContext) {
     try {
-      const postId = params.postId ? Number(params.postId) : undefined
-      const wikiId = params.wikiId ? Number(params.wikiId) : undefined
+      const postId = Number(params.postId)
+      if (!postId) return response.badRequest({ error: 'Invalid or missing postId' })
 
-      if (!postId && !wikiId) {
-        return response.badRequest({ error: 'Missing postId or wikiId parameter' })
-      }
-      const comments = await this.postService.getCommentsForPost({ postId, wikiId })
+      const comments = await this.postService.getCommentsForPost({ postId })
+      return response.ok(comments)
+    } catch (error: any) {
+      return response.badRequest({ error: error.message })
+    }
+  }
+
+  public async wikiComments({ params, response }: HttpContext) {
+    try {
+      const wikiId = Number(params.wikiId)
+      if (!wikiId) return response.badRequest({ error: 'Invalid or missing wikiId' })
+
+      const comments = await this.postService.getCommentsForPost({ wikiId })
       return response.ok(comments)
     } catch (error: any) {
       return response.badRequest({ error: error.message })
