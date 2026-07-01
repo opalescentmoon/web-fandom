@@ -782,7 +782,27 @@ function setupPostModal () {
       return
     }
 
-    if (!caption) return
+    const postModalError = document.getElementById('postModalError')
+
+    if (!caption) {
+      postModalError.textContent = 'Please write something!'
+      postModalError.style.display = 'block'
+      return
+    }
+
+    const tagList = tagsRaw
+      .split(/[\s,]+/)
+      .map(t => t.replace(/^#/, '').trim())
+      .filter(Boolean)
+
+    if (!tagList.length) {
+      postModalError.textContent = 'Please add at least one hashtag!'
+      postModalError.style.display = 'block'
+      return
+    }
+
+    // reset error kalau validasi pass
+    postModalError.style.display = 'none'
 
     try {
       const fandomId = Number(document.body.dataset.fandomId)
