@@ -14,7 +14,7 @@ public/assets
 public/uploads/
 public/images/media_assets
 
-database/seeders/add_seeder.ts
+database/seeders/init2_seeder.ts
 
 # Build tools specific
 npm-debug.log
