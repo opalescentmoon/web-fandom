@@ -14,7 +14,7 @@ public/assets
 public/uploads/
 public/images/media_assets
 
-database\migrations\1782904512183_create_add_post_id_to_medias_table
+database/seeders/init2_seeder.ts
 
 # Build tools specific
 npm-debug.log

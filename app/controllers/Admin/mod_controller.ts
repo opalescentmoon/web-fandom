@@ -46,6 +46,11 @@ export default class ModController {
   public async check({ params, response }: HttpContext) {
     const userId = Number(params.userId)
     const fandomId = Number(params.fandomId)
+
+    if (Number.isNaN(fandomId)) {
+      return response.badRequest({ error: 'Invalid fandom ID provided' })
+    }
+
     const isMod = await this.modService.checkMod(userId, fandomId)
 
     return response.ok({ userId, isMod })

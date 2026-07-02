@@ -5,6 +5,7 @@ import Content from '#models/DBModel/content'
 import User from '#models/DBModel/User/user'
 import Media from '#models/DBModel/media'
 import db from '@adonisjs/lucid/services/db'
+import Moderator from '#models/DBModel/User/moderator'
 
 export default class extends BaseSeeder {
   async run() {
@@ -48,5 +49,9 @@ export default class extends BaseSeeder {
       password: 'cyrene',
     })
     await db.table('user_fandom').insert([{ fandom_id: 1, user_id: 1 }])
+    await Moderator.create({
+      fandomId: 1,
+      userId: 1,
+    })
   }
 }
