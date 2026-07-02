@@ -14,6 +14,8 @@ public/assets
 public/uploads/
 public/images/media_assets
 
+database/seeders/add_seeder.ts
+
 # Build tools specific
 npm-debug.log
 yarn-error.log
