@@ -1,83 +1,21 @@
 /* ============================================================
-   FANDOMHUB — GLOBAL STYLES
-   Cleaned up: variables, organized sections, scoped duplicates.
-   Scoping note: classes that were duplicated with different
-   values across pages (post-header, post-user, avatar-circle.small,
-   modal-*) are now scoped under their page body class so the
-   fandom-feed version and the profile/chat version stop
-   overriding each other. No Edge/HTML changes needed.
+   FANDOMHUB STYLES — grouped by page for readability.
+
+   IMPORTANT: a few class names are defined MORE THAN ONCE
+   (once per page that uses them, with different values). CSS
+   always lets the LAST matching rule in the file win, so those
+   duplicates are placed in this specific order on purpose:
+     Fandom Page  →  Chat Page  →  Profile Page
+   Each duplicate has a ⚠ comment marking it and saying which
+   definition currently wins. If you ever want a page to use
+   its OWN values instead of a later page's, say so — moving
+   the winning block isn't safe to do without checking first.
    ============================================================ */
 
-:root {
-  /* Brand / primary */
-  --color-primary: #c76369;
-  --color-primary-dark: #a84f55;
-  --color-primary-darker: #b1585f;
-
-  /* Text */
-  --color-text-dark: #5c2c2e;
-  --color-text-darker: #3b1414;
-  --color-link: #7d3a3f;
-  --color-link-accent: #8a3036;
-
-  /* Backgrounds */
-  --color-bg-page: #fdf5f5;
-  --color-bg-card: #f2e1e2;
-  --color-bg-card-alt: #f6e4e4;
-  --color-bg-white: #ffffff;
-
-  /* Pinks (accents / surfaces) */
-  --color-pink-100: #f7cfd3;
-  --color-pink-200: #f2d7d9;
-  --color-pink-300: #f0ced1;
-  --color-pink-400: #f0d7d9; /* hairline border (also used as #f0d8da elsewhere — unified here) */
-  --color-pink-500: #e6afb2;
-  --color-pink-600: #e79aa0;
-  --color-pink-700: #e9979b;
-  --color-pink-800: #e2a8ab;
-  --color-pink-900: #d38c90;
-
-  /* Error / danger */
-  --color-danger: #c0392b;
-  --color-danger-bg: #fdf0f0;
-  --color-danger-bg-alt: #fdf0f1;
-  --color-danger-border: #f5c6c6;
-
-  /* Misc */
-  --font-base: system-ui, sans-serif;
-  --header-height: 48px;
-}
 
 /* ============================================================
-   RESET-ISH / SHARED PAGE BODY STYLES
-   (each page body class only sets margin/font/bg — harmless to
-   share, kept per-page for clarity since Edge files reference
-   these individually)
-   ============================================================ */
-
-.intro-body,
-.fandom-body,
-.chat-page-body,
-.profile-page-body,
-.settings-page-body {
-  margin: 0;
-  font-family: var(--font-base);
-}
-
-.chat-page-body,
-.profile-page-body,
-.settings-page-body {
-  background: var(--color-bg-page);
-}
-
-body.fandom-body {
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* ============================================================
-   SHARED / GENERIC COMPONENTS
-   (used identically across multiple pages)
+   SHARED — used by more than one page, kept together so you
+   don't have to hunt for them under any single page section
    ============================================================ */
 
 .icon-button {
@@ -88,20 +26,13 @@ body.fandom-body {
   cursor: pointer;
 }
 
+/* base avatar circle — used in Intro's off-canvas sidebar AND
+   Fandom's create-post modal / rendered post cards */
 .avatar-circle {
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  background: var(--color-pink-900);
-}
-
-.display-name {
-  font-weight: 600;
-}
-
-.username {
-  font-size: 0.85rem;
-  opacity: 0.8;
+  background: #d38c90;
 }
 
 .sr-only {
@@ -116,15 +47,239 @@ body.fandom-body {
   border: 0;
 }
 
+/* post media (images/videos) — rendered inside posts on both
+   the Fandom feed and Profile feed, and previewed in the
+   Fandom create-post modal */
+.post-media {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 520px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+video.post-media {
+  width: 100%;
+  height: auto;
+}
+
+.post-media-preview { margin-top: 10px; }
+.post-media-preview-img, .post-media-preview-video {
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.post-media-preview-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.post-media-remove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* poll voting UI — shown inside a rendered post, so it appears
+   on both the Fandom feed and the Profile feed */
+.poll-box {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poll-option-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.85);
+  cursor: pointer;
+}
+
+.poll-option-votes {
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.poll-option-btn.is-selected {
+  border: 2px solid #6b4a4a;
+  box-shadow: 0 0 0 2px rgba(107, 74, 74, 0.12);
+  font-weight: 600;
+}
+
+.poll-option-btn.is-selected .poll-option-text {
+  font-weight: 600;
+}
+
+/* hashtags — used in rendered posts (Fandom/Profile feeds)
+   and on the Wiki page */
+.post-hashtag {
+  font-size: 0.8rem;
+  color: #c76369;
+  text-decoration: none;
+}
+
+.post-hashtag:hover {
+  text-decoration: underline;
+}
+
+
 /* ============================================================
-   INTRO / LANDING PAGE
+   AUTH MODAL — shared popup, triggered from Intro's sidebar,
+   Fandom's require-auth guard, etc.
    ============================================================ */
 
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  display: none;
+  z-index: 60; /* above sidebar & its overlay */
+}
+
+.auth-modal-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  display: block;
+}
+
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+}
+
+.auth-modal.is-open {
+  display: flex; 
+}
+
+.auth-modal-content {
+  background: #fdf7f7;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem 2.5rem 2.2rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  position: relative;
+  display: none; /* JS will set block on active mode */
+}
+
+.auth-modal-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #5c2c2e;
+  line-height: 1;
+}
+
+.auth-modal-title {
+  margin: -2rem -2.5rem 1rem -2.5rem; /* bleed to the modal's edges */
+  padding: 1rem 2.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #3b1414;
+  background: #e9979b;
+  border-radius: 18px 18px 0 0; /* match .auth-modal-content's own radius */
+  border-bottom: 1px solid #f0d8da;
+}
+
+.auth-modal-subtitle {
+  margin: 0 0 1.25rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #5c2c2e;
+}
+
+.auth-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.auth-modal-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #5c2c2e;
+}
+
+.auth-modal-input {
+  background: #f7cfd3;
+  border: 1px solid #e19aa3;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.auth-modal-button {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: #c76369;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-modal-button:hover {
+  filter: brightness(0.95);
+}
+
+.auth-modal-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #5c2c2e;
+}
+
+.auth-inline-link {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: #8a3036;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+
+/* ============================================================
+   LANDING / INTRO PAGE  (body.intro-body)
+   ============================================================ */
+
+.intro-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* Top red bar */
 .intro-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   padding: 0.5rem 1rem;
 }
@@ -133,7 +288,7 @@ body.fandom-body {
   position: relative;
 }
 
-/* --- Off-canvas sidebar --- */
+/* --- OFF-CANVAS SIDEBAR --- */
 
 .intro-sidebar {
   position: fixed;
@@ -141,7 +296,7 @@ body.fandom-body {
   left: 0;
   width: 260px;
   height: 100vh;
-  background: var(--color-pink-800);
+  background: #e2a8ab;
   padding: 1rem;
   transform: translateX(-100%);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -154,6 +309,7 @@ body.fandom-body {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Dark overlay behind sidebar */
 .intro-overlay {
   position: fixed;
   inset: 0;
@@ -169,15 +325,24 @@ body.fandom-body {
   pointer-events: auto;
 }
 
-/* --- Sidebar content --- */
+/* --- Sidebar content styling --- */
 
 .sidebar-profile {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+}
+
+.display-name {
+  font-weight: 600;
+}
+
+.username {
+  font-size: 0.85rem;
+  opacity: 0.8;
 }
 
 .sidebar-menu {
@@ -188,7 +353,7 @@ body.fandom-body {
 
 .sidebar-link {
   text-decoration: none;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
   font-size: 0.9rem;
 }
 
@@ -202,7 +367,7 @@ body.fandom-body {
   justify-content: flex-start;
   gap: 1.2rem;
   padding: 0.5rem 0.25rem;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
 }
 
 .sidebar-hello {
@@ -220,20 +385,20 @@ body.fandom-body {
   background: none;
   padding: 0;
   margin: 0;
-  color: var(--color-link-accent);
+  color: #8a3036;
   text-decoration: underline;
   cursor: pointer;
   font-size: 0.9rem;
 }
 
-/* --- Main content --- */
-
+/* Main content */
 .intro-main {
-  background: var(--color-bg-page);
+  background: #fdf5f5;
   padding: 1.5rem;
   min-height: calc(100vh - 48px);
 }
 
+/* Top area: donations + search by media */
 .intro-top {
   display: grid;
   grid-template-columns: 1.4fr 1.6fr;
@@ -242,7 +407,7 @@ body.fandom-body {
 }
 
 .intro-donations {
-  background: var(--color-primary-darker);
+  background: #b1585f;
   color: #fff;
   padding: 1rem;
 }
@@ -254,17 +419,18 @@ body.fandom-body {
 }
 
 .intro-search-bar {
-  background: var(--color-pink-600);
+  background: #e79aa0;
   padding: 0.35rem 0.6rem;
 }
 
 .intro-search-bar input {
   width: 100%;
   border: none;
-  background: var(--color-pink-100);
+  background: #f7cfd3;
   padding: 0.35rem 0.1rem;
 }
 
+/* Media links */
 .media-links-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -273,10 +439,11 @@ body.fandom-body {
 
 .media-links-grid a {
   font-size: 0.9rem;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
   text-decoration: underline;
 }
 
+/* Recent / For You */
 .intro-section {
   margin-top: 1.5rem;
 }
@@ -292,13 +459,13 @@ body.fandom-body {
 }
 
 .create-fandom-hint {
-  font-size: 0.9rem;
+  font-size: 0.90rem;
   margin: 0 0 0.75rem;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
 }
 
 .create-fandom-hint a {
-  color: var(--color-primary);
+  color: #c76369;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -311,7 +478,7 @@ body.fandom-body {
 
 .fandom-card {
   position: relative;
-  overflow: hidden; /* clips the ::after */
+  overflow: hidden;
   border-radius: 18px;
   background: #edd4d6;
   background-size: cover;
@@ -326,7 +493,10 @@ body.fandom-body {
 .fandom-card::after {
   content: '';
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
   border-radius: inherit;
   z-index: 1;
   background: linear-gradient(
@@ -351,30 +521,42 @@ body.fandom-body {
   backdrop-filter: blur(2px);
 }
 
+
 /* ============================================================
-   FANDOM HOMEPAGE
+   FANDOM PAGE  (body.fandom-body)
+   Fanworks / Official / Forum tabs, feed, filters, mod menu,
+   create-post modal, Official tab, Wiki page.
    ============================================================ */
 
+body.fandom-body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.fandom-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* Header */
 .fandom-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: var(--header-height);
+  height: 48px;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   padding: 0.5rem 1rem;
   box-sizing: border-box;
 }
 
 .fandom-header-center {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   font-weight: 600;
 }
 
@@ -382,7 +564,12 @@ body.fandom-body {
   letter-spacing: 0.03em;
 }
 
-/* --- Mod menu --- */
+/* ===== MOD MENU ===== */
+.fandom-header-center {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .fandom-mod-dropdown {
   position: absolute;
@@ -391,7 +578,7 @@ body.fandom-body {
   transform: translateX(-50%);
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -406,35 +593,39 @@ body.fandom-body {
   text-align: left;
   cursor: pointer;
   font-size: 0.88rem;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .fandom-mod-option:hover {
-  background: var(--color-danger-bg-alt);
+  background: #fdf0f1;
 }
 
 .fandom-mod-danger {
-  color: var(--color-danger);
+  color: #c0392b;
 }
 
 .fandom-mod-danger:hover {
-  background: var(--color-danger-bg);
+  background: #fdf0f0;
 }
 
-/* --- 3-column grid layout --- */
+/* NOTE: the Edit Fandom / Members modals use the generic
+   .modal-overlay/.modal-box/.modal-header/.modal-title/.modal-close
+   classes — no dedicated Fandom-page block for those exists.
+   See the ⚠ note under Profile Page below for which definition
+   currently styles them. */
 
+/* 3-column grid */
 .fandom-layout {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) 230px;
   height: calc(100vh - 48px);
   margin-top: 48px;
-  overflow: hidden; /* prevents whole layout from scrolling */
+  overflow: hidden;
 }
 
-/* --- Left sidebar --- */
-
+/* Left sidebar */
 .fandom-sidebar {
-  background: var(--color-pink-500);
+  background: #e6afb2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -472,10 +663,10 @@ body.fandom-body {
   transform: scale(0.94);
 }
 
-/* current-page highlight — .is-active is toggled by JS
-   (compares each icon's link to window.location.pathname) */
+/* current-page highlight — .is-active toggled by JS
+   (setupSidebarActiveIcon in script_fandom.js) */
 .sidebar-icon.is-active {
-  background: var(--color-primary);
+  background: #c76369;
 }
 
 .sidebar-icon.is-active img {
@@ -488,22 +679,21 @@ body.fandom-body {
   padding: 0.4rem 0.6rem;
   border-radius: 4px;
   border: none;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   font-size: 0.8rem;
   position: static;
   cursor: pointer;
 }
 
-/* --- Main feed column --- */
-
+/* Main feed */
 .fandom-middle {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-width: 0;
   overflow: hidden;
-  background: var(--color-bg-page);
+  background: #fdf5f5;
 }
 
 .fandom-tabs {
@@ -521,13 +711,13 @@ body.fandom-body {
 
 .fandom-tab.is-active {
   background: #fbe9ea;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
   font-weight: 600;
 }
 
 .fandom-main {
   flex: 1 1 auto;
-  min-height: 0; /* required for overflow-y to work here */
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1rem 1rem 2rem;
@@ -540,43 +730,40 @@ body.fandom-body {
   gap: 0.75rem;
 }
 
-/* --- Post card (fandom feed version) --- */
-
 .post-card {
-  background: var(--color-bg-card);
+  background: #f2e1e2;
   border-radius: 18px;
   padding: 0.6rem 0.75rem;
 }
 
+/* ⚠ DUPLICATE (1 of 2): this is the Fandom-page version of these
+   classes. An identical-named block with DIFFERENT values exists
+   under "PROFILE PAGE" further down — since that one comes LATER
+   in the file, it currently wins and styles post cards on BOTH
+   the Fandom feed and the Profile feed. This block is effectively
+   inactive right now. Let me know if you want Fandom's own
+   version to actually apply here instead. */
 .post-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.post-user {
-  display: flex;
-  align-items: center;
-}
-
-.post-user-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: inherit;
-}
-
 .avatar-circle.small {
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  background: var(--color-pink-900);
+  background: #d38c90;
 }
 
 .post-user-text {
   margin-left: 0.45rem;
   font-size: 0.8rem;
+}
+
+.post-user {
+  display: flex;
+  align-items: center;
 }
 
 .post-username {
@@ -625,6 +812,7 @@ body.fandom-body {
   cursor: pointer;
   font-size: 0.9rem;
 }
+/* ⚠ end of duplicate block 1 of 2 */
 
 .post-comment-btn {
   display: flex;
@@ -639,22 +827,19 @@ body.fandom-body {
   font-size: 0.9rem;
 }
 
-.post-hashtag {
-  font-size: 0.8rem;
-  color: var(--color-primary);
+.post-user-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   text-decoration: none;
+  color: inherit;
 }
 
-.post-hashtag:hover {
-  text-decoration: underline;
-}
-
-/* --- Right filter column --- */
-
+/* Right filter column */
 .fandom-filter {
-  background: var(--color-bg-white);
+  background: #ffffff;
   padding: 1rem 1rem 2rem;
-  border-left: 1px solid var(--color-pink-400);
+  border-left: 1px solid #f0d7d9;
 }
 
 .filter-section + .filter-section {
@@ -678,7 +863,7 @@ body.fandom-body {
 }
 
 .filter-list a {
-  color: var(--color-link);
+  color: #7d3a3f;
   text-decoration: none;
 }
 
@@ -688,7 +873,7 @@ body.fandom-body {
 
 .filter-static-link a {
   text-decoration: none;
-  color: var(--color-link);
+  color: #7d3a3f;
   margin: 0.25rem 0 0;
   font-size: 0.9rem;
 }
@@ -705,7 +890,7 @@ a.js-branch.is-active {
   background: transparent;
   font: inherit;
   font-size: 0.9rem;
-  color: var(--color-link);
+  color: #7d3a3f;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -736,7 +921,7 @@ a.js-branch.is-active {
 .collapse-body a {
   text-decoration: none;
   font-size: 0.85rem;
-  color: var(--color-link);
+  color: #7d3a3f;
 }
 
 .collapse-body a:hover {
@@ -754,13 +939,12 @@ a.js-branch.is-active {
   transform: rotate(180deg);
 }
 
-/* --- Comment input box --- */
-
+/* ── Comment Input Box ────────────────────────────────── */
 .comment-input-box {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: var(--color-pink-500);
+  background: #e6afb2;
   border-radius: 18px;
   padding: 0.6rem 0.75rem;
   margin-bottom: 1rem;
@@ -780,13 +964,12 @@ a.js-branch.is-active {
   color: #747474;
 }
 
-/* --- Comment card --- */
-
+/* ── Comment Card ─────────────────────────────────────── */
 .comment-card {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  background: var(--color-bg-card);
+  background: #f2e1e2;
   border-radius: 18px;
   padding: 0.6rem 0.75rem;
   margin-bottom: 0.5rem;
@@ -804,13 +987,12 @@ a.js-branch.is-active {
   color: #333;
 }
 
-/* --- Search page --- */
-
+/* Search page (within Fandom layout) */
 .fandom-search-bar {
   margin: 0.8rem 0 0.6rem;
   padding: 0.4rem 0.6rem;
   border-radius: 20px;
-  background: var(--color-pink-300);
+  background: #f0ced1;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -851,7 +1033,7 @@ a.js-branch.is-active {
 
 .search-recent a {
   text-decoration: none;
-  color: var(--color-link);
+  color: #7d3a3f;
 }
 
 .search-recent a:hover {
@@ -863,9 +1045,7 @@ a.js-branch.is-active {
   margin: 0.6rem 0 0.8rem;
 }
 
-/* ============================================================
-   CREATE POST MODAL
-   ============================================================ */
+/* ===== CREATE POST MODAL ===== */
 
 .post-overlay {
   position: fixed;
@@ -895,23 +1075,35 @@ a.js-branch.is-active {
   padding: 1.25rem 1.5rem 1rem;
 }
 
+.post-modal-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.25rem;
+  background: #e9979b;
+  border-radius: 20px 20px 0 0; /* match .post-modal's own radius */
+  border-bottom: 1px solid #f0d8da;
+}
+
 .post-close {
   position: absolute;
   top: 0.8rem;
-  left: 0.9rem;
+  right: 0.9rem;
   border: none;
   background: transparent;
   font-size: 1.4rem;
   cursor: pointer;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
 }
 
 .post-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 1.5rem; /* visually offsets from the X */
-  margin-bottom: 0.75rem;
+  margin: 1rem 0 0.75rem; /* top clears the accent strip below */
+  padding-right: 1.75rem; /* keeps clear of the X */
 }
 
 .post-user-mini {
@@ -932,15 +1124,15 @@ a.js-branch.is-active {
 .post-type-select {
   border: none;
   background: transparent;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
   font-weight: 600;
   padding: 0.25rem 0.4rem;
   border-radius: 999px;
 }
 
 .post-modal-body {
-  padding-left: 1.5rem;
-  padding-right: 1rem;
+  padding-left: 1rem;
+  padding-right: 1.5rem;
   margin-bottom: 0.75rem;
 }
 
@@ -949,7 +1141,7 @@ a.js-branch.is-active {
   min-height: 150px;
   border: none;
   resize: vertical;
-  background: var(--color-bg-card-alt);
+  background: #f6e4e4;
   border-radius: 14px;
   padding: 0.75rem;
   font-family: inherit;
@@ -965,7 +1157,7 @@ a.js-branch.is-active {
 }
 
 .post-tags-input label {
-  color: var(--color-text-dark);
+  color: #5c2c2e;
 }
 
 .post-tags-input input {
@@ -1000,73 +1192,26 @@ a.js-branch.is-active {
   background: #f6d0d3;
   padding: 0.25rem 0.8rem;
   font-size: 0.9rem;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
 }
 
 .post-submit-btn {
   border: none;
   border-radius: 999px;
   padding: 0.4rem 1.2rem;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   font-weight: 600;
   cursor: pointer;
 }
 
-.post-media {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  max-height: 520px;
-  object-fit: contain;
-  border-radius: 12px;
-  margin-top: 8px;
-}
-
-video.post-media {
-  width: 100%;
-  height: auto;
-}
-
-.post-media-preview {
-  margin-top: 10px;
-}
-
-.post-media-preview-img,
-.post-media-preview-video {
-  width: 100%;
-  border-radius: 12px;
-  margin-top: 8px;
-}
-
-.post-media-preview-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.post-media-remove {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.post-media-wrap {
-  display: inline-block;
-  position: relative;
-  margin-top: 0.5rem;
-  margin-right: 0.5rem;
-}
-
-/* --- Poll builder (inside create post modal) --- */
-
+/*----Poll Builder (inside Create Post modal)-----*/
 .poll-builder {
   margin-top: 12px;
   padding: 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .poll-builder-head {
@@ -1076,14 +1221,8 @@ video.post-media {
   margin-bottom: 10px;
 }
 
-.poll-builder-title {
-  font-weight: 700;
-}
-
-.poll-builder-hint {
-  font-size: 12px;
-  opacity: 0.7;
-}
+.poll-builder-title { font-weight: 700; }
+.poll-builder-hint { font-size: 12px; opacity: 0.7; }
 
 .poll-options-wrap {
   display: flex;
@@ -1095,8 +1234,8 @@ video.post-media {
   width: 100%;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.85);
 }
 
 .poll-builder-actions {
@@ -1109,50 +1248,12 @@ video.post-media {
 .poll-remove-btn {
   padding: 8px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.85);
   cursor: pointer;
 }
 
-/* --- Poll box (rendered inside a post) --- */
-
-.poll-box {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.poll-option-btn {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.85);
-  cursor: pointer;
-}
-
-.poll-option-votes {
-  font-weight: 700;
-  opacity: 0.85;
-}
-
-.poll-option-btn.is-selected {
-  border: 2px solid #6b4a4a;
-  box-shadow: 0 0 0 2px rgba(107, 74, 74, 0.12);
-  font-weight: 600;
-}
-
-.poll-option-btn.is-selected .poll-option-text {
-  font-weight: 600;
-}
-
-/* ============================================================
-   OFFICIAL TAB + WIKI
-   ============================================================ */
+/* ===== OFFICIAL TAB ===== */
 
 .official-section {
   margin-bottom: 1.5rem;
@@ -1169,49 +1270,70 @@ video.post-media {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
 }
 
-.official-create-wiki-btn,
-.official-load-more-btn {
+.official-create-wiki-btn {
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.3rem 0.8rem;
   border-radius: 999px;
-  border: 1.5px solid var(--color-primary);
+  border: 1.5px solid #c76369;
   background: transparent;
-  color: var(--color-primary);
+  color: #c76369;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
-.official-create-wiki-btn:hover,
-.official-load-more-btn:hover {
-  background: var(--color-primary);
+.official-create-wiki-btn:hover {
+  background: #c76369;
   color: #fff;
 }
 
-#wikiFeed,
+.official-load-more-btn {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1.5px solid #c76369;
+  background: transparent;
+  color: #c76369;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.official-load-more-btn:hover {
+  background: #c76369;
+  color: #fff;
+}
+
+#wikiFeed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 #announcementFeed {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
+/* ===== WIKI PAGE ===== */
+
 .wiki-request-edit-btn {
   font-size: 0.82rem;
   font-weight: 600;
   padding: 0.3rem 0.9rem;
   border-radius: 999px;
-  border: 1.5px solid var(--color-primary);
+  border: 1.5px solid #c76369;
   background: transparent;
-  color: var(--color-primary);
+  color: #c76369;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .wiki-request-edit-btn:hover {
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
 }
 
@@ -1225,7 +1347,7 @@ video.post-media {
 
 #pendingEditsSection h4 {
   font-size: 0.9rem;
-  color: var(--color-text-dark);
+  color: #5c2c2e;
   margin: 0 0 0.5rem;
 }
 
@@ -1234,10 +1356,17 @@ video.post-media {
   color: #999;
 }
 
+.post-media-wrap {
+  display: inline-block;
+  position: relative;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 .wiki-card-title {
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .wiki-card-hint {
@@ -1246,144 +1375,22 @@ video.post-media {
   margin: 0.25rem 0 0;
 }
 
+
 /* ============================================================
-   AUTH MODAL
+   CHAT PAGE  (body.chat-page-body)
    ============================================================ */
 
-.auth-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease-out;
-  display: none;
-  z-index: 60; /* above sidebar & its overlay */
-}
-
-.auth-modal-overlay.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-  display: block;
-}
-
-.auth-modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 70;
-}
-
-.auth-modal.is-open {
-  display: flex;
-}
-
-.auth-modal-content {
-  background: #fdf7f7;
-  border-radius: 18px;
-  width: 100%;
-  max-width: 480px;
-  padding: 2rem 2.5rem 2.2rem;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-  position: relative;
-  display: none; /* JS sets to block on active mode */
-}
-
-.auth-modal-close {
-  position: absolute;
-  top: 0.9rem;
-  left: 1rem;
-  border: none;
-  background: transparent;
-  font-size: 1.4rem;
-  cursor: pointer;
-  color: var(--color-text-dark);
-  line-height: 1;
-}
-
-.auth-modal-title {
-  margin: 0 0 0.25rem;
-  text-align: center;
-  font-size: 1.5rem;
-  color: var(--color-text-dark);
-}
-
-.auth-modal-subtitle {
-  margin: 0 0 1.25rem;
-  text-align: center;
-  font-size: 1rem;
-  color: var(--color-text-dark);
-}
-
-.auth-modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.auth-modal-label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.9rem;
-  color: var(--color-text-dark);
-}
-
-.auth-modal-input {
-  background: var(--color-pink-100);
-  border: 1px solid #e19aa3;
-  padding: 0.4rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-.auth-modal-button {
-  margin-top: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  border-radius: 999px;
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.auth-modal-button:hover {
-  filter: brightness(0.95);
-}
-
-.auth-modal-footer {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--color-text-dark);
-}
-
-.auth-inline-link {
-  border: none;
-  background: none;
-  padding: 0;
+.chat-page-body {
   margin: 0;
-  color: var(--color-link-accent);
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: 0.85rem;
+  font-family: system-ui, sans-serif;
+  background: #fdf5f5;
 }
-
-/* ============================================================
-   CHAT PAGE
-   (chat-page-body scope keeps its modal-* rules isolated from
-   the profile-page-body modal-* rules below)
-   ============================================================ */
 
 .chat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   padding: 0.5rem 1rem;
 }
@@ -1399,7 +1406,7 @@ video.post-media {
 }
 
 .chat-list {
-  background: var(--color-pink-500);
+  background: #e6afb2;
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -1414,7 +1421,7 @@ video.post-media {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--color-pink-300);
+  background: #f0ced1;
   border-radius: 20px;
   padding: 0.3rem 0.6rem;
   margin-bottom: 0.75rem;
@@ -1453,7 +1460,7 @@ video.post-media {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  background: var(--color-pink-200);
+  background: #f2d7d9;
 }
 
 .chat-list-text {
@@ -1481,7 +1488,7 @@ video.post-media {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--color-pink-700);
+  background: #e9979b;
   padding: 0.5rem 0.9rem;
 }
 
@@ -1499,7 +1506,7 @@ video.post-media {
   flex: 1;
   padding: 0.75rem 0.9rem;
   overflow-y: auto;
-  background: var(--color-bg-page);
+  background: #fdf5f5;
 }
 
 .chat-message-row {
@@ -1537,7 +1544,7 @@ video.post-media {
   display: flex;
   align-items: center;
   padding: 0.45rem 0.7rem;
-  border-top: 1px solid var(--color-pink-400);
+  border-top: 1px solid #f0d7d9;
   background: #f2d4d7;
 }
 
@@ -1555,7 +1562,7 @@ video.post-media {
   border: none;
   border-radius: 999px;
   padding: 0.4rem 0.7rem;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   cursor: pointer;
 }
@@ -1565,7 +1572,7 @@ video.post-media {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary);
+  color: #c76369;
   font-size: 0.9rem;
   opacity: 0.7;
 }
@@ -1574,7 +1581,7 @@ video.post-media {
   width: 100%;
   padding: 0.4rem;
   margin-bottom: 0.5rem;
-  background: var(--color-primary);
+  background: #c76369;
   color: white;
   border: none;
   border-radius: 10px;
@@ -1582,30 +1589,24 @@ video.post-media {
   font-size: 0.85rem;
 }
 
-.message-status {
-  font-size: 0.7rem;
-  margin-top: 0.15rem;
-  text-align: right;
-  color: #bbb;
-}
-
-.message-status.read {
-  color: #4fc3f7;
-}
-
-/* --- Chat page: new-chat / user-search modal --- */
-
-.chat-page-body .modal-overlay {
+/* ⚠ DUPLICATE (1 of 2): this is the Chat-page version of the
+   shared modal classes, used by the "new chat" popup. An
+   identical-named block with DIFFERENT values exists under
+   "PROFILE PAGE" further down — since that one comes LATER in
+   the file, it currently wins and styles this Chat modal too,
+   PLUS Fandom's Edit Fandom / Members modals. This block is
+   effectively inactive right now. */
+.modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
 }
 
-.chat-page-body .modal-box {
+.modal-box {
   background: #fff;
   border-radius: 14px;
   padding: 1.25rem;
@@ -1617,30 +1618,31 @@ video.post-media {
   gap: 0.75rem;
 }
 
-.chat-page-body .modal-box .modal-body {
+.modal-box .modal-body {
   max-height: 60vh;
   overflow-y: auto;
 }
 
-.chat-page-body .modal-header {
+.modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.chat-page-body .modal-title {
+.modal-title {
   margin: 0;
   font-size: 1rem;
-  color: var(--color-primary);
+  color: #c76369;
 }
 
-.chat-page-body .modal-close {
+.modal-close {
   background: none;
   border: none;
   font-size: 1.3rem;
   cursor: pointer;
   color: #999;
 }
+/* ⚠ end of duplicate block 1 of 2 */
 
 #postModalError {
   margin-bottom: 0.75rem;
@@ -1648,7 +1650,7 @@ video.post-media {
 
 .modal-search-input {
   padding: 0.4rem 0.75rem;
-  border: 1px solid var(--color-pink-400);
+  border: 1px solid #f0d7d9;
   border-radius: 20px;
   outline: none;
   font-size: 0.88rem;
@@ -1678,16 +1680,15 @@ video.post-media {
 }
 
 .modal-user-item:hover {
-  background: var(--color-danger-bg-alt);
+  background: #fdf0f1;
 }
 
-.modal-user-item img,
-.modal-user-avatar {
+.modal-user-item img, .modal-user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 999px;
   object-fit: cover;
-  background: var(--color-pink-200);
+  background: #f2d7d9;
 }
 
 .modal-user-name {
@@ -1696,7 +1697,7 @@ video.post-media {
 
 .modal-selected-label {
   font-size: 0.8rem;
-  color: var(--color-primary);
+  color: #c76369;
   margin: 0;
 }
 
@@ -1707,7 +1708,7 @@ video.post-media {
 }
 
 .modal-chip {
-  background: var(--color-pink-200);
+  background: #f2d7d9;
   border-radius: 20px;
   padding: 0.2rem 0.6rem;
   font-size: 0.78rem;
@@ -1718,13 +1719,13 @@ video.post-media {
 
 .modal-chip-remove {
   cursor: pointer;
-  color: var(--color-primary);
+  color: #c76369;
   font-weight: bold;
 }
 
 .modal-start-btn {
   padding: 0.5rem;
-  background: var(--color-primary);
+  background: #c76369;
   color: white;
   border: none;
   border-radius: 10px;
@@ -1732,15 +1733,33 @@ video.post-media {
   font-size: 0.88rem;
 }
 
+.message-status {
+  font-size: 0.7rem;
+  margin-top: 0.15rem;
+  text-align: right;
+  color: #bbb;
+}
+
+.message-status.read {
+  color: #4fc3f7;
+}
+
+
 /* ============================================================
-   PROFILE PAGE
+   PROFILE PAGE  (body.profile-page-body)
    ============================================================ */
+
+.profile-page-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #fdf5f5;
+}
 
 .profile-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   padding: 0.5rem 1rem;
   position: fixed;
@@ -1764,20 +1783,20 @@ video.post-media {
 }
 
 .profile-main {
+  padding: 0;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  padding: 0;
-  background: var(--color-bg-white);
 }
 
 .profile-banner {
   display: flex;
   gap: 1rem;
   padding: 1.2rem 1.5rem;
-  background: var(--color-pink-700);
-  color: var(--color-text-darker);
+  background: #e9979b;
+  color: #3b1414;
   flex: 0 0 auto;
 }
 
@@ -1788,21 +1807,10 @@ video.post-media {
   background: #f4d5d7;
 }
 
-.profile-avatar-wrapper {
-  flex-shrink: 0;
-}
-
 .profile-info-text {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-}
-
-.profile-name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
 .profile-name {
@@ -1836,74 +1844,64 @@ video.post-media {
   max-width: 600px;
 }
 
-.edit-profile-btn {
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--color-text-darker);
-  background: transparent;
-  color: var(--color-text-darker);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
+/* NOTE: not actually referenced in profile.edge — the real post
+   list is #profileFeed below. Left as-is since you asked not to
+   remove/combine anything. */
+.profile-posts {
+  padding: 1.2rem 1.5rem 2rem;
+  background: #fdf5f5;
 }
 
-.edit-profile-btn:hover {
-  background: var(--color-text-darker);
-  color: #fff;
-}
-
-/* --- Posts list (profile-page version — scoped, differs from
-   fandom feed: smaller avatar, right-aligned multi-tag, etc.) --- */
-
-/* NOTE: this used to be .profile-posts, but that class isn't
-   actually used in the Edge file — the real post list is
-   #profileFeed. Retargeted + made scrollable so only the posts
-   scroll while the banner above stays put. */
+/* the ACTUAL post list container (used by script_profile.js) —
+   made scrollable so .profile-banner above can stay fixed */
 #profileFeed {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: 1.2rem 1.5rem 2rem;
-  background: var(--color-bg-page);
+  background: #fdf5f5;
   box-sizing: border-box;
 }
 
-.profile-page-body .post-header {
+/* ⚠ DUPLICATE (2 of 2): this is the Profile-page version of these
+   classes — since it's the LAST one in the file, this is the
+   version that currently applies to post cards on BOTH the
+   Profile feed AND the Fandom feed (overriding the Fandom-page
+   block earlier in this file). */
+.post-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.profile-page-body .post-user {
+.post-user {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.profile-page-body .avatar-circle.small {
+.avatar-circle.small {
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  background: var(--color-pink-200);
+  background: #f2d7d9;
 }
 
-.profile-page-body .post-user-text {
+.post-user-text {
   display: flex;
   flex-direction: column;
   font-size: 0.8rem;
 }
 
-.profile-page-body .post-username {
+.post-username {
   font-weight: 500;
 }
 
-.profile-page-body .post-date {
+.post-date {
   opacity: 0.7;
 }
 
-.profile-page-body .post-tag {
+.post-tag {
   font-size: 0.85rem;
 }
 
@@ -1919,21 +1917,21 @@ video.post-media {
   font-size: 0.78rem;
 }
 
-.profile-page-body .post-body {
+.post-body {
   margin-top: 0.6rem;
 }
 
-.profile-page-body .post-preview {
+.post-preview {
   height: 50px;
   border-radius: 8px;
   background: linear-gradient(to right, #f3dfe1, #eacfd2);
 }
 
-.profile-page-body .post-preview.large {
+.post-preview.large {
   height: 140px;
 }
 
-.profile-page-body .post-footer {
+.post-footer {
   margin-top: 0.5rem;
   display: flex;
   justify-content: space-between;
@@ -1941,21 +1939,20 @@ video.post-media {
   font-size: 0.8rem;
 }
 
-.profile-page-body .post-tags span + span {
+.post-tags span + span {
   margin-left: 0.3rem;
 }
 
-.profile-page-body .post-actions button {
+.post-actions button {
   border: none;
   background: transparent;
   cursor: pointer;
 }
-
-/* --- Right sidebar --- */
+/* ⚠ end of duplicate block 2 of 2 */
 
 .profile-sidebar {
-  background: var(--color-bg-white);
-  border-left: 1px solid var(--color-pink-400);
+  background: #ffffff;
+  border-left: 1px solid #f0d8da;
   padding: 1.2rem 1.5rem;
   position: sticky;
   top: 48px;
@@ -1985,16 +1982,49 @@ video.post-media {
 .profile-sidebar-section a {
   text-decoration: none;
   font-size: 0.86rem;
-  color: var(--color-link);
+  color: #7d3a3f;
 }
 
 .profile-sidebar-section a:hover {
   text-decoration: underline;
 }
 
-/* --- Edit Profile modal (scoped — separate from chat modal) --- */
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
 
-.profile-page-body .modal-overlay {
+.edit-profile-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid #3b1414;
+  background: transparent;
+  color: #3b1414;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.edit-profile-btn:hover {
+  background: #3b1414;
+  color: #fff;
+}
+
+.profile-avatar-wrapper {
+  flex-shrink: 0;
+}
+
+/* ── Edit Profile Modal ──────────────────────────── */
+/* ⚠ DUPLICATE (2 of 2): the Profile-page version of the shared
+   modal classes — since this is the LAST definition in the file,
+   this is what currently styles the Chat "new chat" modal AND
+   Fandom's Edit Fandom / Members modals too, in addition to this
+   Edit Profile modal. */
+.modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(59, 20, 20, 0.45);
@@ -2005,7 +2035,7 @@ video.post-media {
   padding: 1rem;
 }
 
-.profile-page-body .modal-box {
+.modal-box {
   background: #fff;
   border-radius: 16px;
   width: 100%;
@@ -2016,28 +2046,29 @@ video.post-media {
   overflow: hidden;
 }
 
-.profile-page-body .modal-header {
+.modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--color-pink-400);
-  background: var(--color-pink-700);
+  border-bottom: 1px solid #f0d8da;
+  background: #e9979b;
 }
 
-.profile-page-body .modal-title {
+.modal-title {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
+/* ⚠ end of duplicate block 2 of 2 */
 
 .modal-close-btn {
   background: none;
   border: none;
   font-size: 1.4rem;
   cursor: pointer;
-  color: var(--color-text-darker);
+  color: #3b1414;
   line-height: 1;
   padding: 0;
   opacity: 0.7;
@@ -2048,7 +2079,7 @@ video.post-media {
   opacity: 1;
 }
 
-.profile-page-body .modal-body {
+.modal-body {
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -2067,21 +2098,21 @@ video.post-media {
   height: 80px;
   border-radius: 999px;
   background: #f4d5d7;
-  border: 2px solid var(--color-pink-700);
+  border: 2px solid #e9979b;
   overflow: hidden;
 }
 
 .avatar-upload-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-primary);
+  color: #c76369;
   cursor: pointer;
   text-decoration: underline;
   transition: color 0.15s;
 }
 
 .avatar-upload-label:hover {
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .modal-field {
@@ -2093,16 +2124,16 @@ video.post-media {
 .modal-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .modal-input {
   font-size: 0.9rem;
   padding: 0.5rem 0.75rem;
-  border: 1.5px solid var(--color-pink-400);
+  border: 1.5px solid #f0d8da;
   border-radius: 8px;
-  background: var(--color-bg-page);
-  color: var(--color-text-darker);
+  background: #fdf5f5;
+  color: #3b1414;
   outline: none;
   transition: border-color 0.15s;
   font-family: inherit;
@@ -2111,7 +2142,7 @@ video.post-media {
 }
 
 .modal-input:focus {
-  border-color: var(--color-primary);
+  border-color: #c76369;
 }
 
 .modal-textarea {
@@ -2121,9 +2152,9 @@ video.post-media {
 
 .modal-error {
   font-size: 0.82rem;
-  color: var(--color-danger);
-  background: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
+  color: #c0392b;
+  background: #fdf0f0;
+  border: 1px solid #f5c6c6;
   border-radius: 6px;
   padding: 0.4rem 0.75rem;
 }
@@ -2133,8 +2164,8 @@ video.post-media {
   justify-content: flex-end;
   gap: 0.6rem;
   padding: 0.9rem 1.25rem;
-  border-top: 1px solid var(--color-pink-400);
-  background: var(--color-bg-page);
+  border-top: 1px solid #f0d8da;
+  background: #fdf5f5;
 }
 
 .modal-cancel-btn {
@@ -2142,15 +2173,15 @@ video.post-media {
   font-weight: 600;
   padding: 0.45rem 1rem;
   border-radius: 999px;
-  border: 1.5px solid var(--color-primary);
+  border: 1.5px solid #c76369;
   background: transparent;
-  color: var(--color-primary);
+  color: #c76369;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .modal-cancel-btn:hover {
-  background: var(--color-pink-400);
+  background: #f0d8da;
 }
 
 .modal-save-btn {
@@ -2159,14 +2190,14 @@ video.post-media {
   padding: 0.45rem 1.2rem;
   border-radius: 999px;
   border: none;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .modal-save-btn:hover {
-  background: var(--color-primary-dark);
+  background: #a84f55;
 }
 
 .modal-save-btn:disabled {
@@ -2174,15 +2205,22 @@ video.post-media {
   cursor: not-allowed;
 }
 
+
 /* ============================================================
-   SETTINGS PAGE
+   SETTINGS PAGE  (body.settings-page-body)
    ============================================================ */
+
+.settings-page-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #fdf5f5;
+}
 
 .settings-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--color-primary);
+  background: #c76369;
   color: #fff;
   padding: 0.5rem 1rem;
 }
@@ -2194,7 +2232,7 @@ video.post-media {
 }
 
 .settings-list {
-  background: var(--color-pink-500);
+  background: #e6afb2;
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -2203,14 +2241,14 @@ video.post-media {
 .settings-list-title {
   margin: 0 0 0.5rem;
   font-size: 1.2rem;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .settings-search-bar {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--color-pink-300);
+  background: #f0ced1;
   border-radius: 20px;
   padding: 0.3rem 0.6rem;
   margin-bottom: 0.75rem;
@@ -2245,7 +2283,7 @@ video.post-media {
   border-radius: 10px;
   font-size: 0.88rem;
   font-weight: 500;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .settings-list-item:hover {
@@ -2267,7 +2305,7 @@ video.post-media {
 }
 
 .settings-main {
-  background: var(--color-bg-page);
+  background: #fdf5f5;
   padding: 1.5rem 2rem;
   overflow-y: auto;
 }
@@ -2275,13 +2313,13 @@ video.post-media {
 .settings-panel-title {
   margin: 0 0 0.25rem;
   font-size: 1.25rem;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .settings-panel-subtitle {
   margin: 0 0 1.25rem;
   font-size: 0.85rem;
-  color: var(--color-link);
+  color: #7d3a3f;
   opacity: 0.85;
 }
 
@@ -2298,7 +2336,7 @@ video.post-media {
 }
 
 .settings-row:hover {
-  background: var(--color-bg-card-alt);
+  background: #f6e4e4;
 }
 
 .settings-row-text {
@@ -2315,26 +2353,26 @@ video.post-media {
 
 .settings-row-value {
   font-size: 0.85rem;
-  color: var(--color-link);
+  color: #7d3a3f;
   opacity: 0.8;
 }
 
 .settings-row-label {
   font-size: 0.92rem;
   font-weight: 600;
-  color: var(--color-text-darker);
+  color: #3b1414;
 }
 
 .settings-row-desc {
   font-size: 0.8rem;
-  color: var(--color-link);
+  color: #7d3a3f;
   opacity: 0.8;
 }
 
 .settings-row-danger .settings-row-label {
-  color: var(--color-danger);
+  color: #c0392b;
 }
 
 .settings-row-danger:hover {
-  background: var(--color-danger-bg);
+  background: #fdf0f0;
 }
