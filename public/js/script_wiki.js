@@ -329,6 +329,18 @@ function setupCreateWikiModal() {
         return
       }
 
+      const tagsRaw = document.getElementById('createWikiTags')?.value.trim()
+      const tagList = (tagsRaw || '')
+        .split(/[\s,]+/)
+        .map(t => t.replace(/^#/, '').trim())
+        .filter(Boolean)
+
+      if (!tagList.length) {
+        errorEl.textContent = 'Please add at least one hashtag!'
+        errorEl.style.display = 'block'
+        return
+      }
+
       try {
         saveBtn.disabled = true
         saveBtn.textContent = 'Creating...'
