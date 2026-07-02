@@ -48,6 +48,24 @@ export class HashtagService {
   public async usedInBranch(params: { fandomId: number; branch: string }) {
     const { fandomId, branch } = params
 
+    // Lore & Worldbuilding → dari wiki_pages + hashtag_wikis
+    if (branch === 'Lore' || branch === 'Worldbuilding') {
+      const contentId = branch === 'Lore' ? 5 : 6
+
+      const rows = await Hashtag.query()
+        .select('hashtags.id as hashtagId', 'hashtags.hashtag_name as hashtagName')
+        .join('hashtag_wikis', 'hashtags.id', 'hashtag_wikis.hashtag_id')
+        .join('wiki_pages', 'wiki_pages.id', 'hashtag_wikis.wiki_id')
+        .where('wiki_pages.fandom_id', fandomId)
+        .where('wiki_pages.content_id', contentId)
+        .groupBy('hashtags.id', 'hashtags.hashtag_name')
+        .orderBy('hashtags.hashtag_name', 'asc')
+        .pojo()
+
+      return rows
+    }
+
+    // Announcement & other branches → dari posts (existing logic)
     const rows = await Hashtag.query()
       .select('hashtags.id as hashtagId', 'hashtags.hashtag_name as hashtagName')
       .join('hashtag_posts', 'hashtags.id', 'hashtag_posts.hashtag_id')
