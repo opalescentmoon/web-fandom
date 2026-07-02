@@ -183,16 +183,22 @@
             return
           }
 
-          if (body?.data?.token?.token) {
-            localStorage.setItem('accessToken', body.data.token.token)
+          showFeedback(feedback, 'Account created! Please log in.')
 
-          }
-          if (body?.data?.user) {
-            localStorage.setItem('currentUser', JSON.stringify(body.data.user))
-          }
+          const registeredUsername = body?.data?.user?.user_name || formData.get('username') || ''
 
-          showFeedback(feedback, 'Account created')
-          setTimeout(() => location.reload(), 800)
+          setTimeout(() => {
+            registerForm.reset()
+            openAuthModal('login')
+
+            const loginUsernameInput = document.querySelector('#loginForm input[name="username"]')
+            if (loginUsernameInput) {
+              loginUsernameInput.value = registeredUsername
+            }
+
+            const loginFeedback = document.getElementById('loginFeedback')
+            showFeedback(loginFeedback, 'Account created! Please log in.')
+          }, 800)
         } catch (err) {
           console.error(err)
           showFeedback(feedback, 'Network error', true)
