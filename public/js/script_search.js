@@ -13,6 +13,36 @@ function normalizeQuery(q) {
   return String(q || '').trim().replace(/^#/, '')
 }
 
+function renderWikiCard(w) {
+  const wikiId = w.id
+  const title = w.title ?? 'Untitled'
+  const contentId = w.contentId ?? w.content_id
+  const branch = contentId === 5 ? 'Lore' : contentId === 6 ? 'Worldbuilding' : 'Official'
+  const hashtags = Array.isArray(w.hashtags) ? w.hashtags : []
+  const hashtagHtml = hashtags.map(h => {
+    const name = h.name ?? h.hashtagName ?? h.hashtag_name ?? ''
+    if (!name) return ''
+    return `<a href="#" class="post-hashtag js-hashtag" data-tag="${escapeHtml(name)}">#${escapeHtml(name)}</a>`
+  }).filter(Boolean).join(' ')
+
+  return `
+    <article class="post-card" onclick="window.location.href='/wiki/${wikiId}'" style="cursor:pointer">
+      <header class="post-header">
+        <div class="post-user-text">
+          <div class="wiki-card-title">${escapeHtml(title)}</div>
+        </div>
+        <div class="post-branch">${escapeHtml(branch)}</div>
+      </header>
+      <main class="post-body">
+        <p class="wiki-card-hint">Click to read more</p>
+      </main>
+      <footer class="post-footer">
+        <div class="post-hashtags">${hashtagHtml}</div>
+      </footer>
+    </article>
+  `
+}
+
 async function loadSearch() {
   const feed = document.getElementById('feedSection')
   if (!feed) return
@@ -42,13 +72,18 @@ async function loadSearch() {
   const res = await fetch(api.toString(), { headers: { Accept: 'application/json' } })
   const posts = await res.json().catch(() => [])
 
+
   if (!res.ok) {
     feed.innerHTML = `<div class="feed-loading">Search failed</div>`
     return
   }
 
   feed.innerHTML = (posts || []).length
-    ? posts.map((p) => renderPostCard({ ...p, __src: 'search' })).join('')
+    ? posts.map((p) => 
+        p.__type === 'wiki' 
+          ? renderWikiCard(p) 
+          : renderPostCard({ ...p, __src: 'search' })
+      ).join('')
     : `<div class="feed-loading">No results</div>`
 }
 
