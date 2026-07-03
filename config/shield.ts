@@ -21,7 +21,7 @@ const shieldConfig = defineConfig({
       // '/auth/login',
       '/auth/register',
       '/auth/logout',
-      '/api/*',
+      '/api/**',
 
       '/api/poll/create',
 
@@ -101,7 +101,7 @@ const shieldConfig = defineConfig({
       '/api/user/email',
       '/api/user/password',
       '/api/user/update',
-      
+      '/api/user/delete',
     ],
     enableXsrfCookie: false,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
