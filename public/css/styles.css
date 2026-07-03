@@ -2376,3 +2376,16 @@ a.js-branch.is-active {
 .settings-row-danger:hover {
   background: #fdf0f0;
 }
+
+.settings-fandom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0d8da;
+}
+
+.settings-fandom-name {
+  font-size: 0.88rem;
+  color: #3b1414;
+}

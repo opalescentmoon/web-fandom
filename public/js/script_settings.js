@@ -236,3 +236,71 @@ document.getElementById('openDeleteAccount').addEventListener('click', async () 
     alert('Something went wrong. Please try again.')
   }
 })
+
+// ============================================================
+// FANDOMS MODAL
+// ============================================================
+document.getElementById('openFandomsModal').addEventListener('click', async () => {
+  openModal('fandomsOverlay')
+
+  const listEl = document.getElementById('fandomsModalList')
+  listEl.textContent = 'Loading...'
+
+  try {
+    const res = await fetch('/api/user/me/joined-fandoms', {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+    })
+    const fandoms = await res.json()
+
+    if (!fandoms.length) {
+      listEl.innerHTML = '<p style="font-size:0.85rem;color:#999;">You haven\'t joined any fandoms yet.</p>'
+      return
+    }
+
+    listEl.innerHTML = fandoms.map(f => `
+      <div class="settings-fandom-row" id="fandom-row-${f.fandomId}">
+        <span class="settings-fandom-name">${f.fandomName}</span>
+        <button class="modal-cancel-btn" style="font-size:0.78rem;padding:0.3rem 0.75rem;" data-id="${f.fandomId}">Leave</button>
+      </div>
+    `).join('')
+
+    listEl.querySelectorAll('button[data-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const fandomId = Number(btn.dataset.id)
+        const confirmed = confirm('Leave this fandom?')
+        if (!confirmed) return
+
+        const res = await fetch('/api/fandom/leave', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getAuthToken()}`,
+          },
+          body: JSON.stringify({ fandomId }),
+        })
+
+        if (res.ok) {
+          document.getElementById(`fandom-row-${fandomId}`)?.remove()
+          if (!listEl.querySelector('.settings-fandom-row')) {
+            listEl.innerHTML = '<p style="font-size:0.85rem;color:#999;">You haven\'t joined any fandoms yet.</p>'
+          }
+        } else {
+          alert('Failed to leave fandom. Please try again.')
+        }
+      })
+    })
+  } catch (err) {
+    listEl.innerHTML = '<p style="font-size:0.85rem;color:#c0392b;">Something went wrong.</p>'
+  }
+})
+
+document.getElementById('closeFandomsModal').addEventListener('click', () => closeModal('fandomsOverlay'))
+
+// ============================================================
+// UNDER DEVELOPMENT MODAL
+// ============================================================
+document.querySelectorAll('.open-under-dev').forEach(el => {
+  el.addEventListener('click', () => openModal('underDevOverlay'))
+})
+
+document.getElementById('closeUnderDevModal').addEventListener('click', () => closeModal('underDevOverlay'))

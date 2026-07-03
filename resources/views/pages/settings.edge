@@ -24,10 +24,6 @@
       <!-- Left: sidebar nav -->
       <aside class="settings-list">
         <h2 class="settings-list-title">Settings</h2>
-        <div class="settings-search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Search..." />
-        </div>
 
         <div class="settings-list-items">
           <button class="settings-list-item is-active" data-panel="myAccount">
@@ -93,7 +89,7 @@
           <h1 class="settings-panel-title">Content moderation</h1>
           <p class="settings-panel-subtitle">Manage what content you see and share on Space</p>
 
-          <div class="settings-row">
+          <div class="settings-row" id="openFandomsModal">
             <div class="settings-row-text">
               <div class="settings-row-label">Fandoms</div>
               <div class="settings-row-desc">Manage your joined fandoms</div>
@@ -101,7 +97,7 @@
             <span class="settings-arrow">&rsaquo;</span>
           </div>
 
-          <div class="settings-row">
+          <div class="settings-row open-under-dev">
             <div class="settings-row-text">
               <div class="settings-row-label">Content you see</div>
               <div class="settings-row-desc">Manage what content you see based on your interest</div>
@@ -109,7 +105,7 @@
             <span class="settings-arrow">&rsaquo;</span>
           </div>
 
-          <div class="settings-row">
+          <div class="settings-row open-under-dev">
             <div class="settings-row-text">
               <div class="settings-row-label">Mute and Block</div>
               <div class="settings-row-desc">Manage accounts and tags you've muted or block</div>
@@ -117,7 +113,7 @@
             <span class="settings-arrow">&rsaquo;</span>
           </div>
 
-          <div class="settings-row">
+          <div class="settings-row open-under-dev">
             <div class="settings-row-text">
               <div class="settings-row-label">Chats</div>
               <div class="settings-row-desc">Manage who can chat you directly</div>
@@ -128,6 +124,7 @@
       </section>
     </div>
 
+    <!-- ==========MODALS============ -->
     <!-- Change Email Modal -->
     <div class="modal-overlay" id="changeEmailOverlay" style="display:none;">
       <div class="modal-box">
@@ -211,6 +208,34 @@
         <div class="modal-footer">
           <button class="modal-cancel-btn" id="closeChangePassword2">Cancel</button>
           <button class="modal-save-btn" id="submitChangePassword">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fandoms Modal -->
+    <div class="modal-overlay" id="fandomsOverlay" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Joined Fandoms</h3>
+          <button class="modal-close" id="closeFandomsModal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="fandomsModalList">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Under Development Modal -->
+    <div class="modal-overlay" id="underDevOverlay" style="display:none;">
+      <div class="modal-box" style="text-align:center;">
+        <div class="modal-header">
+          <h3 class="modal-title">Coming Soon</h3>
+          <button class="modal-close" id="closeUnderDevModal">&times;</button>
+        </div>
+        <div class="modal-body" style="align-items:center;gap:0.5rem;">
+          <p style="font-size:1.5rem;">😢</p>
+          <p style="font-size:0.9rem;color:#3b1414;">Hello fellow fandomers! This feature is currently under work. We appreciate your patience regarding this.</p>
         </div>
       </div>
     </div>
